@@ -1,0 +1,6 @@
+rtmidi
+mido
+flake8
+isort
+pytest
+pytest-cov

@@ -1,16 +1,17 @@
 from copy import copy
 
-from beethoven.settings import NameContainer
 from beethoven.theory.interval import Interval
 from beethoven.theory.mappings import note_mappings
 from beethoven.utils.regex import THEORY_NOTE_PARSER
+from beethoven.utils.settings import NameContainer
 
 
 class NoteNameContainer(NameContainer):
     @property
-    def system(self):
+    def anglosaxon(self):
         return self.names[0]
-    anglosaxon = system
+
+    system = anglosaxon
 
     @property
     def solfege(self):
@@ -20,10 +21,14 @@ class NoteNameContainer(NameContainer):
 class NoteSingletonMeta(type):
     _INSTANCES = {}
 
-    def __call__(cls, note_name):
-        if note_name not in cls._INSTANCES:
+    def __call__(cls, note_name=None):
+        if note_name is None:
+            raise ValueError("Note name must be set")
+
+        elif note_name not in cls._INSTANCES:
             instance = super().__call__(note_name)
             cls._INSTANCES[note_name] = instance
+
         return copy(cls._INSTANCES[note_name])
 
 
@@ -38,9 +43,16 @@ class Note(metaclass=NoteSingletonMeta):
     def __repr__(self):
         return f"<Note {self.name}>"
 
+    def _get_theory_note_name(self):
+        return f"{self.note_name}{self._get_alteration_symbols()}"
+
+    @classmethod
+    def to_list(cls, notes_str):
+        return [cls(n) for n in notes_str.split(",")]
+
     @property
     def name(self):
-        return f"{self.note_name}{self._get_alteration_symbols()}"
+        return self._get_theory_note_name()
 
     def __eq__(self, other):
         return self.name == other.name
@@ -65,23 +77,22 @@ class Note(metaclass=NoteSingletonMeta):
         for index, *note_names in mappings:
             name_instance = NoteNameContainer(note_names)
 
-            cls._SYSTEM_DIRECTORY[name_instance.anglosaxon] = (
-                name_instance, index
-            )
+            cls._SYSTEM_DIRECTORY[name_instance.anglosaxon] = (name_instance, index)
 
             for note_name in note_names:
                 cls._DIRECTORY[note_name] = (name_instance, index)
 
-            cls._DIRECTORY[name_instance.solfege.lower()] = (name_instance, index)
+            cls._DIRECTORY[name_instance.solfege] = (name_instance, index)
 
     def _load_attributes(self, note_name):
-        parsed = THEORY_NOTE_PARSER.match(note_name).groupdict()
+        matched = THEORY_NOTE_PARSER.match(note_name)
+        if not matched:
+            raise ValueError("Note name does not exists")
+
+        parsed = matched.groupdict()
 
         note_name = parsed.get("note_name")
         alteration = parsed.get("alteration")
-
-        if parsed.get("note_name") is None:
-            raise ValueError("Note name could not be found")
 
         sharps = alteration.count("#")
         flats = alteration.count("b")
@@ -89,8 +100,7 @@ class Note(metaclass=NoteSingletonMeta):
         if flats and sharps:
             raise ValueError("Note name shouldn't contain sharps AND flats")
 
-        if not (data := self._DIRECTORY.get(note_name)):
-            raise ValueError("Note name does not exists")
+        data = self._DIRECTORY.get(note_name.capitalize())
 
         self.note_name, self.index = data
         self.alteration = sharps - flats
@@ -139,14 +149,15 @@ class Note(metaclass=NoteSingletonMeta):
 
         # get the final alteration
         final_alteration = ((base_st - dest_st + note.alteration) % 12) + interval_st
-        if final_alteration >= 12:
+        if final_alteration >= 12 or final_alteration <= -12:
             final_alteration = final_alteration % 12
+
         # necessary in some edge cases on close alterations, where single b's can lead to eleven #'s
-        elif final_alteration >= 6 or (note.alteration < 0 and final_alteration > 0):
+        if final_alteration >= 6:
             final_alteration -= 12
         # necessary when removing octave interval or anything bigger than 6 half tones
         elif final_alteration <= -6:
-            final_alteration %= 12
+            final_alteration += 12
 
         return dest_note.system, final_alteration, (degree_diff + index_base_note) // 7
 
@@ -175,6 +186,9 @@ class Note(metaclass=NoteSingletonMeta):
         symbol = cls._INTERVAL._get_alteration_symbols(degree + 1, alt_count)
 
         return cls._INTERVAL(f"{degree + 1}{symbol}")
+
+    def to_dict(self):
+        return {"note_name": self.name}
 
 
 Note.load(note_mappings)

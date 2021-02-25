@@ -11,32 +11,29 @@ class TimeSignature:
             beats_per_bar or self.DEFAULT_BEATS_PER_BAR
         )
 
-    def reset(self):
-        self.set(
-            self.DEFAULT_BEAT_UNIT,
-            self.DEFAULT_BEATS_PER_BAR
-        )
-
-    def set(self, beat_unit, beats_per_bar):
-        self.beat_unit = beat_unit
-        self.beats_per_bar = beats_per_bar
-
-    def get(self):
-        return self.value
+    def set(self, beat_unit=None, beats_per_bar=None):
+        if beat_unit:
+            self.beat_unit = beat_unit
+        if beats_per_bar:
+            self.beats_per_bar = beats_per_bar
 
     def copy(self):
         return self.__class__(self.beat_unit, self.beats_per_bar)
 
     def __repr__(self):
-        return f"<Time Signature : {self.beat_unit}/{self.beats_per_bar}>"
+        return f"<Time Signature : {str(self)}>"
+
+    def __str__(self):
+        return f"{self.beat_unit}/{self.beats_per_bar}"
 
     def __eq__(self, other):
         return (
+            isinstance(other, self.__class__) and
             self.beat_unit == other.beat_unit and
             self.beats_per_bar == other.beats_per_bar
         )
 
-    def get_duration(self, tempo):
+    def duration(self, tempo):
         reduction = self.beats_per_bar / 4
 
         quarter = Quarter.duration(bpm=tempo)
@@ -46,89 +43,84 @@ class TimeSignature:
     def gen(self, *args, **kwargs):
         return self._gen(*args, **kwargs)
 
+    def _get_time_section(self, count, divisor):
+        raw_submeasure, divisor_index = divmod(count, divisor)
+        raw_measure, submeasure = divmod(raw_submeasure, self.beats_per_bar)
+        bar, measure = divmod(raw_measure, self.beat_unit)
+
+        return TimeContainer(
+            bar + 1,
+            measure + 1,
+            submeasure + 1,
+            divisor_index + 1,
+            divisor
+        )
+
     def _gen(self, note_duration, duration=None, go_on=False):
         reduction = self.beats_per_bar / 4
 
-        single_computed_time = (1 * note_duration.base_units) / (note_duration.divisor / reduction)
-        divisions = note_duration.divisor
-        
-        # REMOVE THAT
+        divisor = note_duration.divisor
+        reduc_ratio = self.beats_per_bar * reduction
+
+        while not (divisor % 2 or reduc_ratio % 2):
+            divisor //= 2
+            reduc_ratio //= 2
+
+        base_units = int(note_duration.base_units * reduc_ratio)
+
+        # Get total duration
         if duration:
-            total_duration = duration.base_units / reduction
+            last_section = self._get_time_section(
+                int(duration.base_units * self.beats_per_bar * reduction * divisor / duration.divisor),
+                divisor
+            )
+        elif go_on:
+            last_section = None
         else:
-            total_duration = self.beat_unit
+            last_section = self._get_time_section(
+                self.beat_unit * self.beats_per_bar * divisor,
+                divisor
+            )
 
         count = 0
         while 1:
-            computed = count * single_computed_time
-            measure, submeasure_rest = divmod(computed, 1)
-            measure = int(measure + 1)
+            time_section = self._get_time_section(count, divisor)
 
-            if computed >= total_duration:
-                break
+            if last_section is not None and last_section <= time_section:
+                return
 
-            raw_submeasure = submeasure_rest * self.beats_per_bar
-            submeasure = int(raw_submeasure) + 1
-            divisor_index = int(((((raw_submeasure % 1) * reduction) * note_duration.base_units) / single_computed_time) + 1.0000001)
-
-            print(f"----{computed:3.3f} {total_duration:3d}")
-            print(
-                " - -----  "
-                f"{raw_submeasure:3.3f} "
-                f"{(raw_submeasure % 1):3.3f} "
-                f"{(raw_submeasure % 1) / single_computed_time:3.3f} "
-                f"{(raw_submeasure % 1) / (single_computed_time / note_duration.base_units):3.3f} "
-                f"{divisor_index:3.3f}"
-            )
-            """
-            """
-
-            yield TimeContainer(measure, submeasure, int(divisor_index), divisions)
-
-            count += 1
+            yield time_section
+            count += base_units
 
 
 class TimeContainer:
-    def __init__(self, measure, submeasure, divisor_index=1, divisor=1, max_time=None):
+    def __init__(self, bar, measure, submeasure, divisor_index=1, divisor=1):
+        self.bar = bar
         self.measure = measure
         self.submeasure = submeasure
         self.divisor_index = divisor_index
         self.divisor = divisor
-        self.max_time = max_time
 
-    def check(self, measure=None, submeasure=None, divisor_index=None):
-        return (
-            (
-                not measure or (
-                    self.measure == measure
-                    if isinstance(measure, int)
-                    else self.measure in measure
-                )
-            ) and
-            (
-                not submeasure or (
-                    self.submeasure == submeasure
-                    if isinstance(submeasure, int)
-                    else self.submeasure in submeasure
-                )
-            ) and
-            (
-                not divisor_index or (
-                    self.divisor_index == divisor_index
-                    if isinstance(divisor_index, int)
-                    else self.divisor_index in divisor_index
-                )
-            )
-        )
+    def check(self, **kwargs):
+        checks = []
+        for k, v in kwargs.items():
+            self_value = getattr(self, k)
+            if isinstance(v, int):
+                checks.append(self_value == v)
+            else:
+                checks.append(self_value in v)
+
+        return all(checks)
 
     def copy(self):
-        return self.__class__(self.measure, self.submeasure, self.divisor_index, self.divisor)
+        return self.__class__(self.bar, self.measure, self.submeasure, self.divisor_index, self.divisor)
 
     def __repr__(self):
-        return f"<Time {self.measure} / {self.submeasure} ( {self.divisor_index} : {self.divisor}) >"
+        return f"<Time {self.bar} | {self.measure} / {self.submeasure} ( {self.divisor_index} : {self.divisor} )>"
 
     def __eq__(self, other):
         return (
+            self.bar == other.bar and
             self.measure == other.measure and
             self.submeasure == other.submeasure and
             self.divisor_index == other.divisor_index and
@@ -136,39 +128,40 @@ class TimeContainer:
         )
 
     def __lt__(self, other):
-        a = (self.divisor_index) / self.divisor
-        b = (other.divisor_index) / other.divisor
+        if self.bar < other.bar:
+            return True
+        elif self.bar > other.bar:
+            return False
 
-        print(a, b)
-        print(a < b)
+        if self.measure < other.measure:
+            return True
+        elif self.measure > other.measure:
+            return False
+
+        if self.submeasure < other.submeasure:
+            return True
+        elif self.submeasure > other.submeasure:
+            return False
+
         return (
-            self.measure < other.measure or (
-                self.measure == other.measure and
-                self.submeasure < other.submeasure or (
-                    self.measure == other.measure and
-                    self.submeasure == other.submeasure and
-                    a < b
-                )
-            )
+            self.divisor_index / self.divisor <
+            other.divisor_index / other.divisor
         )
+
+    def __le__(self, other):
+        return self == other or self < other
 
     def start_offset(self, time_signature, tempo):
         reduction = time_signature.beats_per_bar / 4
 
-        quarter = Quarter.duration(bpm=tempo)
-        print()
+        quarter = Quarter.duration(bpm=tempo) / reduction
 
-        #print(self.__dict__, quarter, reduction)
-        lmao = (
-            #(((self.submeasure - 1) * quarter) / reduction) + \
-            ((self.measure - 1) * quarter) / reduction) + \
-            ((((self.divisor_index - 1) / self.divisor) * quarter) / reduction
-        )
-        print("---", self, quarter, lmao)
-        #print((((self.measure - 1) * quarter) / reduction) + (((self.divisor_index / self.divisor) * quarter) / reduction))
+        beats_per_bar = time_signature.beats_per_bar
+        beat_unit = time_signature.beat_unit
 
-        return lmao
+        bar_part = (self.bar - 1) * beat_unit
+        measure_part = self.measure - 1
+        submeasure_part = (self.submeasure - 1) / beats_per_bar
+        divisor_part = (1 / beats_per_bar) * ((self.divisor_index - 1) / self.divisor)
 
-
-def default_time_signature_factory():
-    return TimeSignature()
+        return (bar_part + measure_part + submeasure_part + divisor_part) * quarter

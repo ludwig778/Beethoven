@@ -1,19 +1,20 @@
+from beethoven.theory.chord import Chord
 from beethoven.theory.interval import AUGMENTED, DIMINISHED
+from beethoven.theory.scale import Scale
 from beethoven.utils.regex import HARMONY_PARSER
-
-from .chord import Chord
-from .scale import Scale
-
-DEFAULT_DEGREES = "1,3,5,7"
 
 
 class HarmonySingletonMeta(type):
     _INSTANCES = {}
 
-    def __call__(cls, scale):
-        if scale not in cls._INSTANCES:
+    def __call__(cls, scale=None):
+        if scale is None:
+            raise ValueError("Scale must be set")
+
+        elif scale not in cls._INSTANCES:
             instance = super().__call__(scale)
             cls._INSTANCES[scale] = instance
+
         return cls._INSTANCES[scale]
 
 
@@ -23,71 +24,107 @@ class Harmony(metaclass=HarmonySingletonMeta):
         i: interval
         for i, interval in enumerate(Scale("A", "major").intervals, start=1)
     }
-    _MAJOR_DEGREES = ("I", "II", "III", "IV", "V", "VI", "VII")
+    _DEGREES = ("I", "II", "III", "IV", "V", "VI", "VII")
+    _DEFAULT_DEGREES = "1,3,5,7"
 
     def __init__(self, scale):
         self._load_attributes(scale)
 
     def __repr__(self):
-        return f"<Harmony {self.scale.name}>"
+        return f"<Harmony {str(self)}>"
+
+    def __str__(self):
+        return str(self.scale)
 
     def _load_attributes(self, scale):
-        scale_intervals = scale.intervals
-
-        if not len(scale_intervals) == 7:
+        if not len(scale.intervals) == 7:
             raise ValueError("Scale given to harmony must be diatonic")
 
         self.scale = scale
         self.degrees = []
 
-        for interval, major_interval, degree in zip(scale_intervals, self._MAJOR_INTERVALS.values(), self._MAJOR_DEGREES):
-            diff_alteration = interval.alteration + major_interval.alteration
+        default_degrees = [1, 3, 5, 7]
+        scale_notes = self.scale.notes
 
-            if diff_alteration == -1:
-                degree = degree.lower()
-            elif diff_alteration > 0:
-                degree += "a" * diff_alteration
-            elif diff_alteration < -1:
-                degree += "d" * abs(diff_alteration + 1)
+        for i, degree_name in enumerate(self._DEGREES):
+            # TODO refactor with intervals for scale object instead of notes
+            notes = list(map(lambda x: scale_notes[(x + i - 1) % 7], default_degrees))
 
-            self.degrees.append(degree)
+            intervals = [
+                notes[0] // note
+                for note in notes
+            ]
 
-    def get(self, degree):
-        parsed = HARMONY_PARSER.match(degree).groupdict()
+            chord_name = Chord.get_chord_name_from_intervals(intervals).short
+
+            if "min" in chord_name or "dim" in chord_name:
+                degree_name = degree_name.lower()
+
+            self.degrees.append(degree_name)
+
+    def get(self, *args, **kwargs):
+        try:
+            return self._get(*args, **kwargs)
+        except ValueError:
+            return
+
+    def get_base_degree_interval(self, degree):
+        note = self._parse_degree(degree)[0]
+
+        return self.scale.notes[0] // note
+
+    def _get(self, degree, inversion=None, base_note=None, base_degree=None, default_degrees=None, seventh=True):
+        if not default_degrees:
+            default_degrees = self._DEFAULT_DEGREES
+
+        base_degree_interval = None
+        note, alteration, index, chord_name = self._parse_degree(degree, seventh=seventh)
+
+        if base_degree:
+            base_degree_interval = self.get_base_degree_interval(base_degree)
+            note += base_degree_interval
+
+        if chord_name:
+            chord = Chord(note, chord_name, inversion=inversion, base_note=base_note)
+
+        else:
+            scale = self.scale
+
+            if base_degree_interval:
+                scale = Scale(scale.tonic + base_degree_interval, str(scale.name))
+
+            chord = scale.get_chord(
+                index,
+                default_degrees,
+                alteration=alteration,
+                inversion=inversion,
+                base_note=base_note
+            )
+
+        return chord
+
+    def _parse_degree(self, degree, seventh=True):
+        matched = HARMONY_PARSER.match(degree)
+        if not matched:
+            raise ValueError("Degree could not be parsed")
+
+        parsed = matched.groupdict()
         final_alteration = 0
 
         degree_name = parsed.get("degree_name")
         alteration = parsed.get("alteration")
         chord_name = parsed.get("chord_name")
 
-        if not degree_name:
-            raise ValueError("Degree could not be parsed")
+        index = self._DEGREES.index(degree_name.upper())
+        note = self.scale.notes[index]
+        if degree_name not in self.degrees and not chord_name:
+            if degree_name.isupper():
+                chord_name = "maj"
+            else:
+                chord_name = "min"
 
-        if (degree_name + alteration) in self.degrees:
-            index = self.degrees.index(degree_name + alteration)
-
-            note = self.scale.notes[index]
-        elif degree_name.isupper():
-            index = self._MAJOR_DEGREES.index(degree_name)
-
-            note = self.scale.notes[index]
-            if not chord_name:
-                if "7" in DEFAULT_DEGREES:
-                    chord_name = "maj7"
-                else:
-                    chord_name = "maj"
-        else:
-            index = self._MAJOR_DEGREES.index(degree_name.upper())
-
-            note = self.scale.notes[index]
-            note += DIMINISHED
-
-            final_alteration -= 1
-            if not chord_name:
-                if "7" in DEFAULT_DEGREES:
-                    chord_name = "min7"
-                else:
-                    chord_name = "min"
+            if seventh:
+                chord_name += "7"
 
         flats = alteration.count("b")
         sharps = alteration.count("#")
@@ -100,9 +137,7 @@ class Harmony(metaclass=HarmonySingletonMeta):
             for _ in range(sharps):
                 note += AUGMENTED
 
-        if chord_name:
-            chord = Chord(note, chord_name)
-        else:
-            chord = self.scale.get_chord(index, DEFAULT_DEGREES, alteration=final_alteration)
+        return note, final_alteration, index, chord_name
 
-        return chord
+    def to_dict(self):
+        return {"scale": self.scale}

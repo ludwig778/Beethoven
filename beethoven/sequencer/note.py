@@ -10,10 +10,14 @@ from beethoven.utils.regex import SEQUENCER_NOTE_PARSER
 class NotePitchSingletonMeta(NoteSingletonMeta):
     _INSTANCES = {}
 
-    def __call__(cls, note_name):
-        if note_name not in cls._INSTANCES:
+    def __call__(cls, note_name=None):
+        if note_name is None:
+            raise ValueError("Note name must be set")
+
+        elif note_name not in cls._INSTANCES:
             instance = super().__call__(note_name)
             cls._INSTANCES[note_name] = instance
+
         return copy(cls._INSTANCES[note_name])
 
 
@@ -36,25 +40,39 @@ class Note(BaseNote, metaclass=NotePitchSingletonMeta):
             for note_name in note_names:
                 cls._DIRECTORY[note_name + str(octave)] = (name_instance, index)
 
-    def __gt__(self, other):
+    def __lt__(self, other):
         return (
-            (self.index + self.alteration) >
+            (self.index + self.alteration) <
             (other.index + other.alteration)
         )
 
+    def __le__(self, other):
+        return self < other or self == other
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return id(self.name)
+
+    def get_theory_self(self):
+        return BaseNote(self._get_theory_note_name())
+
+    @classmethod
+    def cast_from_theory(cls, note, octave=0, inversion=None):
+        return cls(f"{note.name}{octave}")
+
     def _load_attributes(self, note_name):
-        parsed = SEQUENCER_NOTE_PARSER.match(note_name).groupdict()
+        matched = SEQUENCER_NOTE_PARSER.match(note_name)
+
+        if not matched:
+            raise ValueError("Note could not be parsed")
+
+        parsed = matched.groupdict()
 
         note_name = parsed.get("note_name")
-        octave = parsed.get("octave")
+        octave = int(parsed.get("octave"))
         alteration = parsed.get("alteration")
-
-        if note_name is None:
-            raise ValueError("Note name could not be found")
-        elif octave is None:
-            raise ValueError("Note octave could not be found")
-
-        octave = int(octave)
 
         sharps = alteration.count("#")
         flats = alteration.count("b")
@@ -62,8 +80,7 @@ class Note(BaseNote, metaclass=NotePitchSingletonMeta):
         if flats and sharps:
             raise ValueError("Note name shouldn't contain sharps AND flats")
 
-        if not (data := self._DIRECTORY.get(note_name + str(octave))):
-            raise ValueError("Note name does not exists")
+        data = self._DIRECTORY.get(note_name.capitalize() + str(octave))
 
         self.note_name, self.index = data
         self.octave = octave
@@ -83,3 +100,8 @@ class Note(BaseNote, metaclass=NotePitchSingletonMeta):
 
 
 Note.load(standard_midi_mapping)
+
+note_mapping = {
+    note_name: Note(note_name)
+    for note_name in Note._DIRECTORY.keys()
+}

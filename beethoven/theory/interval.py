@@ -1,8 +1,8 @@
 from copy import copy
 
-from beethoven.settings import NameContainer
 from beethoven.theory.mappings import interval_mappings
 from beethoven.utils.regex import INTERVAL_PARSER
+from beethoven.utils.settings import NameContainer
 
 
 class IntervalNameContainer(NameContainer):
@@ -14,10 +14,14 @@ class IntervalNameContainer(NameContainer):
 class IntervalSingletonMeta(type):
     _INSTANCES = {}
 
-    def __call__(cls, interval_name):
-        if interval_name not in cls._INSTANCES:
+    def __call__(cls, interval_name=None):
+        if interval_name is None:
+            raise ValueError("Interval name must be set")
+
+        elif interval_name not in cls._INSTANCES:
             instance = super().__call__(interval_name)
             cls._INSTANCES[interval_name] = instance
+
         return copy(cls._INSTANCES[interval_name])
 
 
@@ -47,8 +51,20 @@ class Interval(metaclass=IntervalSingletonMeta):
 
     def __eq__(self, other):
         return (
-            self.name == other.name and
+            self.index == other.index and
             self.alteration == other.alteration
+        )
+
+    def __lt__(self, other):
+        return (
+            self.index + self.alteration < other.index + other.alteration
+        )
+
+    def __le__(self, other):
+        return (
+            self < other or
+            self == other
+            # self.index + self.alteration <= other.index + other.alteration
         )
 
     def get_alteration_symbols(self, **kwargs):
@@ -120,9 +136,6 @@ class Interval(metaclass=IntervalSingletonMeta):
         interval_name = parsed.get("interval_name")
         alteration = parsed.get("alteration")
 
-        if interval_name is None:
-            raise ValueError("Interval name does not exists")
-
         alteration_check = []
         if major := "M" in alteration:
             alteration_check.append("M")
@@ -144,6 +157,7 @@ class Interval(metaclass=IntervalSingletonMeta):
         self.name, self.index = data
 
         normalized_index = ((int(self.name.numeric) - 1) % 7) + 1
+        octaves = ((int(self.name.numeric) - 1) // 7)
 
         alteration = 0
         if normalized_index in (2, 3, 6, 7):
@@ -162,18 +176,22 @@ class Interval(metaclass=IntervalSingletonMeta):
             alteration = augmented_num - diminished_num
         elif normalized_index in (1, 8) and alteration_check:
             if major and normalized_index == 1:
-                raise ValueError("Major alteration on unisson interval is not possible")
+                if octaves == 1:
+                    raise ValueError("Major alteration on octave interval is not possible")
+                else:
+                    raise ValueError("Major alteration on unisson interval is not possible")
             if minor and normalized_index == 1:
-                raise ValueError("Minor alteration on unisson interval is not possible")
-
-            if major and normalized_index == 8:
-                raise ValueError("Major alteration on octave interval is not possible")
-            if minor and normalized_index == 8:
-                raise ValueError("Minor alteration on octave interval is not possible")
+                if octaves == 1:
+                    raise ValueError("Minor alteration on octave interval is not possible")
+                else:
+                    raise ValueError("Minor alteration on unisson interval is not possible")
 
             alteration = augmented_num - diminished_num
 
         self.alteration = alteration
+
+    def to_dict(self):
+        return {"interval_name": self.name.numeric}
 
 
 Interval.load(interval_mappings)

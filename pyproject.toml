@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "beethoven"
+version = "0.1.0"
+description = "Python music making library."
+authors = ["Laurent Arthur <laurent.arthur75@gmail.com>"]
+
+license = "GPLv3"
+
+readme = "README.md"
+
+repository = "https://github.com/ludwig778/beethoven"
+
+classifiers = [
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+mido = "^1.2.9"
+rtmidi = "^2.3.4"
+prompt-toolkit = "^3.0.18"
+
+[tool.poetry.dev-dependencies]
+tox = "^3.23.0"
+flake8 = "^3.9.0"
+pytest = "^6.2.3"
+pytest-cov = "^2.11.1"
+isort = "^5.8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

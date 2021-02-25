@@ -1,24 +1,21 @@
-from pytest import mark
-
-from beethoven.sequencer.note_duration import Eighths, Quarter
-from beethoven.sequencer.players.base import Players
-from beethoven.sequencer.tempo import default_tempo_factory
-from beethoven.sequencer.time_signature import default_time_signature_factory
+from beethoven.sequencer.note import Note
+from beethoven.sequencer.note_duration import Whole
+from beethoven.sequencer.players.base import BasePlayer
+from beethoven.sequencer.time_signature import TimeContainer
 
 
-@mark.parametrize("note_duration,length", [
-    (Quarter, 4),
-    (Eighths, 8),
-])
-def test_instrument_metronome(note_duration, length):
-    players = Players()
-    player = players.get("Metronome")
-    player.prepare(
-        time_signature=default_time_signature_factory(),
-        tempo=default_tempo_factory(),
-        duration=note_duration
-    )
+class FakePlayer(BasePlayer):
+    NOTE_DURATION = Whole
 
-    to_play = list(player.play_measure())
 
-    assert len(to_play) == length
+def test_base_player_capabilities():
+    player = FakePlayer()
+
+    assert repr(player) == "<Player FakePlayer>"
+
+    assert player.play(TimeContainer(1, 1, 1), "F4", "F5", velocity=63) == {
+        "part": TimeContainer(1, 1, 1),
+        "notes": [Note("F4"), Note("F5")],
+        "duration": Whole,
+        "velocity": 63
+    }

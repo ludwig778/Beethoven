@@ -17,10 +17,16 @@ class NoteDuration:
         return obj
 
     def __repr__(self):
-        return f"<Note Duration : {self.name}>"
+        return f"<Note Duration : {str(self)}>"
+
+    def __str__(self):
+        return self.name
 
     def __eq__(self, other):
-        return self.base_units / self.divisor == other.base_units / other.divisor
+        return (
+            isinstance(other, self.__class__) and
+            self.base_units / self.divisor == other.base_units / other.divisor
+        )
 
     def copy(self):
         return self.__class__(self.name, self.base_units, self.divisor)

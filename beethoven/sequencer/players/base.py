@@ -1,29 +1,33 @@
-from beethoven.sequencer.note import Note
+from beethoven.sequencer.note import Note, note_mapping
+from beethoven.sequencer.players.arpeggiator import Arpeggiator
+from beethoven.sequencer.players.chord_voicer import ChordVoicer
 
 
 class Players:
     REGISTRY = {}
-    INSTANCES = {}
+    MAX_CHANNELS = 16
 
-    def __init__(self):
-        pass
+    def __init__(self, *players):
+        self.instances = {}
+
+        for player in players:
+            self.add(player)
 
     def add(self, player):
         channel = self._get_first_available_channel()
 
-        self.INSTANCES[channel] = player
+        self.instances[channel] = player
 
     def all(self):
-        return self.INSTANCES
+        return self.instances
 
     def items(self):
-        return self.INSTANCES.items()
+        return self.instances.items()
 
-    @classmethod
-    def _get_first_available_channel(cls):
-        channels_taken = cls.INSTANCES.keys()
-        
-        for i in range(16):
+    def _get_first_available_channel(self):
+        channels_taken = self.instances.keys()
+
+        for i in range(self.MAX_CHANNELS):
             if i not in channels_taken:
                 return i
 
@@ -37,28 +41,42 @@ class Players:
     def register(cls, name, player):
         cls.REGISTRY[name] = player
 
-    def remove(self):
-        pass
+    def remove(self, index):
+        if index in self.instances:
+            del self.instances[index]
 
-    def update(self):
-        pass
+    def update(self, players_channel):
+        self.instances.update(players_channel)
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"<Players : {len(self.instances)} players>"
 
 
 class PlayerMeta(type):
     def __new__(cls, name, bases, dct):
         obj = super().__new__(cls, name, bases, dct)
 
-        print(obj)
-        if name != "BasePlayer":
+        if not dct.get("ABSTRACT", False):
             Players.register(name, obj)
 
         return obj
 
 
 class BasePlayer(metaclass=PlayerMeta):
+    ABSTRACT = True
     DEFAULT_DURATION = None
+    NOTE_RANGE = [None, None]
+    MAPPING = note_mapping
+
+    def __init__(self):
+        self.arpeggiator = Arpeggiator(self)
+        self.chord_voicer = ChordVoicer(self)
+
     def play(self, part, *notes, duration=None, velocity=127):
-        if not all(map(lambda x: isinstance(x, Note), notes)):
+        if notes and not all(map(lambda x: isinstance(x, Note), notes)):
             notes = self._get_notes(*notes)
 
         if duration is None:
@@ -72,6 +90,9 @@ class BasePlayer(metaclass=PlayerMeta):
         }
 
     def __repr__(self):
+        return f"{str(self)}"
+
+    def __str__(self):
         return f"<Player {self.__class__.__name__}>"
 
     @classmethod
@@ -81,9 +102,10 @@ class BasePlayer(metaclass=PlayerMeta):
             for note in notes
         ]
 
-    def prepare(self, time_signature=None, tempo=None, duration=None, scale=None, chord=None):
+    def prepare(self, time_signature=None, tempo=None, duration=None, scale=None, chord=None, **kwargs):
         self.time_signature = time_signature
         self.tempo = tempo
         self.duration = duration or self.DEFAULT_DURATION
+
         self.scale = scale
         self.chord = chord

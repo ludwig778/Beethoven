@@ -1,8 +1,4 @@
 from beethoven.theory.harmony import Harmony as BaseHarmony
-from beethoven.utils.regex import HARMONY_PARSER
-
-from .chord import Chord
-from .interval import AUGMENTED, DIMINISHED
 
 DEFAULT_DEGREES = "1,3,5,7"
 
@@ -12,6 +8,7 @@ class Harmony(BaseHarmony):
     def __init__(self, scale):
         self._load_attributes(scale)
 
+    """
     def _load_attributes(self, scale):
         scale_intervals = scale.intervals
 
@@ -33,8 +30,12 @@ class Harmony(BaseHarmony):
 
             self.degrees.append(degree)
 
-    def get(self, degree):
-        parsed = HARMONY_PARSER.match(degree).groupdict()
+    def get(self, degree, inversion=None, base_note=None):
+        matched = HARMONY_PARSER.match(degree)
+        if not matched:
+            raise ValueError("Degree could not be parsed")
+
+        parsed = matched.groupdict()
         final_alteration = 0
 
         degree_name = parsed.get("degree_name")
@@ -45,7 +46,7 @@ class Harmony(BaseHarmony):
             raise ValueError("Degree could not be parsed")
 
         if (degree_name + alteration) in self.degrees:
-            index = self.degrees.index(degree_name + alteration)
+            index = self.degrees.index(alteration + degree_name)
 
             note = self.scale.notes[index]
         elif degree_name.isupper():
@@ -82,6 +83,13 @@ class Harmony(BaseHarmony):
                 note += AUGMENTED
 
         if chord_name:
-            return Chord(note, chord_name)
+            return Chord(note, chord_name, inversion=inversion, base_note=base_note)
 
-        return self.scale.get_chord(index, DEFAULT_DEGREES, alteration=final_alteration)
+        return self.scale.get_chord(
+            index,
+            DEFAULT_DEGREES,
+            alteration=final_alteration,
+            inversion=inversion,
+            base_note=base_note
+        )
+    """

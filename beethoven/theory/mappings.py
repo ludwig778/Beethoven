@@ -1,6 +1,6 @@
 note_mappings = [
     (0,  "C", "Do"),
-    (2,  "D", "Ré"),
+    (2,  "D", "Re"),
     (4,  "E", "Mi"),
     (5,  "F", "Fa"),
     (7,  "G", "Sol"),
@@ -92,8 +92,8 @@ scale_mappings = [
     ("1,2a,3,4,5a,6,7",              "double harmonic minor", "ionian #5 #2"),
     ("1,2m,3d,4,5d,6m,7d",           "double harmonic minor", "locrian bb3 bb7"),
     ("1,2,3,4,5,6,7m,7",             None,                    "bebop"),
-    ("1,3m,4a,6",                    None,                    "diminished scale"),
-    ("1,3,6m",                       None,                    "augmented scale"),
-    ("1,2,3,4a,6m,7m",               None,                    "whole tone scale"),
-    ("1,2m,2,3m,3,4,5d,5,6m,6,7m,7", None,                    "chromatic scale")
+    ("1,3m,4a,6",                    None,                    "diminished"),
+    ("1,3,6m",                       None,                    "augmented"),
+    ("1,2,3,4a,6m,7m",               None,                    "whole tone"),
+    ("1,2m,2,3m,3,4,5d,5,6m,6,7m,7", None,                    "chromatic")
 ]

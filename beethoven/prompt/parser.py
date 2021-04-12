@@ -68,17 +68,6 @@ def parse_chord_config_string(config_str, current_scale=None):
         if chord_duration:
             parsed["duration"] = chord_duration
 
-    """
-    if chord_duration is None:
-        if (
-            current_duration is None or
-            current_duration != Whole
-        ):
-            parsed["duration"] = Whole
-    if chord_duration != current_duration:
-        parsed["duration"] = chord_duration
-    """
-
     # GET BASE NOTE OR INVERSION
     splitted = config_str.rsplit("/", 1)
     inversion = None

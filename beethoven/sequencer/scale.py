@@ -24,25 +24,6 @@ class Scale(BaseScale):
     def __hash__(self):
         return id(self.name)
 
-    """
-    @classmethod
-    def load(cls, mappings):
-        for mapping in mappings:
-            interval_names, mode_name, *names = mapping
-            names_instance = ScaleNameContainer(names)
-
-            intervals = [
-                Interval(interval_name)
-                for interval_name in interval_names.split(",")
-            ]
-
-            for name in names:
-                cls._DIRECTORY[name] = (names_instance, mode_name, intervals)
-
-            if mode_name:
-                cls._MODES_DIRECTORY[mode_name].append(names[0])
-    """
-
     def _load_attributes(self, tonic, scale_name):
         if not isinstance(tonic, Note):
             tonic = Note(tonic)

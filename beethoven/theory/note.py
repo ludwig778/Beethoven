@@ -69,6 +69,10 @@ class Note(metaclass=NoteSingletonMeta):
 
         return "b" * abs(self.alteration)
 
+    @property
+    def semitones(self):
+        return (self.index + self.alteration) % 12
+
     def __hash__(self):
         return id(self.name)
 

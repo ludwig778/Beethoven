@@ -58,6 +58,10 @@ class Note(BaseNote, metaclass=NotePitchSingletonMeta):
     def get_theory_self(self):
         return BaseNote(self._get_theory_note_name())
 
+    @property
+    def semitones(self):
+        return self.index % 12
+
     @classmethod
     def cast_from_theory(cls, note, octave=0, inversion=None):
         return cls(f"{note.name}{octave}")

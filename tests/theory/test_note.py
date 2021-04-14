@@ -61,6 +61,21 @@ def test_note_with_sharps_and_flats_raise_exception(note_name):
         Note(note_name)
 
 
+@mark.parametrize("note_name,expected_semitones", [
+    ("Cb", 11),
+    ("C",  0),
+    ("C#", 1),
+    ("Gb", 6),
+    ("G",  7),
+    ("G#", 8),
+    ("Ab", 8),
+    ("A",  9),
+    ("A#", 10),
+])
+def test_note_semitones_property(note_name, expected_semitones):
+    assert Note(note_name).semitones == expected_semitones
+
+
 @mark.parametrize("note_name,interval_name,result_note_name", [
     ("A", "3m", "C"),
     ("A", "3", "C#"),

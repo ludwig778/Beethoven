@@ -26,6 +26,21 @@ def test_note_instanciation_without_attributes():
         Note()
 
 
+@mark.parametrize("note_name,expected_semitones", [
+    ("Cb2", 11),
+    ("C3",  0),
+    ("C#4", 1),
+    ("Gb3", 6),
+    ("G4",  7),
+    ("G#5", 8),
+    ("Ab3", 8),
+    ("A4",  9),
+    ("A#4", 10),
+])
+def test_note_semitones_property(note_name, expected_semitones):
+    assert Note(note_name).semitones == expected_semitones
+
+
 @mark.parametrize("note_name", ["foo", "bar", "baz"])
 def test_note_with_wrong_note_name(note_name):
     with raises(ValueError, match="Note could not be parsed"):

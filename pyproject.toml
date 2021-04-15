@@ -23,6 +23,7 @@ python = "^3.6.1"
 mido = "^1.2.9"
 rtmidi = "^2.3.4"
 prompt-toolkit = "^3.0.18"
+colored = "^1.4.2"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.0"

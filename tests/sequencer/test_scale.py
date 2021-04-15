@@ -1,7 +1,7 @@
 from pytest import mark, raises
 
-from beethoven.sequencer.note import Note
 from beethoven.sequencer.chord import Chord
+from beethoven.sequencer.note import Note
 from beethoven.sequencer.scale import Scale
 
 

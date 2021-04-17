@@ -5,7 +5,7 @@ class Tempo:
         self.set(bpm or self.DEFAULT_BPM)
 
     def set(self, bpm):
-        self.value = bpm
+        self.value = int(bpm)
 
     def base_time_unit(self):
         return 60 / self.value

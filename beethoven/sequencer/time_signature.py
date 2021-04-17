@@ -13,9 +13,9 @@ class TimeSignature:
 
     def set(self, beat_unit=None, beats_per_bar=None):
         if beat_unit:
-            self.beat_unit = beat_unit
+            self.beat_unit = int(beat_unit)
         if beats_per_bar:
-            self.beats_per_bar = beats_per_bar
+            self.beats_per_bar = int(beats_per_bar)
 
     def copy(self):
         return self.__class__(self.beat_unit, self.beats_per_bar)
@@ -43,10 +43,10 @@ class TimeSignature:
     def gen(self, *args, **kwargs):
         return self._gen(*args, **kwargs)
 
-    def _get_time_section(self, count, divisor):
+    def _get_time_section(self, count, divisor, beats_per_bar=None, beat_unit=None):
         raw_submeasure, divisor_index = divmod(count, divisor)
-        raw_measure, submeasure = divmod(raw_submeasure, self.beats_per_bar)
-        bar, measure = divmod(raw_measure, self.beat_unit)
+        raw_measure, submeasure = divmod(raw_submeasure, beats_per_bar or self.beats_per_bar)
+        bar, measure = divmod(raw_measure, beat_unit or self.beat_unit)
 
         return TimeContainer(
             bar + 1,
@@ -54,6 +54,30 @@ class TimeSignature:
             submeasure + 1,
             divisor_index + 1,
             divisor
+        )
+
+    def normalize_part(self, part):
+        ratio = self.beats_per_bar / 4
+        divisor = part.divisor
+
+        raw_measure = ((part.bar - 1) * self.beat_unit) + (part.measure - 1)
+        raw_submeasure = (raw_measure * self.beats_per_bar) + (part.submeasure - 1)
+        count = ((part.divisor * raw_submeasure) - 1) + (part.divisor_index)
+
+        while True:
+            if divisor % 2:
+                break
+
+            divisor = int(divisor / 2)
+            count = count / 2
+
+        count = int(count / (ratio ** 2))
+
+        return self._get_time_section(
+            count,
+            divisor,
+            beats_per_bar=4,
+            beat_unit=int(self.beat_unit / ratio)
         )
 
     def _gen(self, note_duration, duration=None, go_on=False):
@@ -89,7 +113,13 @@ class TimeSignature:
             if last_section is not None and last_section <= time_section:
                 return
 
+            """
+            if normalize_part:
+                yield self.normalize_part(time_section)
+            else:
+            """
             yield time_section
+
             count += base_units
 
 

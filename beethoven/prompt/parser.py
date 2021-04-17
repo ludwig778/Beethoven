@@ -1,5 +1,6 @@
 from copy import copy
 
+from beethoven.prompt.parsers import PARSER
 from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Sixteenths, Whole)
 from beethoven.sequencer.tempo import Tempo  # , default_tempo_factory
@@ -8,10 +9,9 @@ from beethoven.theory.chord import Chord
 from beethoven.theory.harmony import Harmony
 from beethoven.theory.note import Note
 from beethoven.theory.scale import Scale
-from beethoven.utils.regex import PROMPT_ENTRY_PARSERS
 
 
-def parse_global_config_string(config_str, current_scale=None):
+def process_config(parsed_config, current_scale=None):
     parsed = {}
     scale_updated = False
 
@@ -21,12 +21,11 @@ def parse_global_config_string(config_str, current_scale=None):
         scale_name = current_scale.name
         tonic_note = current_scale.tonic
 
-    if match_scale := PROMPT_ENTRY_PARSERS["scale"].search(config_str):
-        scale_name = match_scale.groupdict().get("scale")
+    if scale_name := parsed_config.get("scale"):
         scale_updated = True
 
-    if match_tonic := PROMPT_ENTRY_PARSERS["note"].search(config_str):
-        tonic_note = Note(match_tonic.groupdict().get("note"))
+    if tonic_name := parsed_config.get("note"):
+        tonic_note = Note(tonic_name)
         scale_updated = True
 
     if scale_updated and scale_name and tonic_note:
@@ -34,64 +33,57 @@ def parse_global_config_string(config_str, current_scale=None):
     elif not current_scale:
         return parsed
 
-    if match := PROMPT_ENTRY_PARSERS["progression"].search(config_str):
-        parsed["progression"] = match.groupdict().get("progression").replace("_", " ")
+    if progression := parsed_config.get("progression"):
+        parsed["progression"] = progression
 
-    if match := PROMPT_ENTRY_PARSERS["time_signature"].search(config_str):
-        parsed["time_signature"] = TimeSignature(*map(int, match.groupdict().get("time_signature").split("/")))
+    if time_signature := parsed_config.get("time_signature"):
+        parsed["time_signature"] = TimeSignature(*time_signature)
 
-    if match := PROMPT_ENTRY_PARSERS["tempo"].search(config_str):
-        parsed["tempo"] = Tempo(int(match.groupdict().get("tempo")))
+    if tempo := parsed_config.get("tempo"):
+        parsed["tempo"] = Tempo(tempo)
 
     return parsed
 
 
-def parse_chord_config_string(config_str, current_scale=None):
+def process_chord_config(parsed_config, current_scale=None):
     parsed = {}
 
     # GET CHORD DURATION
-    splitted = config_str.rsplit(":", 1)
-    chord_duration = None
-    if len(splitted) == 2:
-        config_str, raw_duration = splitted
+    if duration := parsed_config.get("duration"):
         chord_duration = {
             "W": Whole,
             "H": Half,
             "Q": Quarter,
             "E": Eighths,
             "S": Sixteenths,
-        }[raw_duration[-1]]
+        }[duration]
 
-        if len(raw_duration) == 2 and raw_duration[0].isdigit():
-            chord_duration *= int(raw_duration[0])
+        if chord_duration and (duration_count := parsed_config.get("duration_count")):
+            chord_duration *= int(duration_count)
 
         if chord_duration:
             parsed["duration"] = chord_duration
 
+    if inversion := parsed_config.get("inversion"):
+        pass
+
     # GET BASE NOTE OR INVERSION
-    splitted = config_str.rsplit("/", 1)
-    inversion = None
     base_note = None
     base_degree = None
-    raw_data = None
-    if len(splitted) == 2:
-        config_str, raw_data = splitted
-        if raw_data.isdigit():
-            inversion = int(raw_data)
-        else:
-            try:
-                base_note = Note(raw_data)
-            except (ValueError, AttributeError):
-                # base_degree_interval = harmony.get_base_degree_interval(raw_data)
-                base_degree = raw_data
+    if base := parsed_config.get("base"):
+        try:
+            base_note = Note(base)
+        except (ValueError, AttributeError):
+            # base_degree_interval = harmony.get_base_degree_interval(raw_data)
+            base_degree = base
 
     if not (chord := Harmony(current_scale).get(
-            config_str,
+            parsed_config.get("chord"),
             inversion=inversion,
             base_note=base_note,
             base_degree=base_degree
     )):
-        chord = Chord.get_from_fullname(config_str, inversion=inversion, base_note=base_note)
+        chord = Chord.get_from_fullname(parsed_config.get("chord"), inversion=inversion, base_note=base_note)
 
     parsed["chord"] = chord
 
@@ -104,12 +96,13 @@ def prompt_harmony_list_parser(string):
 
     current_scale = None
 
-    for sub_string in string.split(";"):
-        if not sub_string:
+    for sub_config in PARSER.parseString(string).get("harmony_list"):
+
+        if not sub_config:
             continue
 
-        config = parse_global_config_string(
-            sub_string,
+        config = process_config(
+            sub_config,
             current_scale
         )
 
@@ -121,12 +114,14 @@ def prompt_harmony_list_parser(string):
         if not config.get("progression"):
             continue
 
-        for item in config.pop("progression").split(","):
-            config.update(parse_chord_config_string(item, current_scale))
+        for item in config.pop("progression"):
+            config.update(process_chord_config(item, current_scale))
 
             parsed_harmony_list.append(copy(config))
 
             config.pop("scale", None)
             config.pop("duration", None)
+            config.pop("tempo", None)
+            config.pop("time_signature", None)
 
     return parsed_harmony_list

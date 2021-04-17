@@ -75,7 +75,9 @@ class BasePlayer(metaclass=PlayerMeta):
         self.arpeggiator = Arpeggiator(self)
         self.chord_voicer = ChordVoicer(self)
 
-    def play(self, part, *notes, duration=None, velocity=127):
+        self.part = None
+
+    def play(self, *notes, duration=None, velocity=127):
         if notes and not all(map(lambda x: isinstance(x, Note), notes)):
             notes = self._get_notes(*notes)
 
@@ -83,11 +85,32 @@ class BasePlayer(metaclass=PlayerMeta):
             duration = self.NOTE_DURATION
 
         return {
-            "part": part,
+            "part": self.part,
             "notes": notes,
             "duration": duration,
             "velocity": velocity
         }
+
+    def check(self, **kwargs):
+        if not self.part:
+            return False
+
+        if getattr(self, "NORMALIZE_TS", False):
+            part = self.time_signature.normalize_part(self.part)
+        else:
+            part = self.part
+
+        print("=====", self, self.part, part)
+
+        checks = []
+        for k, v in kwargs.items():
+            part_value = getattr(part, k)
+            if isinstance(v, int):
+                checks.append(part_value == v)
+            else:
+                checks.append(part_value in v)
+
+        return all(checks)
 
     def __repr__(self):
         return f"{str(self)}"

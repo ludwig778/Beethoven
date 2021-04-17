@@ -1,4 +1,10 @@
-default: tests
+default: prompt
+
+prompt:
+	poetry run python3 beethoven/prompt/main.py
+
+py:
+	poetry run python3
 
 sh:
 	bash
@@ -15,7 +21,7 @@ tox:
 	tox
 
 tests:
-	pytest --cov=beethoven --cov-append --cov-report html:coverage_html
+	pytest --cov=beethoven --cov-append --cov-report html:coverage_html -vs
 .PHONY: tests
 
 cov:

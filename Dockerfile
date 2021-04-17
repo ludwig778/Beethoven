@@ -32,7 +32,7 @@ RUN pyenv install 3.9.2 && \
 COPY pyproject.toml poetry.lock ./
 
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-root
+    poetry install
 
 COPY . .
 

@@ -79,7 +79,7 @@ from beethoven.theory.scale import Scale
         ]
     ),
     (
-        "n=A sc=major p=I:H,I:2Q,I", [
+        "n=A sc=major p=I:d=H,I:d=2Q,I", [
             {
                 "chord": Chord("A", "maj7"),
                 "scale": Scale("A", "ionian"),
@@ -95,7 +95,7 @@ from beethoven.theory.scale import Scale
         ]
     ),
     (
-        "n=C sc=major p=Amaj7/1,Bmin7/2", [
+        "n=C sc=major p=Amaj7:i=1,Bmin7:i=2", [
             {
                 "chord": Chord("A", "maj7", inversion=1),
                 "scale": Scale("C", "ionian"),
@@ -106,7 +106,7 @@ from beethoven.theory.scale import Scale
         ]
     ),
     (
-        "n=C sc=major p=V/ii,ii", [
+        "n=C sc=major p=V:b=ii,ii", [
             {
                 "chord": Chord("A", "7"),
                 "scale": Scale("C", "ionian"),
@@ -117,7 +117,7 @@ from beethoven.theory.scale import Scale
         ]
     ),
     (
-        "n=C sc=major p=I/A,B/C", [
+        "n=C sc=major p=I:b=A,B:b=C", [
             {
                 "chord": Chord("C", "maj7", base_note="A"),
                 "scale": Scale("C", "ionian"),

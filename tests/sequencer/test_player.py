@@ -13,7 +13,8 @@ def test_base_player_capabilities():
 
     assert repr(player) == "<Player FakePlayer>"
 
-    assert player.play(TimeContainer(1, 1, 1), "F4", "F5", velocity=63) == {
+    player.part = TimeContainer(1, 1, 1)
+    assert player.play("F4", "F5", velocity=63) == {
         "part": TimeContainer(1, 1, 1),
         "notes": [Note("F4"), Note("F5")],
         "duration": Whole,

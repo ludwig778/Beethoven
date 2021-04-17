@@ -5,9 +5,6 @@ class Tuning:
     def __init__(self, *strings):
         self.strings = list(strings)
 
-    def __eq__(self, other):
-        return self.strings == other.strings
-
     def __str__(self):
         return f"<Tuning {len(self.strings)} strings>"
 

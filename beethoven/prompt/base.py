@@ -2,6 +2,7 @@ from enum import Enum, auto
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import FileHistory
+from pyparsing import ParseFatalException
 
 
 class PromptSignal(Enum):
@@ -51,8 +52,12 @@ class BasePrompt:
             return signal
 
         if text:
-            if signal := self.dispatch(text):
-                return signal
+            try:
+                if signal := self.dispatch(text):
+                    return signal
+            except ParseFatalException as exc:
+                offset = len(self.session.message) + exc.loc
+                print(f"{' ' * offset}^ {exc.msg}")
 
     def dispatch(self):
         raise NotImplementedError()

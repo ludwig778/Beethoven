@@ -3,7 +3,7 @@ from copy import copy
 from beethoven.prompt.parsers import PARSER
 from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Sixteenths, Whole)
-from beethoven.sequencer.tempo import Tempo  # , default_tempo_factory
+from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from beethoven.theory.chord import Chord
 from beethoven.theory.harmony import Harmony
@@ -18,10 +18,11 @@ def process_config(parsed_config, current_scale=None):
     scale_name = None
     tonic_note = None
     if current_scale:
-        scale_name = current_scale.name
+        scale_name = str(current_scale.name)
         tonic_note = current_scale.tonic
 
-    if scale_name := parsed_config.get("scale"):
+    if scale_name_value := parsed_config.get("scale"):
+        scale_name = scale_name_value
         scale_updated = True
 
     if tonic_name := parsed_config.get("note"):
@@ -90,11 +91,11 @@ def process_chord_config(parsed_config, current_scale=None):
     return parsed
 
 
-def prompt_harmony_list_parser(string):
+def prompt_harmony_list_parser(string, full_config=None):
     parsed_harmony_list = []
-    config = {}
+    config = full_config or {}
 
-    current_scale = None
+    current_scale = config.get("scale")
 
     for sub_config in PARSER.parseString(string).get("harmony_list"):
 
@@ -111,17 +112,30 @@ def prompt_harmony_list_parser(string):
         elif not current_scale:
             continue
 
-        if not config.get("progression"):
+        progression = (
+            config.pop("progression", None) or
+            full_config.get("last_progression") or []
+        )
+
+        if not progression:
+            if full_config is not None:
+                full_config.update(config)
             continue
 
-        for item in config.pop("progression"):
+        for item in progression:
             config.update(process_chord_config(item, current_scale))
 
             parsed_harmony_list.append(copy(config))
+
+            if full_config is not None:
+                full_config.update(config)
 
             config.pop("scale", None)
             config.pop("duration", None)
             config.pop("tempo", None)
             config.pop("time_signature", None)
+
+        if full_config is not None:
+            full_config.update({"last_progression": progression})
 
     return parsed_harmony_list

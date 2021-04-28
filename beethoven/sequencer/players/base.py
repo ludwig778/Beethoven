@@ -100,8 +100,6 @@ class BasePlayer(metaclass=PlayerMeta):
         else:
             part = self.part
 
-        print("=====", self, self.part, part)
-
         checks = []
         for k, v in kwargs.items():
             part_value = getattr(part, k)

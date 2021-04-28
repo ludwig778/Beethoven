@@ -41,7 +41,7 @@ class Grid:
 
     @classmethod
     def parse(cls, string, **kwargs):
-        return cls(parts=prompt_harmony_list_parser(string), **kwargs)
+        return cls(parts=prompt_harmony_list_parser(string, **kwargs), **kwargs)
 
     def __repr__(self):
         return str(self)

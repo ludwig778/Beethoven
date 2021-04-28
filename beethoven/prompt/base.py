@@ -22,18 +22,18 @@ class BasePrompt:
         )
 
     def loop(self):
-        try:
-            while True:
+        while True:
+            try:
                 signal = self._handle()
                 if signal == PromptSignal.LEAVE:
                     break
                 if signal == PromptSignal.QUIT:
                     return PromptSignal.QUIT
-        except EOFError:
-            print("EOF : quitting...")
-            return PromptSignal.QUIT
-        except KeyboardInterrupt:
-            pass
+            except EOFError:
+                print("EOF : quitting...")
+                return PromptSignal.QUIT
+            except KeyboardInterrupt:
+                pass
 
     def _pre_handle(self):
         text = self.session.prompt()

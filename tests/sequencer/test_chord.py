@@ -42,6 +42,21 @@ def test_chord_instanciation_with_inversion():
     assert inverted.notes == Note.to_list("E5,A5")
 
 
+@mark.parametrize("root_note,chord_name,extensions,expected_str,expected_notes", [
+    ("A2", "power",    ("5",),        "A2power",            Note.to_list("A2,E3")),
+    ("A2", "power",    ("4",),        "A2power add4",       Note.to_list("A2,D3,E3")),
+    ("B2", "min",      ("9a",),       "B2min add9a",        Note.to_list("B2,D3,F#3,C##4")),
+    ("D3", "maj7",     ("11", "13d"), "D3maj7 add11add13d", Note.to_list("D3,F#3,A3,C#4,G4,Bbb4")),
+    ("F4", "min maj7", ("14dd",),     "F4min maj7 add14dd", Note.to_list("F4,Ab4,C5,E5,Ebbb6"))
+])
+def test_chord_instanciation_with_extensions(root_note, chord_name, extensions, expected_str, expected_notes):
+    chord = Chord(root_note, chord_name, extensions=extensions)
+
+    assert repr(chord) == f"<Chord {expected_str}>"
+
+    assert chord.notes == expected_notes
+
+
 @mark.parametrize("inversion", [-1, 2])
 def test_chord_instanciation_with_inversion_out_of_range(inversion):
     with raises(ValueError, match="Chord inversion out of range"):

@@ -72,7 +72,7 @@ def test_chord_name_container():
     ('power', 'power chord', 'add5'),
     ('maj', 'major triad', ''),
     ('sus2', 'suspended 2', 'sus2'),
-    ('min7', 'minor 7', '–7')
+    ('min7', 'minor 7', '-7')
 ])
 def test_chord_notation_on_initialization(short, extended, symbol):
     root_note = "A4"

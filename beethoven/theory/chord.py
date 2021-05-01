@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 
 from beethoven.theory.interval import Interval
 from beethoven.theory.mappings import chord_mappings
@@ -24,16 +25,21 @@ class ChordNameContainer(NameContainer):
 class ChordSingletonMeta(type):
     _INSTANCES = {}
 
-    def __call__(cls, root_note=None, chord_name=None, inversion=None, base_note=None):
+    def __call__(cls, root_note=None, chord_name=None, inversion=None, base_note=None, extensions=None):
         if root_note is None and chord_name is None:
             raise ValueError("Chord name and root note must be set")
 
         elif base_note and not isinstance(base_note, Note):
             base_note = Note(base_note)
 
-        args = frozenset([root_note, chord_name, inversion, base_note])
+        extensions = frozenset([
+            extension if isinstance(extension, Interval) else Interval(extension)
+            for extension in extensions or []
+        ])
+
+        args = frozenset([root_note, chord_name, inversion, base_note, extensions])
         if args not in cls._INSTANCES:
-            instance = super().__call__(root_note, chord_name, inversion, base_note)
+            instance = super().__call__(root_note, chord_name, inversion, base_note, extensions)
             cls._INSTANCES[args] = instance
 
         return cls._INSTANCES[args]
@@ -43,14 +49,17 @@ class Chord(metaclass=ChordSingletonMeta):
     _DIRECTORY = {}
     _REVERSE_DIRECTORY = defaultdict(list)
 
-    def __init__(self, root, name, inversion, base_note):
-        self._load_attributes(root, name, inversion, base_note)
+    def __init__(self, root, name, inversion, base_note, extensions):
+        self._load_attributes(root, name, inversion, base_note, extensions)
 
     def __repr__(self):
         return f"<Chord {str(self)}>"
 
     def __str__(self):
         string = f"{self.root.name}{self.name}"
+
+        if self.extensions:
+            string += " " + ("".join(map(lambda e: f"add{e.shortname}", self.extensions)))
 
         if self.base_note:
             string += f"/{self.base_note.name}"
@@ -102,14 +111,15 @@ class Chord(metaclass=ChordSingletonMeta):
     def get_chord_name_from_intervals(cls, intervals):
         return cls._REVERSE_DIRECTORY.get(",".join([i.shortname for i in intervals]))
 
-    def _load_attributes(self, root_note, chord_name, inversion, base_note):
+    def _load_attributes(self, root_note, chord_name, inversion, base_note, extensions):
         if not isinstance(root_note, Note):
             root_note = Note(root_note)
 
         if not (data := self._DIRECTORY.get(chord_name)):
             raise ValueError("Chord name does not exists")
 
-        self.name, self.intervals = data
+        self.name, intervals = data
+        self.intervals = copy(intervals)
 
         if inversion and (inversion < 0 or inversion >= len(self.intervals)):
             raise ValueError("Chord inversion out of range")
@@ -130,12 +140,24 @@ class Chord(metaclass=ChordSingletonMeta):
         ]
         self.notes += base_chord_notes[self.inversion:] + base_chord_notes[:self.inversion]
 
+        self.extensions = []
+        for extension in sorted(extensions):
+            if extension in self.intervals:
+                continue
+
+            self.intervals.append(extension)
+            self.notes.append(self.root + extension)
+            self.extensions.append(extension)
+
+        self.intervals = list(sorted(self.intervals))
+
     def to_dict(self):
         return {
             "chord_name": self.name.short,
             "root_note": self.root,
             "base_note": self.base_note,
-            "inversion": self.inversion
+            "inversion": self.inversion,
+            "extensions": self.extensions
         }
 
 

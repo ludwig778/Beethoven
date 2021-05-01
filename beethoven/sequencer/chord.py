@@ -1,33 +1,40 @@
+from copy import copy
+
 from beethoven.sequencer.note import Note
 from beethoven.theory.chord import Chord as BaseChord
 from beethoven.theory.chord import ChordSingletonMeta
-from beethoven.theory.interval import OCTAVE
+from beethoven.theory.interval import Interval, OCTAVE
 from beethoven.utils.regex import SEQUENCER_CHORD_PARSER
 
 
 class SequencerChordSingletonMeta(ChordSingletonMeta):
     _INSTANCES = {}
 
-    def __call__(cls, root_note=None, chord_name=None, inversion=None, base_note=None):
+    def __call__(cls, root_note=None, chord_name=None, inversion=None, base_note=None, extensions=None):
         if root_note is None and chord_name is None:
             raise ValueError("Chord name and root note must be set")
 
         elif base_note and not isinstance(base_note, Note):
             base_note = Note(base_note)
 
-        args = frozenset([root_note, chord_name, inversion, base_note])
+        extensions = frozenset([
+            extension if isinstance(extension, Interval) else Interval(extension)
+            for extension in extensions or []
+        ])
+
+        args = frozenset([root_note, chord_name, inversion, base_note, extensions])
         if args not in cls._INSTANCES:
-            instance = super().__call__(root_note, chord_name, inversion, base_note)
+            instance = super().__call__(root_note, chord_name, inversion, base_note, extensions)
             cls._INSTANCES[args] = instance
 
         return cls._INSTANCES[args]
 
 
 class Chord(BaseChord, metaclass=SequencerChordSingletonMeta):
-    def __init__(self, root, name, inversion, base_note):
-        self._load_attributes(root, name, inversion, base_note)
+    def __init__(self, root, name, inversion, base_note, extensions):
+        self._load_attributes(root, name, inversion, base_note, extensions)
 
-    def _load_attributes(self, root_note, chord_name, inversion, base_note):
+    def _load_attributes(self, root_note, chord_name, inversion, base_note, extensions):
         if not isinstance(root_note, Note):
             root_note = Note(root_note)
 
@@ -51,7 +58,8 @@ class Chord(BaseChord, metaclass=SequencerChordSingletonMeta):
                 )
             )
 
-        self.name, self.intervals = data
+        self.name, intervals = data
+        self.intervals = copy(intervals)
 
         if inversion and (inversion < 0 or inversion >= len(self.intervals)):
             raise ValueError("Chord inversion out of range")
@@ -74,6 +82,18 @@ class Chord(BaseChord, metaclass=SequencerChordSingletonMeta):
                 note += OCTAVE
             self.notes.append(note)
             last_note = note
+
+        self.extensions = []
+        for extension in sorted(extensions):
+            if extension in self.intervals:
+                continue
+
+            self.notes.append(self.root + extension)
+            self.intervals.append(extension)
+            self.extensions.append(extension)
+
+        self.notes = list(sorted(self.notes))
+        self.intervals = list(sorted(self.intervals))
 
     @classmethod
     def get_from_fullname(cls, name, **kwargs):

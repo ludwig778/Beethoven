@@ -46,7 +46,7 @@ def test_interval_with_implicit_major(interval_name):
     assert Interval(interval_name) == Interval(interval_name + "M")
 
 
-@mark.parametrize("interval_name", ["foo", "bar", "15"])
+@mark.parametrize("interval_name", ["foo", "bar", "16"])
 def test_interval_with_wrong_interval_name(interval_name):
     with raises(ValueError, match="Interval name does not exists"):
         Interval(interval_name)

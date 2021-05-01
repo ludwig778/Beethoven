@@ -23,7 +23,8 @@ interval_mappings = [
     (17, "11", "eleventh"),
     (19, "12", "twelveth"),
     (21, "13", "thirdteenth"),
-    (23, "14", "fourteenth")
+    (23, "14", "fourteenth"),
+    (24, "15", "two octaves")
 ]
 
 

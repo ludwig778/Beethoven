@@ -114,7 +114,7 @@ def prompt_harmony_list_parser(string, full_config=None):
 
         progression = (
             config.pop("progression", None) or
-            full_config.get("last_progression") or []
+            full_config and full_config.get("last_progression") or []
         )
 
         if not progression:

@@ -47,7 +47,7 @@ class Interval(metaclass=IntervalSingletonMeta):
         return f"<Interval {self.fullname if fullname_enabled else self.shortname}>"
 
     def __hash__(self):
-        return id(self.name)
+        return id(self.system_name)
 
     def __eq__(self, other):
         return (
@@ -134,16 +134,16 @@ class Interval(metaclass=IntervalSingletonMeta):
         parsed = INTERVAL_PARSER.match(interval_name).groupdict()
 
         interval_name = parsed.get("interval_name")
-        alteration = parsed.get("alteration")
+        alteration_str = parsed.get("alteration")
 
         alteration_check = []
-        if major := "M" in alteration:
+        if major := "M" in alteration_str:
             alteration_check.append("M")
-        if minor := "m" in alteration:
+        if minor := "m" in alteration_str:
             alteration_check.append("m")
-        if diminished_num := alteration.count("d"):
+        if diminished_num := alteration_str.count("d"):
             alteration_check.append("d")
-        if augmented_num := alteration.count("a"):
+        if augmented_num := alteration_str.count("a"):
             alteration_check.append("a")
 
         if len(alteration_check) > 1:
@@ -189,6 +189,8 @@ class Interval(metaclass=IntervalSingletonMeta):
             alteration = augmented_num - diminished_num
 
         self.alteration = alteration
+
+        self.system_name = str(self.name) + alteration_str
 
     def to_dict(self):
         return {"interval_name": self.name.numeric}

@@ -10,7 +10,8 @@ alpha = Word(alphas)
 alpha_note = Word(alphas + "#b")
 integer = Word(nums)
 
-COMMAND_PARSER = CaselessLiteral("c=").suppress() + alpha("command")
+#COMMAND_PARSER = CaselessLiteral("c=").suppress() + alpha("command")
+COMMAND_PARSER = alpha("command")
 SCALE_PARSER = (
     CaselessLiteral("sc=").suppress() + alpha("scale")
     .setParseAction(validate_scale)
@@ -61,10 +62,10 @@ PROGRESSION_PARSER = (
 )
 
 PARSER = delimitedList(Group(ZeroOrMore(
-    COMMAND_PARSER |
     SCALE_PARSER |
     NOTE_PARSER |
     TEMPO_PARSER |
     TIME_SIGNATURE_PARSER |
-    PROGRESSION_PARSER
+    PROGRESSION_PARSER |
+    COMMAND_PARSER
 )), delim=";")("harmony_list")

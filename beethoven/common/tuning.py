@@ -11,6 +11,10 @@ class Tuning:
     def __repr__(self):
         return str(self)
 
+    @classmethod
+    def from_notes_str(cls, string):
+        return cls(*Note.to_list(string))
+
 
 E_STANDARD = Tuning(*Note.to_list("E,A,D,G,B,E"))
 E_STANDARD_BASS = Tuning(*Note.to_list("E,A,D,G"))

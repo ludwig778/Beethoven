@@ -7,6 +7,9 @@ class NameContainer:
     def __init__(self, names):
         self.names = names
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
         return self.names[self._SETTINGS[self.__class__.__name__]]
 

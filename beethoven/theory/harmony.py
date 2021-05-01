@@ -73,7 +73,7 @@ class Harmony(metaclass=HarmonySingletonMeta):
 
         return self.scale.notes[0] // note
 
-    def _get(self, degree, inversion=None, base_note=None, base_degree=None, default_degrees=None, seventh=True):
+    def _get(self, degree, inversion=None, base_note=None, base_degree=None, default_degrees=None, seventh=True, extensions=None):
         if not default_degrees:
             default_degrees = self._DEFAULT_DEGREES
 
@@ -85,7 +85,13 @@ class Harmony(metaclass=HarmonySingletonMeta):
             note += base_degree_interval
 
         if chord_name:
-            chord = Chord(note, chord_name, inversion=inversion, base_note=base_note)
+            chord = Chord(
+                note,
+                chord_name,
+                inversion=inversion,
+                base_note=base_note,
+                extensions=extensions
+            )
 
         else:
             scale = self.scale
@@ -98,7 +104,8 @@ class Harmony(metaclass=HarmonySingletonMeta):
                 default_degrees,
                 alteration=alteration,
                 inversion=inversion,
-                base_note=base_note
+                base_note=base_note,
+                extensions=extensions
             )
 
         return chord

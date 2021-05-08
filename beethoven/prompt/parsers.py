@@ -10,7 +10,6 @@ alpha = Word(alphas)
 alpha_note = Word(alphas + "#b")
 integer = Word(nums)
 
-#COMMAND_PARSER = CaselessLiteral("c=").suppress() + alpha("command")
 COMMAND_PARSER = alpha("command")
 SCALE_PARSER = (
     CaselessLiteral("sc=").suppress() + alpha("scale")

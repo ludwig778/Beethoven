@@ -43,6 +43,7 @@ def test_harmony_repr():
 
 
 @mark.parametrize("degree_name,expected_chord", [
+    ("i",       "Amin7"),
     ("I",       "Amaj7"),
     ("ii",      "Bmin7"),
     ("II",      "Bmaj7"),
@@ -60,6 +61,27 @@ def test_harmony_parse_degree(degree_name, expected_chord):
     harmony = Harmony(Scale("A", "major"))
 
     assert harmony.get(degree_name) == Chord.get_from_fullname(expected_chord)
+
+
+@mark.parametrize("degree_name,expected_chord", [
+    ("i",       "Amin7"),
+    ("I",       "Amaj7"),
+    ("ii",      "Bmin7"),
+    ("II",      "Bmin7"),
+    ("bII",     "Bbmin7"),
+    ("IV",      "Dmaj7"),
+    ("bIV",     "Dbmaj7"),
+    ("#V",      "E#7"),
+    ("VI7",     "F#7"),
+    ("VIIdim7", "G#dim7"),
+    ("vii",     "G#min7b5"),
+    ("viimin7", "G#min7"),
+    ("VII",     "G#min7b5"),
+])
+def test_harmony_parse_degree_non_strictly(degree_name, expected_chord):
+    harmony = Harmony(Scale("A", "major"))
+
+    assert harmony.get(degree_name, strict=False) == Chord.get_from_fullname(expected_chord)
 
 
 @mark.parametrize("scale_name,expected_degrees", [

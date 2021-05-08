@@ -81,13 +81,18 @@ class Harmony(metaclass=HarmonySingletonMeta):
         base_degree=None,
         default_degrees=None,
         seventh=True,
+        strict=True,
         extensions=None
     ):
         if not default_degrees:
             default_degrees = self._DEFAULT_DEGREES
 
         base_degree_interval = None
-        note, alteration, index, chord_name = self._parse_degree(degree, seventh=seventh)
+        note, alteration, index, chord_name = self._parse_degree(
+            degree,
+            seventh=seventh,
+            strict=strict
+        )
 
         if base_degree:
             base_degree_interval = self.get_base_degree_interval(base_degree)
@@ -119,7 +124,7 @@ class Harmony(metaclass=HarmonySingletonMeta):
 
         return chord
 
-    def _parse_degree(self, degree, seventh=True):
+    def _parse_degree(self, degree, seventh=True, strict=True):
         matched = HARMONY_PARSER.match(degree)
         if not matched:
             raise ValueError("Degree could not be parsed")
@@ -133,13 +138,14 @@ class Harmony(metaclass=HarmonySingletonMeta):
 
         index = self._DEGREES.index(degree_name.upper())
         note = self.scale.notes[index]
+
         if degree_name not in self.degrees and not chord_name:
-            if degree_name.isupper():
+            if strict and degree_name.isupper():
                 chord_name = "maj"
-            else:
+            elif degree_name.islower():
                 chord_name = "min"
 
-            if seventh:
+            if chord_name and seventh:
                 chord_name += "7"
 
         flats = alteration.count("b")

@@ -73,7 +73,16 @@ class Harmony(metaclass=HarmonySingletonMeta):
 
         return self.scale.notes[0] // note
 
-    def _get(self, degree, inversion=None, base_note=None, base_degree=None, default_degrees=None, seventh=True, extensions=None):
+    def _get(
+        self,
+        degree,
+        inversion=None,
+        base_note=None,
+        base_degree=None,
+        default_degrees=None,
+        seventh=True,
+        extensions=None
+    ):
         if not default_degrees:
             default_degrees = self._DEFAULT_DEGREES
 

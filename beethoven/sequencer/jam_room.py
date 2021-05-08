@@ -1,5 +1,3 @@
-from beethoven.common.tuning import E_STANDARD
-from beethoven.display.fretboard import Fretboard
 from beethoven.repository.midi import midi
 from beethoven.sequencer.players.base import Players
 
@@ -11,7 +9,6 @@ class JamRoom:
 
     def play(self, callback=None, **kwargs):
         for grid_part_index in midi.play(self.grid, self.players, **kwargs):
-            grid_part = self.grid.parts[grid_part_index - 1]
 
             if callback:
                 callback(grid_part_index)

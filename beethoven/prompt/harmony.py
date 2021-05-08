@@ -1,4 +1,5 @@
 from beethoven.prompt.base import BasePrompt
+from beethoven.prompt.display import display
 from beethoven.prompt.state import state
 from beethoven.sequencer.grid import Grid
 
@@ -9,7 +10,7 @@ class HarmonyPrompt(BasePrompt):
     def dispatch(self, text):
         try:
             state.jam_room.grid = Grid.parse(text, full_config=state.config)
-            state.jam_room.play()
+            state.jam_room.play(callback=display)
 
         except ValueError as exc:
             print(f"Error : {str(exc)}")

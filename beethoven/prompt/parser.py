@@ -7,6 +7,7 @@ from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from beethoven.theory.chord import Chord
 from beethoven.theory.harmony import Harmony
+from beethoven.theory.interval import Interval
 from beethoven.theory.note import Note
 from beethoven.theory.scale import Scale
 
@@ -78,13 +79,22 @@ def process_chord_config(parsed_config, current_scale=None):
             # base_degree_interval = harmony.get_base_degree_interval(raw_data)
             base_degree = base
 
+    if extensions := parsed_config.get("extensions"):
+        extensions = {Interval(e) for e in extensions}
+
     if not (chord := Harmony(current_scale).get(
             parsed_config.get("chord"),
             inversion=inversion,
             base_note=base_note,
-            base_degree=base_degree
+            base_degree=base_degree,
+            extensions=extensions
     )):
-        chord = Chord.get_from_fullname(parsed_config.get("chord"), inversion=inversion, base_note=base_note)
+        chord = Chord.get_from_fullname(
+            parsed_config.get("chord"),
+            inversion=inversion,
+            base_note=base_note,
+            extensions=extensions
+        )
 
     parsed["chord"] = chord
 

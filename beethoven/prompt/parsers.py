@@ -48,12 +48,17 @@ CHORD_DURATION_PARSER = (
     CaselessLiteral(":d=").suppress() +
     Optional(integer("duration_count")) + alpha("duration")
 )
+CHORD_EXTENSIONS_PARSER = ZeroOrMore(
+    CaselessLiteral(":e=").suppress() +
+    Word(alphas + nums).setResultsName("extensions", listAllMatches=True)
+)
 
 CHORD_PARSER = (
     CHORD_NAME_PARSER +
     Optional(CHORD_BASE_PARSER) +
     Optional(CHORD_DURATION_PARSER) +
-    Optional(CHORD_INVERSION_PARSER)
+    Optional(CHORD_INVERSION_PARSER) +
+    Optional(CHORD_EXTENSIONS_PARSER)
 )
 
 PROGRESSION_PARSER = (

@@ -24,5 +24,27 @@ class State:
 
         self.config = self.DEFAULT_CONFIG
 
+        self.display_config = {
+            "fretboards": [
+                {
+                    "tuning": Tuning.from_notes_str("E,A,D,G,B,E"),
+                    "tonic_color": "white",
+                    "chord_color": "yellow",
+                    "diatonic_color": {
+                        2: "light_red",
+                        3: "light_green",
+                        4: "turquoise_2",
+                        6: "magenta"
+                    }
+                }
+            ]
+        }
+
+    def load(self):
+        raise NotImplementedError()
+
+    def save(self):
+        raise NotImplementedError()
+
 
 state = State()

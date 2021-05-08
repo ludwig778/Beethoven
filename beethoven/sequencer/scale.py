@@ -44,7 +44,7 @@ class Scale(BaseScale):
         if self.mode:
             self.mode_index = self._MODES_DIRECTORY[self.mode].index(str(self.name))
 
-    def get_chord(self, start_degree, degrees, alteration=0, inversion=None, base_note=None):
+    def get_chord(self, start_degree, degrees, alteration=0, inversion=None, base_note=None, extensions=None):
         degrees = degrees.split(",")
         notes = []
 
@@ -64,4 +64,10 @@ class Scale(BaseScale):
 
         chord_name = Chord.get_chord_name_from_intervals(intervals)
 
-        return Chord(first_note, chord_name.short, inversion=inversion, base_note=base_note)
+        return Chord(
+            first_note,
+            chord_name.short,
+            inversion=inversion,
+            base_note=base_note,
+            extensions=extensions
+        )

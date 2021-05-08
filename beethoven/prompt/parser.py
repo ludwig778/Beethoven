@@ -1,6 +1,7 @@
 from copy import copy
 
 from beethoven.prompt.parsers import PARSER
+from beethoven.prompt.state import state
 from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Sixteenths, Whole)
 from beethoven.sequencer.tempo import Tempo
@@ -87,7 +88,8 @@ def process_chord_config(parsed_config, current_scale=None):
             inversion=inversion,
             base_note=base_note,
             base_degree=base_degree,
-            extensions=extensions
+            extensions=extensions,
+            strict=state.prompt_config.get("strict")
     )):
         chord = Chord.get_from_fullname(
             parsed_config.get("chord"),

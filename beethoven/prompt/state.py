@@ -1,11 +1,11 @@
+from beethoven.common.tuning import Tuning
 from beethoven.players.drum import Drum
 from beethoven.players.piano import Piano
 from beethoven.sequencer.jam_room import JamRoom
-
-from beethoven.theory.scale import Scale
+from beethoven.sequencer.note_duration import Whole
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
-from beethoven.sequencer.note_duration import Whole
+from beethoven.theory.scale import Scale
 
 
 class State:

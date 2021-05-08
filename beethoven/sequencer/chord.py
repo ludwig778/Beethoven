@@ -3,7 +3,7 @@ from copy import copy
 from beethoven.sequencer.note import Note
 from beethoven.theory.chord import Chord as BaseChord
 from beethoven.theory.chord import ChordSingletonMeta
-from beethoven.theory.interval import Interval, OCTAVE
+from beethoven.theory.interval import OCTAVE, Interval
 from beethoven.utils.regex import SEQUENCER_CHORD_PARSER
 
 

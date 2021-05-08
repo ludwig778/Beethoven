@@ -8,17 +8,17 @@ from beethoven.theory.chord import Chord as TheoryChord
 def adapt_chord_to_sequencer(chord, range):
     low_range, high_range = range
 
+    chord_data = chord.to_dict()
+    root_note = chord_data.pop("root_note")
+
     if isinstance(chord, TheoryChord):
-        chord_data = chord.to_dict()
-        root = chord_data.pop("root_note")
+        root_note = Note.cast_from_theory(root_note)
 
-        chord = Chord(root_note=Note.cast_from_theory(root), **chord_data)
+    if root_note < low_range:
+        while root_note < low_range:
+            root_note += OCTAVE
 
-    if chord.root < low_range:
-        while chord.root < low_range:
-            chord.root += OCTAVE
-
-    chord = Chord(chord.root, chord.name.short, chord.inversion, chord.base_note)
+    chord = Chord(root_note=root_note, **chord_data)
 
     return [
         note

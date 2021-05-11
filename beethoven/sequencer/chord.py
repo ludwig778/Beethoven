@@ -1,6 +1,7 @@
 from copy import copy
 
 from beethoven.sequencer.note import Note
+from beethoven.theory.note import Note as TheoryNote
 from beethoven.theory.chord import Chord as BaseChord
 from beethoven.theory.chord import ChordSingletonMeta
 from beethoven.theory.interval import OCTAVE, Interval
@@ -14,8 +15,11 @@ class SequencerChordSingletonMeta(ChordSingletonMeta):
         if root_note is None and chord_name is None:
             raise ValueError("Chord name and root note must be set")
 
-        elif base_note and not isinstance(base_note, Note):
-            base_note = Note(base_note)
+        elif base_note and isinstance(base_note, str):
+            try:
+                base_note = Note(base_note)
+            except Exception:
+                base_note = TheoryNote(base_note)
 
         extensions = frozenset([
             extension if isinstance(extension, Interval) else Interval(extension)

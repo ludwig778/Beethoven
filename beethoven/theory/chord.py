@@ -29,7 +29,7 @@ class ChordSingletonMeta(type):
         if root_note is None and chord_name is None:
             raise ValueError("Chord name and root note must be set")
 
-        elif base_note and not isinstance(base_note, Note):
+        elif base_note and isinstance(base_note, str):
             base_note = Note(base_note)
 
         extensions = frozenset([

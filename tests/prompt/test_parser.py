@@ -126,6 +126,17 @@ from beethoven.theory.scale import Scale
                 "chord": Chord("B", "maj", base_note="C")
             }
         ]
+    ),
+    (
+        "n=C sc=major p=Gmin7:b=A,Dmaj:b=C", [
+            {
+                "chord": Chord("G", "min7", base_note="A"),
+                "scale": Scale("C", "ionian"),
+            },
+            {
+                "chord": Chord("D", "maj", base_note="C")
+            }
+        ]
     )
 ])
 def test_prompt_harmony_list_parser(input_string, expected):

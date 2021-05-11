@@ -1,3 +1,6 @@
+ARGS = $(filter-out $@,$(MAKECMDGOALS))
+
+
 default: prompt
 
 prompt:
@@ -19,6 +22,9 @@ sure: lint isort
 
 tox:
 	tox
+
+test_on:
+	pytest --cov=beethoven --cov-append --cov-report html:coverage_html -vs ${ARGS}
 
 tests:
 	pytest --cov=beethoven --cov-append --cov-report html:coverage_html -vs

@@ -36,20 +36,13 @@ class BasePrompt:
             except KeyboardInterrupt:
                 pass
 
-    def _pre_handle(self):
+    def _handle(self):
         text = self.session.prompt()
 
         if text in ("q", "quit"):
-            return PromptSignal.QUIT, text
+            return PromptSignal.QUIT
         elif text in ("l", "leave"):
-            return PromptSignal.LEAVE, text
-
-        return None, text
-
-    def _handle(self):
-        signal, text = self._pre_handle()
-        if signal:
-            return signal
+            return PromptSignal.LEAVE
 
         if text:
             try:

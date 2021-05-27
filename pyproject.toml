@@ -3,19 +3,19 @@ name = "beethoven"
 version = "0.1.0"
 description = "Python music making library."
 authors = ["Laurent Arthur <laurent.arthur75@gmail.com>"]
-
 license = "GPLv3"
-
 readme = "README.md"
-
+homepage = "https://github.com/ludwig778/beethoven"
 repository = "https://github.com/ludwig778/beethoven"
-
 classifiers = [
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.8",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+include = [
+    "LICENSE",
 ]
 
 [tool.poetry.dependencies]

@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from prompt_toolkit import PromptSession
+from prompt_toolkit import PromptSession, prompt
 from prompt_toolkit.history import FileHistory
 from pyparsing import ParseFatalException
 
@@ -17,10 +17,17 @@ class BasePrompt:
     def __init__(self):
         self.session = PromptSession(
             message=self.PROMPT_STR,
+            completer=self._get_completer(),
             bottom_toolbar=self.BOTTOM_TOOLBAR,
             history=FileHistory(".beethoven_history"),
             enable_suspend=True
         )
+
+    def prompt(self, text):
+        return prompt(text)
+
+    def _get_completer(self):
+        raise NotImplementedError
 
     def loop(self):
         while True:

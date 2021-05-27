@@ -21,6 +21,7 @@ DEFAULT_PROMPT_CONFIG = {
     "strict": True
 }
 
+
 class State:
 
     def __init__(self, prompt_config=None):
@@ -57,6 +58,5 @@ else:
                     6: "magenta"
                 }
             }
-        ]
-    }
-)
+        ]}
+    )

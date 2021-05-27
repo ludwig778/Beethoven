@@ -1,5 +1,13 @@
-from beethoven.prompt.root import RootPrompt
+from beethoven.prompt.base import BasePrompt, PromptSignal
+from beethoven.prompt.harmony import HarmonyPrompt
 
-if __name__ == "__main__":
-    root_prompt = RootPrompt()
-    root_prompt.loop()
+
+class MainPrompt(BasePrompt):
+    PROMPT_STR = ">>> "
+
+    def dispatch(self, text):
+        if text == "s":
+            if HarmonyPrompt().loop() == PromptSignal.QUIT:
+                return PromptSignal.QUIT
+
+        print("text is : ", text)

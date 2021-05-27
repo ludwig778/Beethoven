@@ -33,6 +33,9 @@ pytest-cov = "^2.11.1"
 isort = "^5.8.0"
 pytest-env = "^0.6.2"
 
+[tool.poetry.scripts]
+beethoven = "beethoven:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

@@ -1,5 +1,6 @@
 from pytest import mark
 
+from beethoven.prompt.parser import prompt_harmony_list_parser
 from beethoven.repository.midi import MidiRepository
 from beethoven.sequencer.grid import Grid
 from beethoven.sequencer.jam_room import JamRoom
@@ -209,10 +210,8 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
 def test_midi_messages_from_jam_room(harmony_str, players, expected_messages, expected_length, monkeypatch):
     midi = MidiRepository(virtual=True)
 
-    room = JamRoom(
-        grid=Grid.parse(harmony_str),
-        players=players
-    )
+    grid = Grid(parts=prompt_harmony_list_parser(harmony_str))
+    room = JamRoom(grid=grid, players=players)
 
     def get_messages(midi_file, **kwargs):
         messages = []

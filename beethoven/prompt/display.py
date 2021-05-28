@@ -18,9 +18,12 @@ class PromptDisplay:
                 func()
 
     def print_fretboard(self):
-        print("FRETBOARDS")
+        fretboards = state.prompt_config.get("fretboards") or []
 
-        for fretboard_config in state.prompt_config.get("fretboards"):
+        if fretboards:
+            print("FRETBOARDS")
+
+        for fretboard_config in fretboards:
             tuning = fretboard_config.get("tuning", E_STANDARD)
 
             print(f"{tuning}\n")

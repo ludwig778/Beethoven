@@ -1,11 +1,16 @@
+from prompt_toolkit.completion import WordCompleter
+
 from beethoven.prompt.base import BasePrompt
 from beethoven.prompt.display import display
 from beethoven.prompt.state import state
 from beethoven.sequencer.grid import Grid
 
 
-class HarmonyPrompt(BasePrompt):
-    PROMPT_STR = "harmony> "
+class ComposePrompt(BasePrompt):
+    PROMPT_STR = "compose> "
+
+    def _get_completer(self):
+        return WordCompleter([])
 
     def dispatch(self, text):
         try:

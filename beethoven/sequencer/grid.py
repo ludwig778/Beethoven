@@ -1,6 +1,5 @@
 from copy import copy
 
-from beethoven.prompt.parser import prompt_harmony_list_parser
 from beethoven.sequencer.note_duration import Whole
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
@@ -38,10 +37,6 @@ class Grid:
             self.parts.append(grid_part)
 
             last_part = grid_part
-
-    @classmethod
-    def parse(cls, string, **kwargs):
-        return cls(parts=prompt_harmony_list_parser(string, **kwargs), **kwargs)
 
     def __repr__(self):
         return str(self)

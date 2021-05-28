@@ -46,4 +46,4 @@ def validate_time_signature(string, loc, expr):
 
 @handle_parser_exception
 def validate_chord(string, loc, expr):
-    print("VALIDATE CHORD", string, loc, expr)
+    pass  # TODO

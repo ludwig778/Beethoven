@@ -29,7 +29,6 @@ class MidiRepository:
         messages = defaultdict(list)
 
         for grid_part_index, grid_part in enumerate(grid.parts, start=1):
-            print("GRID", grid_part_index)
             messages[global_time].append(('text', {"text": str(grid_part_index)}))
 
             tempo = grid_part.tempo

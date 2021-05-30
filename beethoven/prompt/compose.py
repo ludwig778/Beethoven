@@ -13,6 +13,23 @@ class ComposePrompt(BasePrompt):
     def _get_completer(self):
         return WordCompleter([])
 
+    def _help(self):
+        print(" == Composer ==")
+        print(" Define as much parts as you want, semi colon separated")
+        print()
+        print(" Each parts are defined with the following attributes")
+        print("   scale with sc=major")
+        print("   note with n=C#")
+        print("   tempo with t=90")
+        print("   time signature with ts=5/4")
+        print("   progression with p=II,V,I")
+        print()
+        print(" Progression is a comma separated list of degrees or chords")
+        print(" Could be:")
+        print("   p=I,IV,V")
+        print("   p=Amaj7,C#min7,E7")
+        print()
+
     def dispatch(self, text):
         try:
             grid = Grid(parts=prompt_harmony_list_parser(text, full_config=state.config))

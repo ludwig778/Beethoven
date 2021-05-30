@@ -29,6 +29,9 @@ class BasePrompt:
     def _get_completer(self):
         raise NotImplementedError
 
+    def _help(self):
+        raise NotImplementedError
+
     def loop(self):
         while True:
             try:
@@ -50,6 +53,8 @@ class BasePrompt:
             return PromptSignal.QUIT
         elif text in ("l", "leave"):
             return PromptSignal.LEAVE
+        elif text in ("h", "help"):
+            self._help()
 
         if text:
             try:

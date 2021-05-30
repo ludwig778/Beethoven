@@ -59,7 +59,8 @@ class BasePrompt:
         if text:
             try:
                 if signal := self.dispatch(text):
-                    return signal
+                    if signal in (PromptSignal.QUIT, PromptSignal.LEAVE):
+                        return signal
             except ParseFatalException as exc:
                 offset = len(self.session.message) + exc.loc
                 print(f"{' ' * offset}^ {exc.msg}")

@@ -1,7 +1,8 @@
 from prompt_toolkit.completion import WordCompleter
 
-from beethoven.prompt.base import BasePrompt, PromptSignal
+from beethoven.prompt.base import BasePrompt
 from beethoven.prompt.compose import ComposePrompt
+from beethoven.prompt.training import TrainingPrompt
 
 
 class MainPrompt(BasePrompt):
@@ -9,12 +10,17 @@ class MainPrompt(BasePrompt):
 
     def _get_completer(self):
         return WordCompleter([
-            "compose", "leave", "quit",
+            "compose", "training", "help", "leave", "quit",
         ])
+
+    def _help(self):
+        print(" == Menu ==")
+        print(" - Training")
+        print(" - Compose")
 
     def dispatch(self, text):
         if text.lower() in ("c", "compose"):
-            if ComposePrompt().loop() == PromptSignal.QUIT:
-                return PromptSignal.QUIT
+            return ComposePrompt().loop()
 
-        print("text is : ", text)
+        elif text.lower() in ("t", "training"):
+            return TrainingPrompt().loop()

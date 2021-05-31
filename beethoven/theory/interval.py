@@ -1,8 +1,8 @@
 from copy import copy
 
 from beethoven.theory.mappings import interval_mappings
+from beethoven.utils.name_container import NameContainer
 from beethoven.utils.regex import INTERVAL_PARSER
-from beethoven.utils.settings import NameContainer
 
 
 class IntervalNameContainer(NameContainer):

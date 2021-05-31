@@ -4,8 +4,8 @@ from copy import copy
 from beethoven.theory.interval import Interval
 from beethoven.theory.mappings import chord_mappings
 from beethoven.theory.note import Note
+from beethoven.utils.name_container import NameContainer
 from beethoven.utils.regex import CHORD_PARSER
-from beethoven.utils.settings import NameContainer
 
 
 class ChordNameContainer(NameContainer):

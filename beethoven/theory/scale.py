@@ -4,7 +4,7 @@ from beethoven.theory.chord import Chord
 from beethoven.theory.interval import AUGMENTED, DIMINISHED, Interval
 from beethoven.theory.mappings import scale_mappings
 from beethoven.theory.note import Note
-from beethoven.utils.settings import NameContainer
+from beethoven.utils.name_container import NameContainer
 
 
 class ScaleNameContainer(NameContainer):

@@ -1,6 +1,7 @@
 from copy import copy
 
-from beethoven.prompt.parsers import PARSER
+from beethoven.models import GridPart
+from beethoven.prompt.parsers import COMPOSE_PARSER, SECTION_PARSER
 from beethoven.prompt.state import state
 from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Sixteenths, Whole)
@@ -103,21 +104,114 @@ def process_chord_config(parsed_config, current_scale=None):
     return parsed
 
 
+def expand_harmony_string(string, extra_config=None):
+    harmony_list = []
+    extra_config = extra_config or {}
+
+    harmony_strings = (
+        COMPOSE_PARSER
+        .parseString(string)
+        .get("harmony_strings")
+    ) or []
+
+    for sub_config in harmony_strings:
+
+        section_parsed = SECTION_PARSER.parseString(sub_config)
+
+        repeat = section_parsed.pop("repeat", 1)
+        command = section_parsed.pop("command", None)
+        progression = section_parsed.pop("progression", [])
+
+        section_extra_config = {
+            **section_parsed,
+            **extra_config
+        }
+
+        if command:
+            if obj := GridPart.get(command):
+                next_grid = expand_harmony_string(obj.text, section_extra_config)
+            else:
+                next_grid = expand_harmony_string(f"p={command}", section_extra_config)
+
+            harmony_list += next_grid * repeat
+        else:
+            harmony_list += [
+                {
+                    "progression": progression,
+                    **dict(section_parsed),
+                    **extra_config
+                }
+            ] * repeat
+
+    return harmony_list
+
+
+def handle_global_commands(string):
+    interrupt = False
+
+    parsed = COMPOSE_PARSER.parseString(string)
+
+    if value := parsed.get("register"):
+        text = "; ".join(parsed.get("harmony_strings"))
+
+        if obj := GridPart.get(value):
+            print("updated")
+            obj.update(text=text)
+
+        else:
+            print("created")
+            obj = GridPart.create(value, text=text)
+
+        state.grid_parts[obj.name] = obj
+        interrupt = True
+
+    elif value := parsed.get("delete"):
+        if obj := GridPart.get(value):
+            obj.delete()
+            print("deleted")
+            state.grid_parts.pop(value, None)
+
+        interrupt = True
+
+    elif parsed.get("info") is not None:
+        values = parsed.get("info")
+
+        if not values:
+            for obj in sorted(GridPart.list(), key=lambda o: o.name):
+                print(f"{obj.name:23s}: {obj.text}")
+
+        else:
+            for value in values:
+                if obj := GridPart.get(value):
+                    print("  ", obj.text)
+
+                else:
+                    print("no infos")
+
+        interrupt = True
+
+    return interrupt
+
+
 def prompt_harmony_list_parser(string, full_config=None):
     parsed_harmony_list = []
     config = full_config or {}
 
+    if handle_global_commands(string):
+        return
+
+    harmony_list = expand_harmony_string(string)
+
     current_scale = config.get("scale")
 
-    for sub_config in PARSER.parseString(string).get("harmony_list"):
-
-        if not sub_config:
-            continue
-
-        config = process_config(
-            sub_config,
-            current_scale
-        )
+    for section_parsed in harmony_list:
+        config = {
+            **config,
+            **process_config(
+                section_parsed,
+                current_scale
+            )
+        }
 
         if config.get("scale"):
             current_scale = config["scale"]

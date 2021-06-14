@@ -10,7 +10,12 @@ alpha = Word(alphas)
 alpha_note = Word(alphas + "#b")
 integer = Word(nums)
 
-COMMAND_PARSER = alpha("command")
+command = Word(alphas + nums + "#b.,:=")
+
+REGISTER_PARSER = CaselessLiteral("register").suppress() + command("register")
+INFO_PARSER = CaselessLiteral("info").suppress() + Group(ZeroOrMore(command))("info")
+DELETE_PARSER = CaselessLiteral("delete").suppress() + command("delete")
+COMMAND_PARSER = command("command")
 SCALE_PARSER = (
     CaselessLiteral("sc=").suppress() + alpha("scale")
     .setParseAction(validate_scale)
@@ -27,6 +32,14 @@ TIME_SIGNATURE_PARSER = (
     CaselessLiteral("ts=").suppress() +
     (integer + Literal("/").suppress() + integer)("time_signature")
     .setParseAction(validate_time_signature)
+)
+REPEAT_PARSER = (
+    (
+        CaselessLiteral("r=") |
+        CaselessLiteral("repeat=")
+    ).suppress() +
+    integer("repeat")
+    .setParseAction(lambda v: int(v[0]))
 )
 
 CHORD_NAME_PARSER = (
@@ -65,11 +78,26 @@ PROGRESSION_PARSER = (
     delimitedList(Group(CHORD_PARSER))("progression")
 )
 
-PARSER = delimitedList(Group(ZeroOrMore(
+SECTION_PARSER = ZeroOrMore(
     SCALE_PARSER |
     NOTE_PARSER |
     TEMPO_PARSER |
     TIME_SIGNATURE_PARSER |
     PROGRESSION_PARSER |
+    REPEAT_PARSER |
     COMMAND_PARSER
-)), delim=";")("harmony_list")
+)
+
+HARMONY_STRINGS_PARSER = delimitedList(
+    Word(alphas + nums + "()#b_=/:, "),
+    delim=";"
+)("harmony_strings")
+
+COMPOSE_PARSER = (
+    INFO_PARSER |
+    DELETE_PARSER |
+    (
+        Optional(REGISTER_PARSER) +
+        Optional(HARMONY_STRINGS_PARSER)
+    )
+)

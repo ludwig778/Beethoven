@@ -11,7 +11,7 @@ class ComposePrompt(BasePrompt):
     PROMPT_STR = "compose> "
 
     def _get_completer(self):
-        return WordCompleter([])
+        return WordCompleter(["register", "delete", "info", "help", *state.grid_parts])
 
     def _help(self):
         print(" == Composer ==")

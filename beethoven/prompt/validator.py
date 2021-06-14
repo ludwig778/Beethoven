@@ -2,6 +2,7 @@ from pyparsing import ParseFatalException
 
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
+from beethoven.theory.chord import Chord
 from beethoven.theory.harmony import Harmony
 from beethoven.theory.note import Note
 from beethoven.theory.scale import Scale
@@ -46,4 +47,9 @@ def validate_time_signature(string, loc, expr):
 
 @handle_parser_exception
 def validate_chord(string, loc, expr):
-    pass  # TODO
+    value = expr[0]
+    if not (
+        Chord.get_from_fullname(value) or
+        Harmony(Scale("A", "major")).get(value)
+    ):
+        raise Exception("Couldn't parse chord item")

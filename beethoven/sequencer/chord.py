@@ -1,10 +1,10 @@
 from copy import copy
 
 from beethoven.sequencer.note import Note
-from beethoven.theory.note import Note as TheoryNote
 from beethoven.theory.chord import Chord as BaseChord
 from beethoven.theory.chord import ChordSingletonMeta
 from beethoven.theory.interval import OCTAVE, Interval
+from beethoven.theory.note import Note as TheoryNote
 from beethoven.utils.regex import SEQUENCER_CHORD_PARSER
 
 

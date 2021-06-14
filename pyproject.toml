@@ -24,6 +24,8 @@ mido = "^1.2.9"
 prompt-toolkit = "^3.0.18"
 colored = "^1.4.2"
 python-rtmidi = "^1.4.9"
+pymongo = "^3.11.4"
+dnspython = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.23.0"

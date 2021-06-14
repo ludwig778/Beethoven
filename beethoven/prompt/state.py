@@ -1,6 +1,7 @@
 from os import environ
 
 from beethoven.common.tuning import Tuning
+from beethoven.models import GridPart
 from beethoven.players.drum import Drum
 from beethoven.players.piano import Piano
 from beethoven.sequencer.jam_room import JamRoom
@@ -8,7 +9,6 @@ from beethoven.sequencer.note_duration import Whole
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from beethoven.theory.scale import Scale
-
 
 DEFAULT_CONFIG = {
     "scale": Scale("C", "major"),
@@ -26,6 +26,11 @@ class State:
 
     def __init__(self, prompt_config=None):
         self.jam_room = JamRoom()
+
+        self.grid_parts = {
+            gp.name: gp
+            for gp in GridPart.list()
+        }
 
         self.jam_room.players.add(Piano())
         self.jam_room.players.add(Drum())

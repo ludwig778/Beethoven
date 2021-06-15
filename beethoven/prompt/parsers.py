@@ -1,7 +1,7 @@
 from pyparsing import (CaselessLiteral, Group, Literal, Optional, Word,
                        ZeroOrMore, alphas, delimitedList, nums)
 
-from beethoven.prompt.validator import (validate_chord, validate_note,
+from beethoven.prompt.validator import (validate_chord_item, validate_note,
                                         validate_note_or_degree,
                                         validate_scale, validate_tempo,
                                         validate_time_signature)
@@ -10,7 +10,7 @@ alpha = Word(alphas)
 alpha_note = Word(alphas + "#b")
 integer = Word(nums)
 
-command = Word(alphas + nums + "#b.,:=")
+command = Word(alphas + nums + "#b.,:=_")
 
 REGISTER_PARSER = CaselessLiteral("register").suppress() + command("register")
 INFO_PARSER = CaselessLiteral("info").suppress() + Group(ZeroOrMore(command))("info")
@@ -44,7 +44,8 @@ REPEAT_PARSER = (
 
 CHORD_NAME_PARSER = (
     Word(alphas + nums + "#_")("chord")
-    .setParseAction(validate_chord)
+    .setParseAction(validate_chord_item)
+    .setParseAction(lambda v: v[0].replace("_", " "))
     # TODO
     # Should parse for note/degree
 )

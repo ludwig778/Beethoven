@@ -46,8 +46,9 @@ def validate_time_signature(string, loc, expr):
 
 
 @handle_parser_exception
-def validate_chord(string, loc, expr):
-    value = expr[0]
+def validate_chord_item(string, loc, expr):
+    value = expr[0].replace("_", " ")
+
     if not (
         Chord.get_from_fullname(value) or
         Harmony(Scale("A", "major")).get(value)

@@ -75,7 +75,7 @@ CHORD_PARSER = (
 
 PROGRESSION_PARSER = (
     CaselessLiteral("p=").suppress() +
-    delimitedList(Group(CHORD_PARSER))("progression")
+    Optional(delimitedList(Group(CHORD_PARSER)))("progression")
 )
 
 SECTION_PARSER = ZeroOrMore(

@@ -68,10 +68,12 @@ CHORD_EXTENSIONS_PARSER = ZeroOrMore(
 
 CHORD_PARSER = (
     CHORD_NAME_PARSER +
-    Optional(CHORD_BASE_PARSER) +
-    Optional(CHORD_DURATION_PARSER) +
-    Optional(CHORD_INVERSION_PARSER) +
-    Optional(CHORD_EXTENSIONS_PARSER)
+    (
+        Optional(CHORD_BASE_PARSER) &
+        Optional(CHORD_DURATION_PARSER) &
+        Optional(CHORD_INVERSION_PARSER) &
+        Optional(CHORD_EXTENSIONS_PARSER)
+    )
 )
 
 PROGRESSION_PARSER = (

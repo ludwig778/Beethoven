@@ -63,7 +63,7 @@ class Settings:
             config_file.touch()
             with config_file.open(mode="w") as fd:
                 dump(self.get_default(), fd, indent=4)
-                print(f"Tracker : Template configuration set at {config_file}")
+                print(f"Beethoven : Template configuration set at {config_file}")
 
     def load_from_env(self):
         for prefix, config in self.config.items():
@@ -72,7 +72,7 @@ class Settings:
                 attr = environ.get(env_name, default)
 
                 if attr is None and not self.parsed.get(field_name):
-                    print(f"Tracker : {field_name} must be set")
+                    print(f"Beethoven : {field_name} must be set")
                     exit(1)
 
                 if attr:

@@ -41,6 +41,10 @@ REPEAT_PARSER = (
     integer("repeat")
     .setParseAction(lambda v: int(v[0]))
 )
+BYPASS_PARSER = (
+    CaselessLiteral("!")("bypass")
+    .setParseAction(lambda *a: True)
+)
 
 CHORD_NAME_PARSER = (
     Word(alphas + nums + "#_")("chord")
@@ -88,11 +92,12 @@ SECTION_PARSER = ZeroOrMore(
     TIME_SIGNATURE_PARSER |
     PROGRESSION_PARSER |
     REPEAT_PARSER |
+    BYPASS_PARSER |
     COMMAND_PARSER
 )
 
 HARMONY_STRINGS_PARSER = delimitedList(
-    Word(alphas + nums + "()#b_=/:, "),
+    Word(alphas + nums + "()#b_=/:, !"),
     delim=";"
 )("harmony_strings")
 

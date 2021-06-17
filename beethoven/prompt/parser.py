@@ -118,6 +118,7 @@ def expand_harmony_string(string, extra_config=None):
 
         section_parsed = SECTION_PARSER.parseString(sub_config)
 
+        bypass = section_parsed.pop("bypass", False)
         repeat = section_parsed.pop("repeat", 1)
         command = section_parsed.pop("command", None)
         progression = section_parsed.pop("progression", [])
@@ -138,6 +139,7 @@ def expand_harmony_string(string, extra_config=None):
             harmony_list += [
                 {
                     "progression": progression,
+                    "bypass": bypass,
                     **dict(section_parsed),
                     **extra_config
                 }
@@ -226,7 +228,7 @@ def prompt_harmony_list_parser(string, full_config=None):
         if full_config:
             full_config.update(config)
 
-        if not progression:
+        if section_parsed.pop("bypass", False) or not progression:
             continue
 
         for item in progression:

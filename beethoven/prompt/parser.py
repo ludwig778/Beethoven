@@ -198,7 +198,7 @@ def handle_global_commands(string):
 def prompt_harmony_list_parser(string, full_config=None):
     parsed_harmony_list = []
     config = copy(full_config) if full_config else {}
-    last_progression = config.pop("last_progression", [])
+    last_progression = config.pop("last_progression", None)
 
     if handle_global_commands(string):
         return
@@ -222,13 +222,13 @@ def prompt_harmony_list_parser(string, full_config=None):
             continue
 
         progression = (
-            config.pop("progression", None) or last_progression
+            config.pop("progression", None) or last_progression or []
         )
 
         if full_config:
             full_config.update(config)
 
-        if section_parsed.pop("bypass", False) or not progression:
+        if section_parsed.pop("bypass", False):
             continue
 
         for item in progression:

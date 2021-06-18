@@ -10,7 +10,7 @@ alpha = Word(alphas)
 alpha_note = Word(alphas + "#b")
 integer = Word(nums)
 
-command = Word(alphas + nums + "#b.,:=_")
+command = Word(alphas + nums + "#.,:=_+-Δ°ø()")
 
 REGISTER_PARSER = CaselessLiteral("register").suppress() + command("register")
 INFO_PARSER = CaselessLiteral("info").suppress() + Group(ZeroOrMore(command))("info")

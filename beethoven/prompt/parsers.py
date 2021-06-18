@@ -47,9 +47,9 @@ BYPASS_PARSER = (
 )
 
 CHORD_NAME_PARSER = (
-    Word(alphas + nums + "#_")("chord")
-    .setParseAction(validate_chord_item)
-    .setParseAction(lambda v: v[0].replace("_", " "))
+    Word(alphas + nums + "#_+-Δ°ø()")("chord")
+    .addParseAction(lambda v: v[0].replace("_", " "))
+    .addParseAction(validate_chord_item)
     # TODO
     # Should parse for note/degree
 )

@@ -175,6 +175,18 @@ def handle_global_commands(string):
 
         interrupt = True
 
+    elif parsed.get("settings"):
+
+        print("Scale            :", state.config.get("scale"))
+        print("Tempo            :", state.config.get("tempo"))
+        print("Duration         :", state.config.get("duration"))
+        print("Time signature   :", state.config.get("time_signature"))
+
+        if state.config.get("last_progression"):
+            print("Last progression :", state.config.get("last_progression").asList())
+
+        interrupt = True
+
     elif parsed.get("info") is not None:
         values = parsed.get("info")
 

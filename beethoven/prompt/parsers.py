@@ -15,6 +15,7 @@ command = Word(alphas + nums + "#.,:=_+-Δ°ø()")
 REGISTER_PARSER = CaselessLiteral("register").suppress() + command("register")
 INFO_PARSER = CaselessLiteral("info").suppress() + Group(ZeroOrMore(command))("info")
 DELETE_PARSER = CaselessLiteral("delete").suppress() + command("delete")
+SETTINGS_PARSER = CaselessLiteral("settings")("settings").setParseAction(lambda *a: True)
 COMMAND_PARSER = command("command")
 SCALE_PARSER = (
     CaselessLiteral("sc=").suppress() + Word(alphas + nums + "#_-")("scale")
@@ -105,6 +106,7 @@ HARMONY_STRINGS_PARSER = delimitedList(
 COMPOSE_PARSER = (
     INFO_PARSER |
     DELETE_PARSER |
+    SETTINGS_PARSER |
     (
         Optional(REGISTER_PARSER) +
         Optional(HARMONY_STRINGS_PARSER)

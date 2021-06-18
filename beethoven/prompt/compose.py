@@ -5,13 +5,19 @@ from beethoven.prompt.display import display
 from beethoven.prompt.parser import prompt_harmony_list_parser
 from beethoven.prompt.state import state
 from beethoven.sequencer.grid import Grid
+from beethoven.utils.mappings import get_chord_names, get_scale_names
 
 
 class ComposePrompt(BasePrompt):
     PROMPT_STR = "compose> "
 
     def _get_completer(self):
-        return WordCompleter(["register", "delete", "info", "help", *state.grid_parts])
+        return WordCompleter([
+            "register", "delete", "settings", "info", "help",
+            *sorted(state.grid_parts),
+            *sorted(get_chord_names(lambda x: x.replace(" ", "_"))),
+            *sorted(get_scale_names(lambda x: x.replace(" ", "_")))
+        ])
 
     def _help(self):
         print(" == Composer ==")

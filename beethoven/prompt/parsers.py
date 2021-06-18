@@ -17,8 +17,9 @@ INFO_PARSER = CaselessLiteral("info").suppress() + Group(ZeroOrMore(command))("i
 DELETE_PARSER = CaselessLiteral("delete").suppress() + command("delete")
 COMMAND_PARSER = command("command")
 SCALE_PARSER = (
-    CaselessLiteral("sc=").suppress() + alpha("scale")
-    .setParseAction(validate_scale)
+    CaselessLiteral("sc=").suppress() + Word(alphas + nums + "#_-")("scale")
+    .addParseAction(lambda v: v[0].replace("_", " "))
+    .addParseAction(validate_scale)
 )
 NOTE_PARSER = (
     CaselessLiteral("n=").suppress() + alpha_note("note")

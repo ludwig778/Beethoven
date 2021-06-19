@@ -108,13 +108,9 @@ def expand_harmony_string(string, extra_config=None):
     harmony_list = []
     extra_config = extra_config or {}
 
-    harmony_strings = (
-        COMPOSE_PARSER
-        .parseString(string)
-        .get("harmony_strings")
-    ) or []
+    parsed = COMPOSE_PARSER.parseString(string)
 
-    for sub_config in harmony_strings:
+    for sub_config in parsed.get("harmony_strings") or []:
 
         section_parsed = SECTION_PARSER.parseString(sub_config)
 

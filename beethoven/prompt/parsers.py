@@ -99,9 +99,9 @@ SECTION_PARSER = ZeroOrMore(
 )
 
 HARMONY_STRINGS_PARSER = delimitedList(
-    Word(alphas + nums + "()#b_=/:, !"),
+    Word(alphas + nums + "()#_=/:, !.+-Δ°ø"),
     delim=";"
-)("harmony_strings")
+)
 
 COMPOSE_PARSER = (
     INFO_PARSER |
@@ -109,6 +109,6 @@ COMPOSE_PARSER = (
     SETTINGS_PARSER |
     (
         Optional(REGISTER_PARSER) +
-        Optional(HARMONY_STRINGS_PARSER)
+        HARMONY_STRINGS_PARSER("harmony_strings")
     )
 )

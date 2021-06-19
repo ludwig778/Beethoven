@@ -153,18 +153,14 @@ class MidiRepository:
 
                 self._send_msg(msg)
 
-        try:
-            if go_on:
-                while 1:
-                    yield from _play(midi_file)
-            elif repeat and repeat > 1:
-                for _ in range(repeat):
-                    yield from _play(midi_file)
-            else:
+        if go_on:
+            while 1:
                 yield from _play(midi_file)
-
-        except KeyboardInterrupt:
-            self._shutdown()
+        elif repeat and repeat > 1:
+            for _ in range(repeat):
+                yield from _play(midi_file)
+        else:
+            yield from _play(midi_file)
 
         return
 

@@ -12,3 +12,6 @@ class JamRoom:
 
             if callback:
                 callback(grid_part_index)
+
+    def quiet(self):
+        midi._shutdown()

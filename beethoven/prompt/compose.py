@@ -46,3 +46,8 @@ class ComposePrompt(BasePrompt):
         except ValueError as exc:
             print(f"Error : {str(exc)}")
             return
+
+    def clean(self):
+        super().clean()
+
+        state.jam_room.quiet()

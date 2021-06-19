@@ -1,3 +1,4 @@
+import sys
 from enum import Enum, auto
 
 from prompt_toolkit import PromptSession, prompt
@@ -61,9 +62,18 @@ class BasePrompt:
                 if signal := self.dispatch(text):
                     if signal in (PromptSignal.QUIT, PromptSignal.LEAVE):
                         return signal
+
+            except KeyboardInterrupt:
+                self.clean()
+
+                return
+
             except ParseFatalException as exc:
                 offset = len(self.session.message) + exc.loc
                 print(f"{' ' * offset}^ {exc.msg}")
 
     def dispatch(self):
         raise NotImplementedError()
+
+    def clean(self):
+        sys.stdout.write("\r")

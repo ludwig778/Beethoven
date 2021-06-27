@@ -98,10 +98,10 @@ SECTION_PARSER = ZeroOrMore(
     COMMAND_PARSER
 )
 
-HARMONY_STRINGS_PARSER = delimitedList(
+HARMONY_STRINGS_PARSER = ZeroOrMore(delimitedList(
     Word(alphas + nums + "()#_=/:, !.+-Δ°ø"),
     delim=";"
-)
+))
 
 COMPOSE_PARSER = (
     INFO_PARSER |

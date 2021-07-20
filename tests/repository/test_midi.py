@@ -1,25 +1,20 @@
 from pytest import mark
 
-from beethoven.prompt.parser import prompt_harmony_list_parser
 from beethoven.repository.midi import MidiRepository
-from beethoven.sequencer.grid import Grid
+from beethoven.theory.scale import Scale
+from beethoven.theory.chord import Chord
+from beethoven.sequencer.grid import Grid, GridPart
 from beethoven.sequencer.jam_room import JamRoom
+from beethoven.sequencer.note_duration import Whole, Half, Quarter
+from beethoven.sequencer.tempo import Tempo
+from beethoven.sequencer.time_signature import TimeSignature
 from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
 
 
-@mark.parametrize("harmony_str,players,expected_messages,expected_length", [
-    # Test with empty harmony string
+@mark.parametrize("grid,players,expected_messages,expected_length", [
+    # Test with empty grid
     (
-        "",
-        [FakePlayer1()],
-        [
-            {"type": "end_of_track", "time": 0}
-        ],
-        0.0
-    ),
-    # Test with empty harmony string
-    (
-        "n=A ts=4/4 sc=major t=60 p=",
+        Grid(),
         [FakePlayer1()],
         [
             {"type": "end_of_track", "time": 0}
@@ -28,7 +23,15 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     ),
     # Basic test with no players
     (
-        "n=A ts=4/4 sc=major t=60 p=I",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            )
+        ]),
         [],
         [
             {"type": "text", "text": "1", "time": 0},
@@ -38,7 +41,15 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     ),
     # Basic test
     (
-        "n=A ts=4/4 sc=major t=60 p=I",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            )
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -52,21 +63,15 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     ),
     # Testing duration to grid part
     (
-        "n=A ts=4/4 sc=major t=60 p=I:d=H",
-        [FakePlayer1()],
-        [
-            {"type": "text",     "text": "1", "time": 0},
-            {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 73, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_off", "note": 69, "velocity": 127, "channel": 0, "time": 2.0833333333333335},
-            {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "end_of_track", "time": 0}
-        ],
-        2.0
-    ),
-    # Testing duration to grid part with multiplier
-    (
-        "n=A ts=4/4 sc=major t=60 p=I:d=2Q",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=Half,
+                time_signature=TimeSignature(4, 4)
+            )
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -80,7 +85,22 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     ),
     # Testing duration with time signature fill
     (
-        "n=A ts=4/4 sc=major t=60 p=I:d=Q,II",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=Quarter,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("B", "min"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            )
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -90,16 +110,38 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
             {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "2", "time": 0},
             {"type": "note_on",  "note": 71, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 71, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "end_of_track", "time": 0}
         ],
         4.0
     ),
     # Testing duration with time signature fill with another duration
     (
-        "n=A ts=4/4 sc=major t=60 p=I:d=Q,II,III:d=3Q",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=Quarter,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("B", "min"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("C#", "min"),
+                tempo=Tempo(60),
+                duration=Quarter * 3,
+                time_signature=TimeSignature(4, 4)
+            ),
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -109,45 +151,43 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
             {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "2", "time": 0},
             {"type": "note_on",  "note": 71, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 71, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "3", "time": 0},
             {"type": "note_on",  "note": 61, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 65, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 64, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 61, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 65, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "end_of_track", "time": 0}
-        ],
-        7.0
-    ),
-    # Testing duration with time signature fill
-    (
-        "n=A ts=4/4 sc=major t=60 p=I:d=Q,II,III:d=3Q",
-        [FakePlayer1()],
-        [
-            {"type": "text",     "text": "1", "time": 0},
-            {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 73, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_off", "note": 69, "velocity": 127, "channel": 0, "time": 1.0416666666666667},
-            {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "text",     "text": "2", "time": 0},
-            {"type": "note_on",  "note": 71, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 75, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_off", "note": 71, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 75, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "text",     "text": "3", "time": 0},
-            {"type": "note_on",  "note": 61, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 65, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_off", "note": 61, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 65, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 64, "velocity": 127, "channel": 0, "time": 0},
             {"type": "end_of_track", "time": 0}
         ],
         7.0
     ),
     # Testing with split/spanned duration over time signatures
     (
-        "n=A ts=4/4 sc=major t=60 p=I:d=Q,II:d=W,III",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=Quarter,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("B", "min"),
+                tempo=Tempo(60),
+                duration=Whole,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("C#", "min"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            ),
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -157,21 +197,29 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
             {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "2", "time": 0},
             {"type": "note_on",  "note": 71, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 71, "velocity": 127, "channel": 0, "time": 4.166666666666667},
-            {"type": "note_off", "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "3", "time": 0},
             {"type": "note_on",  "note": 61, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 65, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 64, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 61, "velocity": 127, "channel": 0, "time": 3.125},
-            {"type": "note_off", "note": 65, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 64, "velocity": 127, "channel": 0, "time": 0},
             {"type": "end_of_track", "time": 0}
         ],
         8.0
     ),
     # Basic test with multiple players
     (
-        "n=A ts=4/4 sc=major t=60 p=I",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            )
+        ]),
         [FakePlayer1(), FakePlayer2()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -189,7 +237,22 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     ),
     # Test with time signature change
     (
-        "n=A ts=4/4 sc=major t=60 p=I;ts=2/2 p=II",
+        Grid([
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("A", "maj"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(4, 4)
+            ),
+            GridPart(
+                scale=Scale("A", "major"),
+                chord=Chord("B", "min"),
+                tempo=Tempo(60),
+                duration=None,
+                time_signature=TimeSignature(2, 2)
+            )
+        ]),
         [FakePlayer1()],
         [
             {"type": "text",     "text": "1", "time": 0},
@@ -199,18 +262,17 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
             {"type": "note_off", "note": 73, "velocity": 127, "channel": 0, "time": 0},
             {"type": "text",     "text": "2", "time": 0},
             {"type": "note_on",  "note": 71, "velocity": 127, "channel": 0, "time": 0},
-            {"type": "note_on",  "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_on",  "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "note_off", "note": 71, "velocity": 127, "channel": 0, "time": 4.166666666666667},
-            {"type": "note_off", "note": 75, "velocity": 127, "channel": 0, "time": 0},
+            {"type": "note_off", "note": 74, "velocity": 127, "channel": 0, "time": 0},
             {"type": "end_of_track", "time": 0}
         ],
         8.0
     ),
 ])
-def test_midi_messages_from_jam_room(harmony_str, players, expected_messages, expected_length, monkeypatch):
+def test_midi_messages_from_jam_room(grid, players, expected_messages, expected_length, monkeypatch):
     midi = MidiRepository(virtual=True)
 
-    grid = Grid(parts=prompt_harmony_list_parser(harmony_str))
     room = JamRoom(grid=grid, players=players)
 
     def get_messages(midi_file, **kwargs):

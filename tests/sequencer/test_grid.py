@@ -13,21 +13,39 @@ def test_create_empty_grid():
 
 
 def test_create_grid_with_parts():
-    parts = [
-        {"scale": Scale("A", "major"), "chord": Chord("A", "maj")},
-        {"chord": Chord("C", "min"), "tempo": Tempo(120)},
-        {"chord": Chord("E", "maj"), "duration": Half},
-        {"chord": Chord("G#", "dim"), "time_signature": TimeSignature(3, 2)}
-    ]
     time_signature = TimeSignature(4, 4)
     tempo = Tempo(90)
 
-    grid = Grid(
-        time_signature=time_signature,
-        tempo=tempo,
-        duration=Whole
-    )
-    grid.set_parts(*parts)
+    grid = Grid([
+        GridPart(
+            scale=Scale("A", "major"),
+            chord=Chord("A", "maj"),
+            tempo=Tempo(90),
+            duration=Whole,
+            time_signature=TimeSignature(4, 4)
+        ),
+        GridPart(
+            scale=Scale("A", "major"),
+            chord=Chord("A", "min"),
+            tempo=Tempo(120),
+            duration=Whole,
+            time_signature=TimeSignature(4, 4)
+        ),
+        GridPart(
+            scale=Scale("A", "major"),
+            chord=Chord("A", "maj"),
+            tempo=Tempo(120),
+            duration=Half,
+            time_signature=TimeSignature(4, 4)
+        ),
+        GridPart(
+            scale=Scale("A", "major"),
+            chord=Chord("G#", "dim"),
+            tempo=Tempo(120),
+            duration=Half,
+            time_signature=TimeSignature(3, 2)
+        )
+    ])
 
     assert repr(grid) == "<Grid : 4 parts>"
 
@@ -46,4 +64,4 @@ def test_grid_part_repr():
         Tempo(60)
     )
 
-    assert repr(grid_part) == "<GridPart : C ionian / Cmaj7 / Whole / 4/4 / 60>"
+    assert repr(grid_part) == "<GridPart : C ionian / Cmaj7 / Whole / 4/4 / 60bpm>"

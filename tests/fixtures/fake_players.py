@@ -8,7 +8,7 @@ class FakePlayer1(BasePlayer):
     NOTE_RANGE = [Note("C3"), Note("C5")]
 
     def play_measure(self, **kwargs):
-        for self.part in self.time_signature.gen(self.NOTE_DURATION):
+        for self.part in self.time_signature.generator(self.NOTE_DURATION):
             yield self.play(
                 *self.chord_voicer.get()[0:2],
                 duration=Whole,
@@ -21,7 +21,7 @@ class FakePlayer2(BasePlayer):
     NOTE_RANGE = [Note("D3"), Note("C5")]
 
     def play_measure(self, **kwargs):
-        for self.part in self.time_signature.gen(self.NOTE_DURATION):
+        for self.part in self.time_signature.generator(self.NOTE_DURATION):
             yield self.play(
                 self.arpeggiator.get()[0],
                 duration=Half,

@@ -3,6 +3,8 @@ from os import environ
 
 import mido
 
+from beethoven.sequencer.time_signature import get_part_timestamp
+
 
 class MidiRepository:
     DEFAULT_OUTPUT_NAME = "DEFAULT_OUTPUT"
@@ -59,8 +61,7 @@ class MidiRepository:
                     velocity = notes_attrs["velocity"]
                     note_duration = notes_attrs["duration"].duration(tempo)
 
-                    offset_time = part.start_offset(time_signature, tempo)
-                    part_time = global_time + offset_time
+                    part_time = global_time + get_part_timestamp(time_signature, tempo, part)
 
                     if duration:
                         grid_part_duration = duration.duration(tempo)
@@ -68,11 +69,11 @@ class MidiRepository:
                         if note_duration > grid_part_duration:
                             note_duration = grid_part_duration
 
-                    if part_time + note_duration > limit_time:
-                        note_duration = limit_time - part_time
-
                     if part_time >= limit_time:
                         continue
+
+                    if part_time + note_duration > limit_time:
+                        note_duration = limit_time - part_time
 
                     for note in notes_attrs.get("notes"):
                         messages[part_time].append(('note_on', {

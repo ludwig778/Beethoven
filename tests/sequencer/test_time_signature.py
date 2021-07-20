@@ -4,21 +4,7 @@ from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Septuplet, Sixteenths, Triplet,
                                                Whole)
 from beethoven.sequencer.tempo import Tempo
-from beethoven.sequencer.time_signature import TimeContainer, TimeSignature
-
-
-@mark.parametrize("args,display", (
-    ((),      "4/4"),
-    ((4, 4),  "4/4"),
-    ((3, 8),  "3/8"),
-    ((9, 8),  "9/8"),
-    ((5, 16), "5/16"),
-    ((3, 2),  "3/2")
-))
-def test_time_signature_instanciation(args, display):
-    time_signature = TimeSignature(*args)
-
-    assert repr(time_signature) == f"<Time Signature : {display}>"
+from beethoven.sequencer.time_signature import TimeContainer, TimeSignature, get_part_timestamp
 
 
 @mark.parametrize("args,tempo,duration", (
@@ -97,7 +83,7 @@ def test_time_signature_duration(args, tempo, duration):
 ))
 def test_time_signature_generator_run(time_signature_args, note_duration, num_time, last_time_args):
     time_signature = TimeSignature(*time_signature_args)
-    time_iterator = list(time_signature.gen(note_duration))
+    time_iterator = list(time_signature.generator(note_duration))
 
     assert len(time_iterator) == num_time
 
@@ -106,7 +92,7 @@ def test_time_signature_generator_run(time_signature_args, note_duration, num_ti
 
 def test_time_signature_generator_infinite_loop():
     time_signature = TimeSignature(4, 4)
-    gen = time_signature.gen(Whole, go_on=True)
+    gen = time_signature.generator(Whole, go_on=True)
 
     for _ in range(10):
         time_section = next(gen)
@@ -116,26 +102,20 @@ def test_time_signature_generator_infinite_loop():
 
 def test_time_signature_generator_with_note_range():
     time_signature = TimeSignature(4, 8)
-    time_iterator = list(time_signature.gen(Quarter, Whole))
+    time_iterator = list(time_signature.generator(Quarter, Whole))
 
     assert time_iterator[-1] == TimeContainer(2, 3, 1)
 
 
 def test_time_signature_generator_stop_iteration():
     time_signature = TimeSignature(4, 4)
-    gen = time_signature.gen(Whole)
+    gen = time_signature.generator(Whole)
 
     # Skip the first time_section which is 1/1
     next(gen)
 
     with raises(StopIteration):
         next(gen)
-
-
-def test_time_signature_copy():
-    time_signature = TimeSignature(3, 4)
-
-    assert time_signature == time_signature.copy()
 
 
 def test_time_container_equal_method():
@@ -169,14 +149,14 @@ def test_time_container_start_offset(time_signature_args, tempo, note_duration, 
     time_signature = TimeSignature(*time_signature_args)
     tempo = Tempo(tempo)
 
-    gen = time_signature.gen(note_duration)
+    gen = time_signature.generator(note_duration)
 
     # Skip the first which is equal to 0.0
     next(gen)
 
     time_section = next(gen)
 
-    assert time_section.start_offset(time_signature, tempo) == note_start_offset
+    assert get_part_timestamp(time_signature, tempo, time_section) == note_start_offset
 
 
 def test_time_container_check():
@@ -190,13 +170,3 @@ def test_time_container_check():
 
     assert time_container.check(bar=3, measure=2)
     assert not time_container.check(bar=3, measure=1)
-
-
-def test_time_container_copy():
-    time_container = TimeContainer(3, 2, 1, 3, 7)
-
-    assert time_container == time_container.copy()
-
-
-def test_time_container_repr():
-    assert repr(TimeContainer(3, 2, 1, 6, 7)) == "<Time 3 | 2 / 1 ( 6 : 7 )>"

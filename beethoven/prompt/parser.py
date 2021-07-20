@@ -136,7 +136,7 @@ class TimeSignatureParser(Base):
         validate_time_signature(*self.tokens)
 
     def eval(self, **kwargs):
-        return TimeSignature(*self.expand_values())
+        return TimeSignature(*map(int, self.expand_values()))
 
 
 class RepeatParser(Base):

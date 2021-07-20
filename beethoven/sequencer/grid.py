@@ -1,56 +1,25 @@
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+from beethoven.sequencer.note_duration import NoteDuration
+from beethoven.sequencer.tempo import Tempo
+from beethoven.sequencer.time_signature import TimeSignature
+from beethoven.theory.scale import Scale
+from beethoven.theory.chord import Chord
 
 
-class Grid:
-
-    def __init__(self, parts=None):
-        self.set_parts(parts or [])
-
-    def set_parts(self, parts):
-        self.parts = parts
-
-    def __repr__(self):
-        return str(self)
-
-    def __eq__(self, other):
-        if len(self.parts) != len(other.parts):
-            return False
-
-        for s, o in zip(self.parts, other.parts):
-            if s != o:
-                return False
-
-        return True
-
-    def __str__(self):
-        return f"<Grid : {len(self.parts)} parts>"
-
-
+@dataclass
 class GridPart:
+    scale: Scale
+    chord: Chord
+    time_signature: TimeSignature
+    tempo: Tempo
+    duration: Optional[NoteDuration] = None
 
-    def __init__(self, scale=None, chord=None, duration=None, time_signature=None, tempo=None, repeat=1, bypass=False):
-        self.scale = scale
-        self.chord = chord
-        self.duration = duration
-        self.time_signature = time_signature
-        self.tempo = tempo
+    repeat: int = 1
+    bypass: bool = False
 
-        self.repeat = repeat
-        self.bypass = bypass
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def to_dict(self):
-        return self.__dict__
-
-    def __repr__(self):
-        string = "<GridPart : "
-        string += f"{self.scale} / {self.chord}"
-        string += f" / {self.duration.name}"
-        string += f" / {self.time_signature.beat_unit}/{self.time_signature.beats_per_bar}"
-        string += f" / {self.tempo.bpm}bpm"
-        string += f" / {self.repeat}x" if self.repeat > 1 else ""
-        string += " / bypassed" if self.bypass else ""
-        string += ">"
-
-        return string
+@dataclass
+class Grid:
+    parts: List[GridPart] = field(default_factory=list)

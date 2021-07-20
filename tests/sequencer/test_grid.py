@@ -47,8 +47,6 @@ def test_create_grid_with_parts():
         )
     ])
 
-    assert repr(grid) == "<Grid : 4 parts>"
-
     assert len(grid.parts) == 4
 
     assert grid.parts[0].tempo == tempo
@@ -64,4 +62,13 @@ def test_grid_part_repr():
         Tempo(60)
     )
 
-    assert repr(grid_part) == "<GridPart : C ionian / Cmaj7 / Whole / 4/4 / 60bpm>"
+    assert repr(grid_part) == (
+        "GridPart("
+        "scale=<Scale C ionian>, "
+        "chord=<Chord Cmaj7>, "
+        "time_signature=NoteDuration(name='Whole', base_units=4, divisor=1), "
+        "tempo=TimeSignature(beat_unit=4, beats_per_bar=4), "
+        "duration=Tempo(bpm=60), "
+        "repeat=1, "
+        "bypass=False)"
+    )

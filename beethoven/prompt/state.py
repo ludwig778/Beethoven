@@ -5,14 +5,13 @@ from beethoven.models import GridPart
 from beethoven.players.drum import Drum
 from beethoven.players.piano import Piano
 from beethoven.sequencer.jam_room import JamRoom
-from beethoven.sequencer.note_duration import Whole
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from beethoven.theory.scale import Scale
 
 DEFAULT_CONFIG = {
     "scale": Scale("C", "major"),
-    "duration": Whole,
+    "duration": None,
     "tempo": Tempo(60),
     "time_signature": TimeSignature(4, 4)
 }

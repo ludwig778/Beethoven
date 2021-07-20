@@ -1,258 +1,402 @@
-from copy import copy
+from collections import defaultdict
 
-from beethoven.models import GridPart
-from beethoven.prompt.parsers import COMPOSE_PARSER, SECTION_PARSER
-from beethoven.prompt.state import state
+from pyparsing import (CaselessLiteral, Group,
+                       Optional, Suppress, Word, ZeroOrMore, alphas,
+                       delimitedList, nums, printables)
+
+from beethoven.models import GridPart as GridPartModel
+from beethoven.prompt.validator import (validate_chord_item, validate_note,
+                                        validate_scale, validate_tempo,
+                                        validate_time_signature)
+from beethoven.sequencer.grid import Grid, GridPart
 from beethoven.sequencer.note_duration import (Eighths, Half, Quarter,
                                                Sixteenths, Whole)
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from beethoven.theory.chord import Chord
 from beethoven.theory.harmony import Harmony
-from beethoven.theory.interval import Interval
-from beethoven.theory.note import Note
 from beethoven.theory.scale import Scale
 
+alpha = Word(alphas)
+integer = Word(nums)
+all_printables = Word(printables + " ")
 
-def process_config(parsed_config, current_scale=None):
-    parsed = {}
-    scale_updated = False
-
-    scale_name = None
-    tonic_note = None
-    if current_scale:
-        scale_name = str(current_scale.name)
-        tonic_note = current_scale.tonic
-
-    if scale_name_value := parsed_config.get("scale"):
-        scale_name = scale_name_value
-        scale_updated = True
-
-    if tonic_name := parsed_config.get("note"):
-        tonic_note = Note(tonic_name)
-        scale_updated = True
-
-    if scale_updated and scale_name and tonic_note:
-        parsed["scale"] = Scale(tonic_note, scale_name)
-    elif not current_scale:
-        return parsed
-
-    if progression := parsed_config.get("progression"):
-        parsed["progression"] = progression
-
-    if time_signature := parsed_config.get("time_signature"):
-        parsed["time_signature"] = TimeSignature(*time_signature)
-
-    if tempo := parsed_config.get("tempo"):
-        parsed["tempo"] = Tempo(tempo)
-
-    return parsed
+command = Word(alphas + nums + "#.,:=_+-Δ°ø()")
 
 
-def process_chord_config(parsed_config, current_scale=None):
-    parsed = {}
+class Base:
+    def __init__(self, tokens, **kw):
+        self.tokens = tokens
+        if getattr(self, "post_init", None):
+            self.post_init()
+        if getattr(self, "validate", None):
+            self.validate()
 
-    # GET CHORD DURATION
-    if duration := parsed_config.get("duration"):
-        chord_duration = {
-            "W": Whole,
-            "H": Half,
-            "Q": Quarter,
-            "E": Eighths,
-            "S": Sixteenths,
-        }[duration]
+    @property
+    def value(self):
+        if len(self.tokens) == 1:
+            return self.tokens[0]
+        return ' '.join(map(str, self.tokens))
 
-        if chord_duration and (duration_count := parsed_config.get("duration_count")):
-            chord_duration *= int(duration_count)
+    def token_labels(self):
+        return [getattr(t, "label", None) for t in self.tokens]
 
-        if chord_duration:
-            parsed["duration"] = chord_duration
+    def expand_values(self, **kwargs):
+        return self.eval_tokens(self.tokens, **kwargs)
 
-    if inversion := parsed_config.get("inversion"):
-        pass
+    @staticmethod
+    def filter_tokens(tokens, *token_class):
+        return [t for t in tokens if isinstance(t, token_class)]
 
-    # GET BASE NOTE OR INVERSION
-    base_note = None
-    base_degree = None
-    if base := parsed_config.get("base"):
-        try:
-            base_note = Note(base)
-        except (ValueError, AttributeError):
-            # base_degree_interval = harmony.get_base_degree_interval(raw_data)
-            base_degree = base
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {self.value}>"
 
-    if extensions := parsed_config.get("extensions"):
-        extensions = {Interval(e) for e in extensions}
-
-    if not (chord := Harmony(current_scale).get(
-            parsed_config.get("chord"),
-            inversion=inversion,
-            base_note=base_note,
-            base_degree=base_degree,
-            extensions=extensions,
-            strict=state.prompt_config.get("strict")
-    )):
-        chord = Chord.get_from_fullname(
-            parsed_config.get("chord"),
-            inversion=inversion,
-            base_note=base_note,
-            extensions=extensions
-        )
-
-    parsed["chord"] = chord
-
-    return parsed
+    @classmethod
+    def eval_tokens(cls, tokens, **kwargs):
+        return [
+            t.eval(**kwargs) if isinstance(t, Base) else t
+            for t in tokens
+        ]
 
 
-def expand_harmony_string(string, extra_config=None):
-    harmony_list = []
-    extra_config = extra_config or {}
+class MainParser(Base):
+    def __init__(self, tokens, **kwargs):
+        super().__init__(tokens, **kwargs)
 
-    parsed = COMPOSE_PARSER.parseString(string)
+        if progression_token := self.filter_tokens(self.tokens, ProgressionParser):
+            progression_string = progression_token[0].eval()
+            full_progression_token = full_compose_items.parseString(progression_string)[0]
+            self.tokens.append(full_progression_token)
 
-    for sub_config in parsed.get("harmony_strings") or []:
+    def eval(self, **kwargs):
+        token_by_labels = dict(zip(self.token_labels(), self.tokens))
 
-        section_parsed = SECTION_PARSER.parseString(sub_config)
+        parts = []
+        if parts_token := token_by_labels.get("parts"):
+            parts = parts_token.eval(**kwargs)
 
-        bypass = section_parsed.pop("bypass", False)
-        repeat = section_parsed.pop("repeat", 1)
-        command = section_parsed.pop("command", None)
-        progression = section_parsed.pop("progression", [])
+        return Grid(parts)
 
-        section_extra_config = {
-            **section_parsed,
-            **extra_config
-        }
 
-        if command:
-            if obj := GridPart.get(command):
-                next_grid = expand_harmony_string(obj.text, section_extra_config)
+class MainCommandParser(Base):
+    label = "main_command"
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
+
+
+class ProgressionParser(Base):
+    label = "raw"
+
+    def eval(self, **kwargs):
+        return self.expand_values(**kwargs)[0]
+
+
+class ScaleParser(Base):
+    label = "scale_name"
+
+    def validate(self):
+        validate_scale(self.value)
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
+
+
+class NoteParser(Base):
+    label = "scale_note"
+
+    def validate(self):
+        validate_note(self.value)
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
+
+
+class TempoParser(Base):
+    label = "tempo"
+
+    def validate(self):
+        validate_tempo(self.value)
+
+    def eval(self, **kwargs):
+        return Tempo(self.expand_values()[0])
+
+
+class TimeSignatureParser(Base):
+    label = "time_signature"
+
+    def post_init(self):
+        self.tokens = self.tokens[0]
+
+    @property
+    def value(self):
+        return "/".join(self.tokens)
+
+    def validate(self):
+        validate_time_signature(*self.tokens)
+
+    def eval(self, **kwargs):
+        return TimeSignature(*self.expand_values())
+
+
+class RepeatParser(Base):
+    label = "repeat"
+
+    def eval(self, **kwargs):
+        return int(self.expand_values()[0])
+
+
+class BypassParser(Base):
+    label = "bypass"
+
+    @property
+    def value(self):
+        return self.tokens[0] == "!"
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0] == "!"
+
+
+class CommandParser(Base):
+    label = "command"
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
+
+
+class ProgressionItemParser(Base):
+    def post_init(self):
+        self.tokens = self.tokens[0]
+
+    def eval(self, **kwargs):
+        config = kwargs.get("config") or {}
+        values = {}
+
+        token_by_labels = dict(zip(self.token_labels(), self.tokens))
+        current_scale = config.get("scale")
+        if "scale_name" in token_by_labels or "scale_note" in token_by_labels:
+            new_scale = None
+
+            scale_name = None
+            scale_note = None
+
+            if scale_name_parser := token_by_labels.pop("scale_name", None):
+                scale_name = scale_name_parser.eval()
+            if scale_note_parser := token_by_labels.pop("scale_note", None):
+                scale_note = scale_note_parser.eval()
+
+            if current_scale and (current_scale.name != scale_name or current_scale.tonic.name != scale_note):
+                new_scale = Scale(
+                    scale_note or current_scale.tonic.name,
+                    scale_name or str(current_scale.name)
+                )
+                config["scale"] = new_scale
+                values["scale"] = new_scale
+
+                current_scale = new_scale
+            elif scale_name and scale_note:
+                new_scale = Scale(
+                    scale_note,
+                    scale_name
+                )
+                config["scale"] = new_scale
+                values["scale"] = new_scale
+
+                current_scale = new_scale
+
+        if not current_scale:
+            return []
+        else:
+            values["scale"] = current_scale
+
+        values.update({
+            k: v.eval(**kwargs)
+            for k, v in token_by_labels.items()
+        })
+
+        config["chords"] = values.get("chords") or []
+
+        values.setdefault("time_signature", config.get("time_signature"))
+        values.setdefault("tempo", config.get("tempo"))
+        values.setdefault("scale", config.get("scale"))
+
+        return [
+            GridPart(chord=chord, duration=duration, **values)
+            for chord, duration in values.pop("chords")
+        ]
+
+
+class ChordProgressionParser(Base):
+    label = "chords"
+
+    def eval(self, **kwargs):
+        return self.expand_values(**kwargs)
+
+
+class FullProgressionParser(Base):
+    label = "parts"
+
+    def eval(self, **kwargs):
+        sub_parts = self.expand_values(**kwargs)
+
+        return [part for parts in sub_parts for part in parts]
+
+
+class ChordParser(Base):
+    def eval(self, **kwargs):
+        values = defaultdict(list)
+
+        for k, v in zip(self.token_labels(), self.expand_values(**kwargs)):
+            if k == "extensions":
+                values[k].append(v)
             else:
-                next_grid = expand_harmony_string(f"p={command}", section_extra_config)
+                values[k] = v
 
-            harmony_list += next_grid * repeat
-        else:
-            harmony_list += [
-                {
-                    "progression": progression,
-                    "bypass": bypass,
-                    **dict(section_parsed),
-                    **extra_config
-                }
-            ] * repeat
+        duration = values.pop("duration", None)
 
-    return harmony_list
+        scale = kwargs.get("config", {}).get("scale")
 
+        base_degree = None
+        if values.get("base_note") and values.get("base_note").lower() in ("i", "ii", "iii", "iv", "v", "vi", "vii"):
+            base_degree = values.pop("base_note")
 
-def handle_global_commands(string):
-    interrupt = False
+        chord_name = values.pop("name")
 
-    parsed = COMPOSE_PARSER.parseString(string)
+        if not (chord := Harmony(scale).get(chord_name, base_degree=base_degree, **values)):
+            chord = Chord.get_from_fullname(chord_name, **values)
 
-    if value := parsed.get("register"):
-        text = "; ".join(parsed.get("harmony_strings"))
-
-        if obj := GridPart.get(value):
-            print("updated")
-            obj.update(text=text)
-
-        else:
-            print("created")
-            obj = GridPart.create(value, text=text)
-
-        state.grid_parts[obj.name] = obj
-        interrupt = True
-
-    elif value := parsed.get("delete"):
-        if obj := GridPart.get(value):
-            obj.delete()
-            print("deleted")
-            state.grid_parts.pop(value, None)
-
-        interrupt = True
-
-    elif parsed.get("settings"):
-
-        print("Scale            :", state.config.get("scale"))
-        print("Tempo            :", state.config.get("tempo"))
-        print("Duration         :", state.config.get("duration"))
-        print("Time signature   :", state.config.get("time_signature"))
-
-        if state.config.get("last_progression"):
-            print("Last progression :", state.config.get("last_progression").asList())
-
-        interrupt = True
-
-    elif parsed.get("info") is not None:
-        values = parsed.get("info")
-
-        if not values:
-            for obj in sorted(GridPart.list(), key=lambda o: o.name):
-                print(f"{obj.name:23s}: {obj.text}")
-
-        else:
-            for value in values:
-                if obj := GridPart.get(value):
-                    print("  ", obj.text)
-
-                else:
-                    print("no infos")
-
-        interrupt = True
-
-    return interrupt
+        return chord, duration
 
 
-def prompt_harmony_list_parser(string, full_config=None):
-    parsed_harmony_list = []
-    config = copy(full_config) if full_config else {}
-    last_progression = config.pop("last_progression", None)
+class ChordNameParser(Base):
+    label = "name"
 
-    if handle_global_commands(string):
-        return
+    def post_init(self):
+        self.tokens[0] = self.tokens[0].replace("_", " ")
 
-    harmony_list = expand_harmony_string(string)
+    def validate(self):
+        validate_chord_item(self.tokens[0])
 
-    current_scale = config.get("scale")
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
 
-    for section_parsed in harmony_list:
-        config = {
-            **config,
-            **process_config(
-                section_parsed,
-                current_scale
-            )
-        }
 
-        if config.get("scale"):
-            current_scale = config["scale"]
-        elif not current_scale:
-            continue
+class ChordBaseParser(Base):
+    label = "base_note"
 
-        progression = (
-            config.pop("progression", None) or last_progression or []
-        )
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
 
-        if full_config:
-            full_config.update(config)
 
-        if section_parsed.pop("bypass", False):
-            continue
+class ChordDurationParser(Base):
+    label = "duration"
+    mapping = {
+        "H": Half,
+        "W": Whole,
+        "Q": Quarter,
+        "E": Eighths,
+        "S": Sixteenths
+    }
 
-        for item in progression:
-            config.update(process_chord_config(item, current_scale))
+    def eval(self, **kwargs):
+        value = list(self.expand_values()[0])
+        identifier = value.pop(-1)
+        duration = self.mapping.get(identifier)
+        if value:
+            num = int(value.pop())
+            duration *= num
+        return duration
 
-            parsed_harmony_list.append(copy(config))
 
-            if full_config is not None:
-                full_config.update(config)
+class ChordInversionParser(Base):
+    label = "inversion"
 
-            config.pop("scale", None)
-            config.pop("duration", None)
-            config.pop("tempo", None)
-            config.pop("time_signature", None)
+    def eval(self, **kwargs):
+        return int(self.expand_values()[0])
 
-        if full_config is not None:
-            full_config.update({"last_progression": progression})
 
-    return parsed_harmony_list
+class ChordExtentionsParser(Base):
+    label = "extensions"
+
+    def eval(self, **kwargs):
+        return self.expand_values()[0]
+
+
+scale_pattern = Word(alphas + nums + "#_-")
+note_pattern = Word(alphas + "#b")
+degree_pattern = Word("IV") + Word("#bad")
+tempo_pattern = integer
+time_signature_pattern = Group(integer + Suppress("/") + integer)
+repeat_pattern = integer
+bypass_pattern = CaselessLiteral("!")
+command_pattern = Word(alphas + nums + "._")
+
+chord_name_pattern = Word(alphas + nums + "#_+-Δ°ø()")
+chord_base_pattern = Word(alphas + "#b")
+chord_duration_pattern = Group(Optional(integer) + Word(alphas))
+chord_inversion_pattern = integer
+chord_extensions_pattern = Word(alphas + nums)
+
+scale = (Suppress("sc=") + scale_pattern).setParseAction(ScaleParser)
+note = (Suppress("n=") + note_pattern).setParseAction(NoteParser)
+tempo = (Suppress("t=") + tempo_pattern).setParseAction(TempoParser)
+time_signature = (Suppress("ts=") + time_signature_pattern).setParseAction(TimeSignatureParser)
+repeat = (Suppress("r=") + repeat_pattern).setParseAction(RepeatParser)
+bypass = bypass_pattern.setParseAction(BypassParser)
+command = command_pattern.setParseAction(CommandParser)
+
+chord_name = chord_name_pattern.setParseAction(ChordNameParser)
+chord_base = (Suppress(":b=") + chord_base_pattern).setParseAction(ChordBaseParser)
+chord_duration = (Suppress(":d=") + chord_duration_pattern).setParseAction(ChordDurationParser)
+chord_inversion = (Suppress(":i=") + chord_inversion_pattern).setParseAction(ChordInversionParser)
+chord_extensions = (Suppress(":e=") + chord_extensions_pattern).setParseAction(ChordExtentionsParser)
+chord = (
+    chord_name + ZeroOrMore(
+        chord_base |
+        chord_duration |
+        chord_inversion |
+        chord_extensions
+    )
+).setParseAction(ChordParser)
+
+progression_pattern = Optional(delimitedList(
+    chord,
+    delim=","
+))
+progression = (
+    (Suppress("p=") + progression_pattern)
+).setParseAction(ChordProgressionParser)
+
+compose_item = Group(
+    ZeroOrMore(
+        scale | note | tempo | time_signature | repeat | bypass | progression | command
+    )
+).setParseAction(ProgressionItemParser)
+
+compose_items = all_printables.addParseAction(ProgressionParser)
+full_compose_items = Optional(delimitedList(compose_item, delim=";")).addParseAction(FullProgressionParser)
+
+info, delete, settings, register = map(
+    lambda x: CaselessLiteral(x).setParseAction(MainCommandParser),
+    ("info", "delete", "settings", "register")
+)
+
+commands = Optional(
+    info + ZeroOrMore(command) |
+    delete + command |
+    settings |
+    Optional(register + command) + compose_items
+).setParseAction(MainParser)
+
+COMPOSE_PARSER = None
+SECTION_PARSER = None
+
+
+def prompt_harmony_list_parser(string, config=None):
+    if config is None:
+        config = {}
+
+    ppp = commands.parseString(string)
+    evaluated = ppp[0].eval(config=config)
+
+    return evaluated

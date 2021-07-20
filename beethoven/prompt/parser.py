@@ -119,7 +119,7 @@ class TempoParser(Base):
         validate_tempo(self.value)
 
     def eval(self, **kwargs):
-        return Tempo(self.expand_values()[0])
+        return Tempo(int(self.expand_values()[0]))
 
 
 class TimeSignatureParser(Base):

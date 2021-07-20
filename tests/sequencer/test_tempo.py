@@ -1,15 +1,8 @@
-from pytest import mark
-
 from beethoven.sequencer.tempo import Tempo
 
 
-@mark.parametrize("tempo_arg", (30, 60, 120, 300))
-def test_tempo_instanciation(tempo_arg):
-    tempo = Tempo(tempo_arg)
-
-    assert tempo
-
-    assert repr(tempo) == f"<Tempo : {tempo_arg} bpm>"
+def test_tempo_instanciation():
+    assert Tempo(30)
 
 
 def test_tempo_comparison():

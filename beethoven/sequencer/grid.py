@@ -45,7 +45,8 @@ class GridPart:
 
     def __repr__(self):
         string = "<GridPart : "
-        string += f"{self.scale} / {self.chord} / {self.duration}"
+        string += f"{self.scale} / {self.chord}"
+        string += f" / {self.duration.name}"
         string += f" / {self.time_signature.beat_unit}/{self.time_signature.beats_per_bar}"
         string += f" / {self.tempo.bpm}bpm"
         string += f" / {self.repeat}x" if self.repeat > 1 else ""

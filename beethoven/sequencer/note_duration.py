@@ -1,49 +1,46 @@
-class NoteDuration:
-    def __init__(self, name, base_units, divisor=1):
-        self.name = name
-        self.base_units = base_units
-        self.divisor = divisor
+from dataclasses import dataclass, replace
 
-    def duration(self, bpm):
+from beethoven.sequencer.tempo import Tempo
+
+
+@dataclass
+class NoteDuration:
+    name: str
+    base_units: int
+    divisor: int = 1
+
+    def duration(self, bpm: Tempo) -> float:
+        """Compute the duration with its attributes against a given tempo."""
         return (
             (self.base_units / self.divisor) *
             bpm.base_time_unit()
         )
 
-    def __mul__(self, multiplier):
-        obj = self.copy()
+    def __mul__(self, multiplier: int):
+        obj = replace(self)
         obj.base_units *= multiplier
 
         return obj
 
-    def __repr__(self):
-        return f"<Note Duration : {str(self)}>"
-
-    def __str__(self):
-        return self.name
-
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             isinstance(other, self.__class__) and
             self.base_units / self.divisor == other.base_units / other.divisor
         )
 
-    def copy(self):
-        return self.__class__(self.name, self.base_units, self.divisor)
 
-
+@dataclass
 class NoteDurationTuple:
-    def __init__(self, name, divisor):
-        self.name = name
-        self.divisor = divisor
+    name: str
+    divisor: int
 
-    def __call__(self, note_duration):
-        obj = note_duration.copy()
-
-        obj.name += " " + self.name
-        obj.divisor *= self.divisor
-
-        return obj
+    def __call__(self, note_duration: NoteDuration) -> NoteDuration:
+        """Apply the instance attributes to a given NoteDuration to get a fraction of it."""
+        return replace(
+            note_duration,
+            name=f"{note_duration.name} {self.name}",
+            divisor=note_duration.divisor * self.divisor
+        )
 
 
 OneShot = NoteDuration("OneShot", 0)

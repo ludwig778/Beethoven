@@ -1,6 +1,6 @@
 from pytest import raises
 
-from beethoven.sequencer.players.base import BasePlayer, Players
+from beethoven.sequencer.players.base import BasePlayer, MAX_CHANNELS, Players
 
 
 class FakePlayer1(BasePlayer):
@@ -12,7 +12,7 @@ class FakePlayer2(BasePlayer):
 
 
 def test_players_instanciation():
-    players = Players(FakePlayer1)
+    players = Players([FakePlayer1])
 
     assert repr(players) == "<Players : 1 players>"
 
@@ -38,7 +38,7 @@ def test_players_instanciation():
 
 def test_players_instanciation_exception():
     players = Players()
-    for _ in range(players.MAX_CHANNELS):
+    for _ in range(MAX_CHANNELS):
         players.add(FakePlayer1)
 
     with raises(Exception, match="All channels taken by players"):

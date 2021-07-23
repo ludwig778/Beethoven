@@ -6,6 +6,7 @@ from beethoven.theory.chord import Chord
 from beethoven.sequencer.grid import Grid, GridPart
 from beethoven.sequencer.jam_room import JamRoom
 from beethoven.sequencer.note_duration import Whole, Half, Quarter
+from beethoven.sequencer.players.base import Players
 from beethoven.sequencer.tempo import Tempo
 from beethoven.sequencer.time_signature import TimeSignature
 from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
@@ -15,7 +16,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
     # Test with empty grid
     (
         Grid(),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "end_of_track", "time": 0}
         ],
@@ -32,7 +33,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             )
         ]),
-        [],
+        Players([]),
         [
             {"type": "text", "text": "1", "time": 0},
             {"type": "end_of_track", "time": 4.166666666666667}
@@ -50,7 +51,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             )
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -72,7 +73,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             )
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -101,7 +102,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             )
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -142,7 +143,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             ),
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -188,7 +189,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             ),
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -220,7 +221,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(4, 4)
             )
         ]),
-        [FakePlayer1(), FakePlayer2()],
+        Players([FakePlayer1(), FakePlayer2()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},
@@ -253,7 +254,7 @@ from tests.fixtures.fake_players import FakePlayer1, FakePlayer2
                 time_signature=TimeSignature(2, 2)
             )
         ]),
-        [FakePlayer1()],
+        Players([FakePlayer1()]),
         [
             {"type": "text",     "text": "1", "time": 0},
             {"type": "note_on",  "note": 69, "velocity": 127, "channel": 0, "time": 0},

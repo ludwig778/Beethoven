@@ -1,16 +1,20 @@
+from dataclasses import dataclass
+from typing import List
+
 from beethoven.sequencer.note import Note, note_mapping
 from beethoven.sequencer.players.arpeggiator import Arpeggiator
 from beethoven.sequencer.players.chord_voicer import ChordVoicer
 
+MAX_CHANNELS = 16
+
 
 class Players:
     REGISTRY = {}
-    MAX_CHANNELS = 16
 
-    def __init__(self, *players):
+    def __init__(self, players=None):
         self.instances = {}
 
-        for player in players:
+        for player in players or []:
             self.add(player)
 
     def add(self, player):
@@ -27,7 +31,7 @@ class Players:
     def _get_first_available_channel(self):
         channels_taken = self.instances.keys()
 
-        for i in range(self.MAX_CHANNELS):
+        for i in range(MAX_CHANNELS):
             if i not in channels_taken:
                 return i
 

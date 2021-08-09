@@ -1,6 +1,9 @@
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 
+TEST_ARGS= -vs
+
+
 default: prompt
 
 prompt:
@@ -27,17 +30,17 @@ tox:
 	tox
 
 test_on:
-	pytest --cov=beethoven --cov-append --cov-report html:coverage_html -vs ${ARGS}
+	pytest ${TEST_ARGS} ${ARGS}
 
 tests:
-	pytest --cov=beethoven --cov-append --cov-report html:coverage_html -vs
+	pytest ${TEST_ARGS}
 .PHONY: tests
 
 cov:
-	pytest --cov=beethoven
+	pytest --cov=beethoven ${TEST_ARGS}
 
 cov_html:
-	pytest --cov=beethoven --cov-report html:coverage_html
+	pytest --cov=beethoven --cov-report html:coverage_html ${TEST_ARGS}
 
 pdbg:
 	apt update --yes

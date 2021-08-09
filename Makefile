@@ -18,7 +18,10 @@ lint:
 isort:
 	python3 -m isort beethoven/ tests/
 
-sure: lint isort
+mypy:
+	mypy .
+
+sure: lint isort mypy
 
 tox:
 	tox

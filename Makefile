@@ -51,4 +51,6 @@ dbg:
 
 clean:
 	rm -rf coverage_html
+	rm -rf .pytest_cache
+	rm -rf .mypy_cache
 	find . -name "*.pyc" -o -name "__pycache__"|xargs rm -rf

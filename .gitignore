@@ -6,4 +6,4 @@ coverage_html*
 .coverage
 .poetry
 .pytest_cache
-.tox
+.mypy_cache

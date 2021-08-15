@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM python:3.8-slim-buster
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -15,19 +15,13 @@ RUN apt update && \
         libreadline-dev \
         libsqlite3-dev \
         libssl-dev \
-        make \
-        python3 \
-        python3-pip && \
+        make && \
     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - && \
-    curl -sSL https://pyenv.run | bash && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-ENV PATH=$PATH:/root/.poetry/bin/:/root/.pyenv/bin/
-
-RUN pyenv install 3.9.2 && \
-    ln -s /root/.pyenv/versions/3.9.2/bin/python /usr/bin/python3.9
+ENV PATH=$PATH:/root/.poetry/bin/
 
 COPY pyproject.toml poetry.lock ./
 

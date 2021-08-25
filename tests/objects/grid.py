@@ -1,7 +1,7 @@
 from pytest import mark
 
-from beethoven.objects import Bpm, Grid, GridPart, TimeSignature
-from beethoven.utils.factory import factory
+from beethoven.objects import (Bpm, Chord, Duration, Grid, GridPart, Scale,
+                               TimeSignature)
 
 
 @mark.parametrize("string,grid", [
@@ -10,15 +10,15 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "A_maj7"),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("A_maj7"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
                     duration=None
                 ),
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "G_7"),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("G_7"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
                     duration=None
@@ -31,8 +31,8 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "A"),
-                    chord=factory("chord", "A_dim7"),
+                    scale=Scale.parse("A"),
+                    chord=Chord.parse("A_dim7"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
                     duration=None
@@ -45,8 +45,8 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "A"),
-                    chord=factory("chord", "A"),
+                    scale=Scale.parse("A"),
+                    chord=Chord.parse("A"),
                     bpm=Bpm(90),
                     time_signature=TimeSignature(7, 8),
                     duration=None
@@ -59,22 +59,22 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "A"),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("A"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
-                    duration=factory("duration", "W"),
+                    duration=Duration.parse("W"),
                 ),
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "B"),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("B"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
-                    duration=factory("duration", "1/3Q"),
+                    duration=Duration.parse("1/3Q"),
                 ),
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "C"),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("C"),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
                     duration=None
@@ -87,8 +87,8 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "C"),
-                    chord=factory("chord", "I", scale=factory("scale", "C")),
+                    scale=Scale.parse("C"),
+                    chord=Chord.parse("I", scale=Scale.parse("C")),
                     bpm=Bpm(120),
                     time_signature=TimeSignature(4, 4),
                     duration=None
@@ -101,15 +101,15 @@ from beethoven.utils.factory import factory
         Grid(
             parts=[
                 GridPart(
-                    scale=factory("scale", "C_dorian"),
-                    chord=factory("chord", "I", scale=factory("scale", "C_dorian")),
+                    scale=Scale.parse("C_dorian"),
+                    chord=Chord.parse("I", scale=Scale.parse("C_dorian")),
                     bpm=Bpm(60),
                     time_signature=TimeSignature(3, 2),
                     duration=None
                 ),
                 GridPart(
-                    scale=factory("scale", "D_lydian"),
-                    chord=factory("chord", "V", scale=factory("scale", "D_lydian")),
+                    scale=Scale.parse("D_lydian"),
+                    chord=Chord.parse("V", scale=Scale.parse("D_lydian")),
                     bpm=Bpm(80),
                     time_signature=TimeSignature(3, 8),
                     duration=None
@@ -120,9 +120,9 @@ from beethoven.utils.factory import factory
 ])
 def test_grid_parsing(string, grid):
     default_settings = {
-        "scale": factory("scale", "C"),
-        "time_signature": factory("time_signature", "4/4"),
-        "bpm": factory("bpm", "120")
+        "scale": Scale.parse("C"),
+        "time_signature": TimeSignature.parse("4/4"),
+        "bpm": Bpm.parse("120")
     }
 
-    assert factory("grid", string, default_settings=default_settings) == grid
+    assert Grid.parse(string, default_settings=default_settings) == grid

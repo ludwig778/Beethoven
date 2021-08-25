@@ -3,7 +3,6 @@ from fractions import Fraction
 from pytest import mark
 
 from beethoven.objects import Duration
-from beethoven.utils.factory import factory
 
 
 @mark.parametrize("string,duration", [
@@ -16,4 +15,4 @@ from beethoven.utils.factory import factory
     ("1/5Q", Duration(Fraction(1, 5))),
 ])
 def test_duration_parsing(string, duration):
-    assert factory("duration", string) == duration
+    assert Duration.parse(string) == duration

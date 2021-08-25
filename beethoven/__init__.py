@@ -1,0 +1,1 @@
+import beethoven.enrich  # noqa

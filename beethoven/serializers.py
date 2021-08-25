@@ -2,10 +2,11 @@ from typing import Callable, List
 
 from pyparsing import ParseException
 
-from beethoven.objects import Chord, Degree, Interval, Note
+from beethoven.objects import (Bpm, Chord, Degree, Duration, Interval, Note,
+                               TimeSignature)
 from beethoven.parser import patterns
-from beethoven.toolbox import (get_alteration_from_int,
-                               get_interval_alteration_from_int)
+from beethoven.utils.alterations import (get_alteration_from_int,
+                                         get_interval_alteration_from_int)
 from beethoven.utils.casing import to_pascal_case
 from beethoven.utils.parser import parse
 
@@ -70,6 +71,18 @@ def serialize_chord(chord: Chord) -> str:
         string += f":e={str_extensions}"
 
     return string
+
+
+def serialize_bpm(bpm: Bpm) -> str:
+    return f"{bpm.value}"
+
+
+def serialize_time_signature(time_signature: TimeSignature) -> str:
+    return f"{time_signature.beats_per_bar}/{time_signature.beat_unit}"
+
+
+def serialize_duration(duration: Duration) -> str:
+    return str(duration.value)
 
 
 def serialize_list(serializer: Callable, objs: List) -> str:

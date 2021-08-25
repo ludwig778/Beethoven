@@ -1,8 +1,6 @@
 from pytest import mark, raises
 
-from beethoven.factories import add_interval_to_note
-from beethoven.objects import Note
-from beethoven.utils.factory import factory
+from beethoven.objects import Interval, Note
 
 
 @mark.parametrize("string,note", [
@@ -14,15 +12,15 @@ from beethoven.utils.factory import factory
     ("F#5", Note("F", alteration=1, octave=5)),
 ])
 def test_note_parsing(string, note):
-    assert factory("note", string) == note
+    assert Note.parse(string) == note
 
 
 def test_note_parsing_exception():
     with raises(Exception, match="Mixed alteration"):
-        factory("note", "F#b")
+        Note.parse("F#b")
 
     with raises(Exception, match="Couldn't parse string='empty' as Note"):
-        factory("note", "empty")
+        Note.parse("empty")
 
 
 @mark.parametrize("base_note,interval,target_note", [
@@ -35,11 +33,11 @@ def test_note_parsing_exception():
     ("G0", "13",  "E2"),
 ])
 def test_note_adding_interval(base_note, interval, target_note):
-    base_note = factory("note", base_note)
-    interval = factory("interval", interval)
-    target_note = factory("note", target_note)
+    base_note = Note.parse(base_note)
+    interval = Interval.parse(interval)
+    target_note = Note.parse(target_note)
 
-    assert add_interval_to_note(base_note, interval) == target_note
+    assert base_note + interval == target_note
 
 
 @mark.parametrize("base_note,interval,target_note", [
@@ -52,8 +50,8 @@ def test_note_adding_interval(base_note, interval, target_note):
     ("G4",  "13",  "Bb2"),
 ])
 def test_note_adding_interval_reverse(base_note, interval, target_note):
-    base_note = factory("note", base_note)
-    interval = factory("interval", interval)
-    target_note = factory("note", target_note)
+    base_note = Note.parse(base_note)
+    interval = Interval.parse(interval)
+    target_note = Note.parse(target_note)
 
-    assert add_interval_to_note(base_note, interval, reverse=True) == target_note
+    assert base_note - interval == target_note

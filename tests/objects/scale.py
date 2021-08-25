@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.utils.factory import factory, list_factory
+from beethoven.objects import Interval, Note, Scale
 
 
 @mark.parametrize("scale_name,intervals,notes", [
@@ -13,19 +13,19 @@ from beethoven.utils.factory import factory, list_factory
     ("G0_chromatic",      "1,2m,2,3m,3,4,5d,5,6m,6,7m,7", "G0,Ab0,A0,Bb0,B0,C1,Db1,D1,Eb1,E1,F1,F#1"),
 ])
 def test_scale_parsing(scale_name, intervals, notes):
-    scale = factory("scale", scale_name)
+    scale = Scale.parse(scale_name)
 
-    assert scale.intervals == list_factory("interval", intervals)
-    assert scale.notes == list_factory("note", notes)
+    assert scale.notes == Note.parse_list(notes)
+    assert scale.intervals == Interval.parse_list(intervals)
 
 
 def test_scale_parsing_with_default_name():
-    scale = factory("scale", "C")
+    scale = Scale.parse("C")
 
     intervals = "1,2,3,4,5,6,7"
     notes = "C,D,E,F,G,A,B"
 
     assert scale.name == "ionian"
 
-    assert scale.intervals == list_factory("interval", intervals)
-    assert scale.notes == list_factory("note", notes)
+    assert scale.notes == Note.parse_list(notes)
+    assert scale.intervals == Interval.parse_list(intervals)

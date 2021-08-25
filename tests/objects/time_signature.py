@@ -1,7 +1,6 @@
 from pytest import mark
 
 from beethoven.objects import TimeSignature
-from beethoven.utils.factory import factory
 
 
 @mark.parametrize("string,time_signature", [
@@ -11,4 +10,4 @@ from beethoven.utils.factory import factory
     ("15/16", TimeSignature(15, 16)),
 ])
 def test_time_signature_parsing(string, time_signature):
-    assert factory("time_signature", string) == time_signature
+    assert TimeSignature.parse(string) == time_signature

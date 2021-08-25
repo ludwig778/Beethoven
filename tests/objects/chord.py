@@ -1,9 +1,8 @@
 from pytest import mark
 
-from beethoven.factories import get_chords_from_scale
 from beethoven.mappings import chord_mapping
+from beethoven.objects import Chord, Interval, Note, Scale
 from beethoven.serializers import serialize_chord, serialize_list
-from beethoven.utils.factory import factory, list_factory
 
 
 @mark.parametrize("string,intervals,notes", [
@@ -16,10 +15,10 @@ from beethoven.utils.factory import factory, list_factory
     ("G_min_6", "1,3m,5,6",   "G,Bb,D,E"),
 ])
 def test_simple_chord_parsing(string, intervals, notes):
-    chord = factory("chord", string)
+    chord = Chord.parse(string)
 
-    assert chord.intervals == list_factory("interval", intervals)
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)
+    assert chord.intervals == Interval.parse_list(intervals)
 
 
 @mark.parametrize("string", [
@@ -33,7 +32,7 @@ def test_simple_chord_parsing(string, intervals, notes):
     "A_7",
 ])
 def test_chord_parsing_with_symbols(string):
-    assert factory("chord", string)
+    assert Chord.parse(string)
 
 
 @mark.parametrize("string,notes", [
@@ -42,9 +41,9 @@ def test_chord_parsing_with_symbols(string):
     ("A4:i=2", "E5,A5,C#6"),
 ])
 def test_chord_parsing_with_inversion(string, notes):
-    chord = factory("chord", string)
+    chord = Chord.parse(string)
 
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)
 
 
 @mark.parametrize("string,extensions,notes", [
@@ -54,10 +53,10 @@ def test_chord_parsing_with_inversion(string, notes):
     ("A4:e=11,13m", "11,13m", "A4,C#5,E5,D6,F6"),
 ])
 def test_chord_parsing_with_extensions(string, extensions, notes):
-    chord = factory("chord", string)
+    chord = Chord.parse(string)
 
-    assert chord.extensions == list_factory("interval", extensions)
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)
+    assert chord.extensions == Interval.parse_list(extensions)
 
 
 @mark.parametrize("string,notes", [
@@ -68,9 +67,9 @@ def test_chord_parsing_with_extensions(string, extensions, notes):
     ("A4:b=B5", "B3,A4,C#5,E5"),
 ])
 def test_chord_parsing_with_base_note(string, notes):
-    chord = factory("chord", string)
+    chord = Chord.parse(string)
 
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)
 
 
 @mark.parametrize("string,intervals,extensions,notes", [
@@ -82,11 +81,11 @@ def test_chord_parsing_with_base_note(string, notes):
     ("C4_maj7:i=3:b=A:e=9,11,13", "1,3,5,7", "9,11,13", "A4,B4,C5,E5,G5,D5,F5,A5"),
 ])
 def test_full_chord_parsing(string, intervals, extensions, notes):
-    chord = factory("chord", string)
+    chord = Chord.parse(string)
 
-    assert chord.notes == list_factory("note", notes)
-    assert chord.intervals == list_factory("interval", intervals)
-    assert chord.extensions == list_factory("interval", extensions)
+    assert chord.notes == Note.parse_list(notes)
+    assert chord.intervals == Interval.parse_list(intervals)
+    assert chord.extensions == Interval.parse_list(extensions)
 
 
 @mark.parametrize("intervals,chord_name", [
@@ -102,10 +101,9 @@ def test_get_from_intervals(intervals, chord_name):
     ("G2_ionian", "G2_maj7,A2_min7,B2_min7,C3_maj7,D3_7,E3_min7,F#3_min7"),
 ])
 def test_get_chords_from_scale(scale, chords):
-    scale = factory("scale", scale)
-    scale_chords = get_chords_from_scale(scale)
+    scale = Scale.parse(scale)
 
-    assert serialize_list(serialize_chord, scale_chords) == chords
+    assert serialize_list(serialize_chord, scale.get_chords()) == chords
 
 
 @mark.parametrize("scale,chords", [
@@ -114,10 +112,9 @@ def test_get_chords_from_scale(scale, chords):
     ("G2_ionian", "G2_maj,A2_min,B2_min,C3_maj,D3_maj,E3_min,F#3_min"),
 ])
 def test_get_chords_from_scale_with_triad_degrees(scale, chords):
-    scale = factory("scale", scale)
-    scale_chords = get_chords_from_scale(scale, degrees=[1, 3, 5])
+    scale = Scale.parse(scale)
 
-    assert serialize_list(serialize_chord, scale_chords) == chords
+    assert serialize_list(serialize_chord, scale.get_chords([1, 3, 5])) == chords
 
 
 @mark.parametrize("scale,chord,notes", [
@@ -127,10 +124,10 @@ def test_get_chords_from_scale_with_triad_degrees(scale, chords):
     ("G2_minor",  "II", "A2,C3,E3,G3"),
 ])
 def test_chord_parsing_with_degrees(scale, chord, notes):
-    scale = factory("scale", scale)
-    chord = factory("chord", chord, scale=scale)
+    scale = Scale.parse(scale)
+    chord = Chord.parse(chord, scale=scale)
 
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)
 
 
 @mark.parametrize("scale,chord,notes", [
@@ -141,7 +138,7 @@ def test_chord_parsing_with_degrees(scale, chord, notes):
     ("C4", "V:s=VI",  "E5,G#5,B5,D6"),
 ])
 def test_chord_parsing_with_base_degrees(scale, chord, notes):
-    scale = factory("scale", scale)
-    chord = factory("chord", chord, scale=scale)
+    scale = Scale.parse(scale)
+    chord = Chord.parse(chord, scale=scale)
 
-    assert chord.notes == list_factory("note", notes)
+    assert chord.notes == Note.parse_list(notes)

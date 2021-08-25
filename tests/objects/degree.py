@@ -1,7 +1,6 @@
 from pytest import mark
 
 from beethoven.objects import Degree
-from beethoven.utils.factory import factory
 
 
 @mark.parametrize("string,degree", [
@@ -11,4 +10,4 @@ from beethoven.utils.factory import factory
     ("#v",  Degree(name="v",   alteration=1)),
 ])
 def test_degree_parsing(string, degree):
-    assert factory("degree", string) == degree
+    assert Degree.parse(string) == degree

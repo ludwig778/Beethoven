@@ -1,8 +1,6 @@
 from pytest import mark
 
-from beethoven.factories import get_notes_interval
-from beethoven.objects import Interval
-from beethoven.utils.factory import factory
+from beethoven.objects import Interval, Note
 
 
 @mark.parametrize("string,interval", [
@@ -18,7 +16,7 @@ from beethoven.utils.factory import factory
     ("4aa", Interval("4", alteration=2)),
 ])
 def test_interval_parsing(string, interval):
-    assert factory("interval", string) == interval
+    assert Interval.parse(string) == interval
 
 
 @mark.parametrize("note1,note2,interval", [
@@ -39,11 +37,11 @@ def test_interval_parsing(string, interval):
     ("G4", "G6",  "15"),
 ])
 def test_get_notes_interval(note1, note2, interval):
-    note1 = factory("note", note1)
-    note2 = factory("note", note2)
-    interval = factory("interval", interval)
+    note1 = Note.parse(note1)
+    note2 = Note.parse(note2)
+    interval = Interval.parse(interval)
 
-    assert get_notes_interval(note1, note2) == interval
+    assert note1 / note2 == interval
 
 
 """

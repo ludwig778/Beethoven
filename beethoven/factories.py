@@ -8,8 +8,8 @@ from beethoven.objects import (Bpm, Chord, Degree, Duration, Grid, GridPart,
                                Interval, Note, Scale, TimeSignature)
 from beethoven.serializers import (deserialize, serialize_interval,
                                    serialize_list, serialize_note)
-from beethoven.toolbox import (get_alteration_as_int,
-                               get_interval_alteration_as_int)
+from beethoven.utils.alterations import (get_alteration_as_int,
+                                         get_interval_alteration_as_int)
 from beethoven.utils.validation import check_if_diatonic
 
 default_durations = {
@@ -50,10 +50,7 @@ def build_duration(parsed: dict) -> Duration:
     numerator = parsed.get("numerator", 1)
     denominator = parsed.get("denominator")
 
-    if numerator == 0:
-        raise Exception("Duration numerator can't be equal to 0")
-
-    elif denominator == 0:
+    if denominator == 0:
         raise Exception("Duration denominator can't be equal to 0")
 
     value = Fraction(

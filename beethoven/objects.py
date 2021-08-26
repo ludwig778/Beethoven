@@ -61,6 +61,13 @@ class TimeSignature:
 
 
 @dataclass
+class TimeSection:
+    bar: int
+    measure: int
+    fraction: Fraction = Fraction()
+
+
+@dataclass
 class Duration:
     value: Fraction
 

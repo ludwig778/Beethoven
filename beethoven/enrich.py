@@ -1,10 +1,11 @@
 from beethoven.objects import (Bpm, Chord, Degree, Duration, Grid, Interval,
-                               Note, Scale, TimeSignature)
+                               Note, Scale, TimeSection, TimeSignature)
 from beethoven.toolbox import (add_interval_to_note, get_base_time,
                                get_chords_from_scale, get_list_parser,
                                get_note_index, get_notes_intervals, get_parser,
                                get_timespan, multiply_duration,
                                substract_interval_to_note,
+                               time_section_to_duration,
                                time_signature_as_duration)
 
 enrichment_matrix = {
@@ -37,6 +38,10 @@ enrichment_matrix = {
     TimeSignature: {
         "parse": staticmethod(get_parser("time_signature")),
         "as_duration": property(time_signature_as_duration)
+    },
+    TimeSection: {
+        "parse": staticmethod(get_parser("grid")),
+        "as_duration": time_section_to_duration
     },
     Duration: {
         "parse": staticmethod(get_parser("duration")),

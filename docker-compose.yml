@@ -8,7 +8,7 @@ services:
       - /app/.tox
       - /app/.poetry
     environment:
-      - TEST=true
+      - BEETHOVEN_TEST=true
       - BEETHOVEN_MONGODB_HOST=mongodb
       - BEETHOVEN_MONGODB_USERNAME=user
       - BEETHOVEN_MONGODB_PASSWORD=password123

@@ -3,6 +3,8 @@ from os import environ
 
 TEST: bool = str(environ.get("BEETHOVEN_TEST")) in ("true", "yes", "1")
 
+MIDI_OUTPUT_NAME = environ.get("BEETHOVEN_MIDI_OUTPUT_NAME", "BEETHOVEN_MIDI_OUTPUT")
+
 
 @dataclass
 class MongoConfig:

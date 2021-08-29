@@ -24,6 +24,7 @@ TEST_DATA = {
     ("array", [1, 2, 3, 4]),
     ("bool", True),
     ("non_existing_key", None),
+    (["mapping", "sub_mapping", "sub_key"], "value1"),
 ])
 def test_deepget(path, result):
     assert deepget(TEST_DATA, path) == result

@@ -5,7 +5,6 @@ services:
     build: .
     volumes:
       - .:/app
-      - /app/.tox
       - /app/.poetry
     environment:
       - BEETHOVEN_TEST=true

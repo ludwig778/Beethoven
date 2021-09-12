@@ -26,9 +26,6 @@ mypy:
 
 sure: lint isort mypy
 
-tox:
-	tox
-
 test_on:
 	pytest ${TEST_ARGS} ${ARGS}
 

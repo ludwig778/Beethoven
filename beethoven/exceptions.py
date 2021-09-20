@@ -8,6 +8,12 @@ class ScaleIsNotDiatonic(Exception):
         super().__init__(self.message)
 
 
+class ScaleNotSet(Exception):
+    def __init__(self, message="Scale is not set"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class InversionOutOfRange(Exception):
     def __init__(self, message="Out of range"):
         self.message = message

@@ -1,6 +1,6 @@
 from pytest import mark, raises
 
-from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic
+from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic, ScaleNotSet
 from beethoven.mappings import chord_mapping
 from beethoven.objects import Chord, Interval, Note, Scale
 
@@ -182,8 +182,13 @@ def test_chord_parsing_with_base_degrees(scale, chord, notes):
     assert chord.notes == Note.parse_list(notes)
 
 
-def test_chord_parsing_with_not_diatonic_scale():
+def test_chord_parsing_with_degree_and_non_diatonic_scale():
     scale = Scale.parse("A_pentatonic")
 
     with raises(ScaleIsNotDiatonic, match="Scale A_pentatonic is not diatonic"):
         Chord.parse("V", scale=scale)
+
+
+def test_chord_parsing_with_degree_without_a_scale():
+    with raises(ScaleNotSet, match="Scale must be set when using degree on chord"):
+        Chord.parse("V")

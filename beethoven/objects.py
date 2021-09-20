@@ -5,7 +5,7 @@ from fractions import Fraction
 from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple, Union
 
 from beethoven.core.abstract import AbstractObject
-from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic
+from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic, ScaleNotSet
 from beethoven.mappings import (
     chord_mapping,
     degree_mapping,
@@ -232,7 +232,7 @@ class Chord:
         base_degree = None
         if raw_degree := parsed.get("degree"):
             if not scale:
-                raise Exception("Scale must be set when using degree on chord")
+                raise ScaleNotSet("Scale must be set when using degree on chord")
 
             if not scale.is_diatonic:
                 raise ScaleIsNotDiatonic(scale)

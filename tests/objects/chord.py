@@ -1,6 +1,11 @@
 from pytest import mark, raises
 
-from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic, ScaleNotSet
+from beethoven.exceptions import (
+    ChordNameUnknown,
+    InversionOutOfRange,
+    ScaleIsNotDiatonic,
+    ScaleNotSet,
+)
 from beethoven.mappings import chord_mapping
 from beethoven.objects import Chord, Interval, Note, Scale
 
@@ -22,6 +27,11 @@ def test_simple_chord_parsing(string, intervals, notes):
 
     assert chord.notes == Note.parse_list(notes)
     assert chord.intervals == Interval.parse_list(intervals)
+
+
+def test_simple_chord_parsing_exception():
+    with raises(ChordNameUnknown, match="Chord named fake unknown"):
+        Chord.parse("A_fake")
 
 
 @mark.parametrize(

@@ -5,7 +5,12 @@ from fractions import Fraction
 from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple, Union
 
 from beethoven.core.abstract import AbstractObject
-from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic, ScaleNotSet
+from beethoven.exceptions import (
+    ChordNameUnknown,
+    InversionOutOfRange,
+    ScaleIsNotDiatonic,
+    ScaleNotSet,
+)
 from beethoven.mappings import (
     chord_mapping,
     degree_mapping,
@@ -253,7 +258,7 @@ class Chord:
         if raw_intervals := chord_mapping.get_intervals(name):
             intervals = Interval.parse_list(raw_intervals)
         else:
-            raise Exception(f"Chord named {name} does not exist")
+            raise ChordNameUnknown(name)
 
         notes = [root + interval for interval in intervals]
 

@@ -14,6 +14,13 @@ class ScaleNotSet(Exception):
         super().__init__(self.message)
 
 
+class ChordNameUnknown(Exception):
+    def __init__(self, chord_name, message="Chord named {chord_name} unknown"):
+        self.chord_name = chord_name
+        self.message = message.format(chord_name=chord_name)
+        super().__init__(self.message)
+
+
 class InversionOutOfRange(Exception):
     def __init__(self, message="Out of range"):
         self.message = message

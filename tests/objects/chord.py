@@ -1,5 +1,6 @@
-from pytest import mark
+from pytest import mark, raises
 
+from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic
 from beethoven.mappings import chord_mapping
 from beethoven.objects import Chord, Interval, Note, Scale
 
@@ -52,6 +53,11 @@ def test_chord_parsing_with_inversion(string, notes):
     chord = Chord.parse(string)
 
     assert chord.notes == Note.parse_list(notes)
+
+
+def test_chord_parsing_with_out_of_range_inversion():
+    with raises(InversionOutOfRange):
+        Chord.parse("A4:i=3")
 
 
 @mark.parametrize(
@@ -174,3 +180,10 @@ def test_chord_parsing_with_base_degrees(scale, chord, notes):
     chord = Chord.parse(chord, scale=scale)
 
     assert chord.notes == Note.parse_list(notes)
+
+
+def test_chord_parsing_with_not_diatonic_scale():
+    scale = Scale.parse("A_pentatonic")
+
+    with raises(ScaleIsNotDiatonic, match="Scale A_pentatonic is not diatonic"):
+        Chord.parse("V", scale=scale)

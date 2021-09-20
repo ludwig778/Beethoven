@@ -4,7 +4,13 @@ from beethoven.utils.casing import to_pascal_case
 class ScaleIsNotDiatonic(Exception):
     def __init__(self, scale, message="Scale {} is not diatonic"):
         self.scale = scale
-        self.message = message.format(scale)
+        self.message = message.format(scale.serialize())
+        super().__init__(self.message)
+
+
+class InversionOutOfRange(Exception):
+    def __init__(self, message="Out of range"):
+        self.message = message
         super().__init__(self.message)
 
 

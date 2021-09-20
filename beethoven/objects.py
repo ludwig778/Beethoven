@@ -5,7 +5,7 @@ from fractions import Fraction
 from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple, Union
 
 from beethoven.core.abstract import AbstractObject
-from beethoven.exceptions import ScaleIsNotDiatonic
+from beethoven.exceptions import InversionOutOfRange, ScaleIsNotDiatonic
 from beethoven.mappings import (
     chord_mapping,
     degree_mapping,
@@ -132,10 +132,7 @@ class Interval:
 
     @classmethod
     def build(cls, parsed: dict) -> Interval:
-        name = parsed.get("name")
-
-        if not name:
-            raise Exception("LMAO")
+        name = parsed["name"]
 
         alteration = 0
         if raw_alteration := parsed.get("alteration"):
@@ -193,10 +190,7 @@ class Degree:
 
     @classmethod
     def build(cls, parsed: dict) -> Degree:
-        name = parsed.get("name")
-
-        if name is None:
-            raise Exception("Name must be set")
+        name = parsed["name"]
 
         alteration = 0
         if raw_alteration := parsed.get("alteration"):
@@ -325,7 +319,7 @@ class Chord:
         if inversion == 0:
             return notes
         elif inversion < 0 or inversion > len(notes) - 1:
-            raise Exception("Inversion is out of range")
+            raise InversionOutOfRange()
 
         octave = Interval.parse("8")
 
@@ -441,8 +435,12 @@ class Scale:
 
         return chords
 
+    @property
     def is_diatonic(self) -> bool:
-        return len(self.notes) != 7
+        return len(self.notes) == 7
+
+    def serialize(self):
+        return f"{self.tonic.serialize()}_{self.name}"
 
 
 @dataclass

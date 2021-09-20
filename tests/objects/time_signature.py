@@ -1,7 +1,7 @@
 from pytest import mark, raises
 
-from beethoven.objects import TimeSignature
 from beethoven.exceptions import BeatsPerBarCantBeZero, BeatUnitIsInvalid
+from beethoven.objects import TimeSignature
 
 
 @mark.parametrize(

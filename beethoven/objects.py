@@ -8,6 +8,7 @@ from beethoven.core.abstract import AbstractObject
 from beethoven.exceptions import (
     BeatsPerBarCantBeZero,
     BeatUnitIsInvalid,
+    BpmCantBeZero,
     ChordNameUnknown,
     InversionOutOfRange,
     ScaleIsNotDiatonic,
@@ -466,7 +467,7 @@ class Bpm(AbstractObject):
         value = parsed.get("value")
 
         if not value:
-            raise Exception("Bpm value can't be equal to 0")
+            raise BpmCantBeZero()
 
         return cls(value=value)
 

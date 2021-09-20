@@ -69,3 +69,9 @@ class BeatsPerBarCantBeZero(Exception):
         self.beats_per_bar = beats_per_bar
         self.message = message.format(beats_per_bar=beats_per_bar)
         super().__init__(self.message)
+
+
+class BpmCantBeZero(Exception):
+    def __init__(self, message="Value can't be equal to 0"):
+        self.message = message
+        super().__init__(self.message)

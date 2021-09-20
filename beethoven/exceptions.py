@@ -53,3 +53,19 @@ class CouldNotParse(Exception):
 
 class MixedAlteration(Exception):
     pass
+
+
+class BeatUnitIsInvalid(Exception):
+    def __init__(self, beat_unit, message="Beat unit {beat_unit} is invalid"):
+        self.beat_unit = beat_unit
+        self.message = message.format(beat_unit=beat_unit)
+        super().__init__(self.message)
+
+
+class BeatsPerBarCantBeZero(Exception):
+    def __init__(
+        self, beats_per_bar, message="Beats per bar {beats_per_bar} can't be equal to 0"
+    ):
+        self.beats_per_bar = beats_per_bar
+        self.message = message.format(beats_per_bar=beats_per_bar)
+        super().__init__(self.message)

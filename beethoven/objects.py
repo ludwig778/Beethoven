@@ -6,6 +6,8 @@ from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple, Union
 
 from beethoven.core.abstract import AbstractObject
 from beethoven.exceptions import (
+    BeatsPerBarCantBeZero,
+    BeatUnitIsInvalid,
     ChordNameUnknown,
     InversionOutOfRange,
     ScaleIsNotDiatonic,
@@ -493,11 +495,9 @@ class TimeSignature:
         beat_unit = parsed.get("beat_unit", 4)
 
         if beat_unit not in (1, 2, 4, 8, 16, 32):
-            raise Exception("TimeSignature beat unit value {beat_unit} is invalid")
+            raise BeatUnitIsInvalid(beat_unit)
         elif beats_per_bar == 0:
-            raise Exception(
-                "TimeSignature beat per bar value {beats_per_bar} can't be equal to 0"
-            )
+            raise BeatsPerBarCantBeZero(beats_per_bar)
 
         return cls(beats_per_bar=beats_per_bar, beat_unit=beat_unit)
 

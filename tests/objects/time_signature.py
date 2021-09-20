@@ -1,6 +1,7 @@
-from pytest import mark
+from pytest import mark, raises
 
 from beethoven.objects import TimeSignature
+from beethoven.exceptions import BeatsPerBarCantBeZero, BeatUnitIsInvalid
 
 
 @mark.parametrize(
@@ -14,3 +15,20 @@ from beethoven.objects import TimeSignature
 )
 def test_time_signature_parsing(string, time_signature):
     assert TimeSignature.parse(string) == time_signature
+
+
+def test_time_signature_parsing_exception():
+    with raises(BeatUnitIsInvalid):
+        TimeSignature.parse("4/0")
+
+    with raises(BeatUnitIsInvalid):
+        TimeSignature.parse("4/5")
+
+    with raises(BeatsPerBarCantBeZero):
+        TimeSignature.parse("0/4")
+
+
+def test_time_signature_serialize():
+    string = "15/16"
+
+    assert TimeSignature.parse(string).serialize() == string

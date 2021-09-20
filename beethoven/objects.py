@@ -9,6 +9,7 @@ from beethoven.exceptions import (
     ChordNameUnknown,
     InversionOutOfRange,
     ScaleIsNotDiatonic,
+    ScaleNameUnknown,
     ScaleNotSet,
 )
 from beethoven.mappings import (
@@ -410,7 +411,7 @@ class Scale:
         if raw_intervals := scale_mapping.get_intervals(name):
             intervals = Interval.parse_list(raw_intervals)
         else:
-            raise Exception(f"Scale named {name} does not exist")
+            raise ScaleNameUnknown(name)
 
         notes = [tonic + interval for interval in intervals]
 

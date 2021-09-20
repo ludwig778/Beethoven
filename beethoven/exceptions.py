@@ -21,6 +21,13 @@ class ChordNameUnknown(Exception):
         super().__init__(self.message)
 
 
+class ScaleNameUnknown(Exception):
+    def __init__(self, scale_name, message="Scale named {scale_name} unknown"):
+        self.scale_name = scale_name
+        self.message = message.format(scale_name=scale_name)
+        super().__init__(self.message)
+
+
 class InversionOutOfRange(Exception):
     def __init__(self, message="Out of range"):
         self.message = message

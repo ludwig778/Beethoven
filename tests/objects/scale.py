@@ -1,5 +1,6 @@
-from pytest import mark
+from pytest import mark, raises
 
+from beethoven.exceptions import ScaleNameUnknown
 from beethoven.objects import Interval, Note, Scale
 
 
@@ -24,6 +25,11 @@ def test_scale_parsing(scale_name, intervals, notes):
 
     assert scale.notes == Note.parse_list(notes)
     assert scale.intervals == Interval.parse_list(intervals)
+
+
+def test_scale_parsing_exception():
+    with raises(ScaleNameUnknown, match="Scale named fake unknown"):
+        Scale.parse("A_fake")
 
 
 def test_scale_parsing_with_default_name():

@@ -16,40 +16,85 @@ class FakePlayer(Player):
         yield notes, section, duration
 
 
-@mark.parametrize("players,grid,expected_midi_file,expected_elapsed", [
-    (
-        {0: FakePlayer()},
-        "bpm=960 sc=A_major ts=4/4 p=I",
-        MidiFile(type=1, ticks_per_beat=480, tracks=[
-            MidiTrack([
-                MetaMessage('text', text='0', time=Fraction(0, 1)),
-                Message('note_on', channel=0, note=43, velocity=64, time=0),
-                Message('note_off', channel=0, note=43, velocity=64, time=Fraction(11983, 200)),
-                Message('note_on', channel=0, note=43, velocity=64, time=0),
-                Message('note_off', channel=0, note=43, velocity=64, time=Fraction(11983, 200)),
-                Message('note_on', channel=0, note=43, velocity=64, time=0),
-                Message('note_off', channel=0, note=43, velocity=64, time=Fraction(11983, 200)),
-                Message('note_on', channel=0, note=43, velocity=64, time=0),
-                Message('note_off', channel=0, note=43, velocity=64, time=Fraction(11983, 200)),
-                MetaMessage('end_of_track', time=0)
-            ])
-        ]),
-        0.25
-    ),
-    (
-        {0: FakePlayer()},
-        "bpm=240 sc=A_major ts=1/4 p=I",
-        MidiFile(type=1, ticks_per_beat=480, tracks=[
-            MidiTrack([
-                MetaMessage('text', text='0', time=Fraction(0, 1)),
-                Message('note_on', channel=0, note=43, velocity=64, time=0),
-                Message('note_off', channel=0, note=43, velocity=64, time=Fraction(11983, 50)),
-                MetaMessage('end_of_track', time=0)
-            ])
-        ]),
-        0.25
-    ),
-])
+@mark.parametrize(
+    "players,grid,expected_midi_file,expected_elapsed",
+    [
+        (
+            {0: FakePlayer()},
+            "bpm=960 sc=A_major ts=4/4 p=I",
+            MidiFile(
+                type=1,
+                ticks_per_beat=480,
+                tracks=[
+                    MidiTrack(
+                        [
+                            MetaMessage("text", text="0", time=Fraction(0, 1)),
+                            Message("note_on", channel=0, note=43, velocity=64, time=0),
+                            Message(
+                                "note_off",
+                                channel=0,
+                                note=43,
+                                velocity=64,
+                                time=Fraction(11983, 200),
+                            ),
+                            Message("note_on", channel=0, note=43, velocity=64, time=0),
+                            Message(
+                                "note_off",
+                                channel=0,
+                                note=43,
+                                velocity=64,
+                                time=Fraction(11983, 200),
+                            ),
+                            Message("note_on", channel=0, note=43, velocity=64, time=0),
+                            Message(
+                                "note_off",
+                                channel=0,
+                                note=43,
+                                velocity=64,
+                                time=Fraction(11983, 200),
+                            ),
+                            Message("note_on", channel=0, note=43, velocity=64, time=0),
+                            Message(
+                                "note_off",
+                                channel=0,
+                                note=43,
+                                velocity=64,
+                                time=Fraction(11983, 200),
+                            ),
+                            MetaMessage("end_of_track", time=0),
+                        ]
+                    )
+                ],
+            ),
+            0.25,
+        ),
+        (
+            {0: FakePlayer()},
+            "bpm=240 sc=A_major ts=1/4 p=I",
+            MidiFile(
+                type=1,
+                ticks_per_beat=480,
+                tracks=[
+                    MidiTrack(
+                        [
+                            MetaMessage("text", text="0", time=Fraction(0, 1)),
+                            Message("note_on", channel=0, note=43, velocity=64, time=0),
+                            Message(
+                                "note_off",
+                                channel=0,
+                                note=43,
+                                velocity=64,
+                                time=Fraction(11983, 50),
+                            ),
+                            MetaMessage("end_of_track", time=0),
+                        ]
+                    )
+                ],
+            ),
+            0.25,
+        ),
+    ],
+)
 def test_grid_to_midi(players, grid, expected_midi_file, expected_elapsed):
     grid = Grid.parse(grid)
 

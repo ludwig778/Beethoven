@@ -34,32 +34,28 @@ def prompt_redirect(monkeypatch):
     yield redirect
 
 
-@mark.parametrize("inputs,outputs", [
-    (
-        ["leave"],
-        ["leaving MainPrompt"]
-    ),
-    (
-        ["quit"],
-        ["quitting"]
-    ),
-    (
-        ["train", "leave"],
-        ["going to train", "leaving TrainingPrompt"]
-    ),
-    (
-        ["train", "leave", "compose", "quit"],
-        ["going to train", "leaving TrainingPrompt", "going to compose", "quitting"]
-    ),
-    (
-        ["compose", "sc=A_major bpm=33 ts=4/4 p=I"],
-        ["going to compose"]
-    ),
-    (
-        ["compose", "invalid_grid"],
-        ["going to compose", "Couldn't parse string='invalid_grid' as Grid"]
-    ),
-])
+@mark.parametrize(
+    "inputs,outputs",
+    [
+        (["leave"], ["leaving MainPrompt"]),
+        (["quit"], ["quitting"]),
+        (["train", "leave"], ["going to train", "leaving TrainingPrompt"]),
+        (
+            ["train", "leave", "compose", "quit"],
+            [
+                "going to train",
+                "leaving TrainingPrompt",
+                "going to compose",
+                "quitting",
+            ],
+        ),
+        (["compose", "sc=A_major bpm=33 ts=4/4 p=I"], ["going to compose"]),
+        (
+            ["compose", "invalid_grid"],
+            ["going to compose", "Couldn't parse string='invalid_grid' as Grid"],
+        ),
+    ],
+)
 def test_prompt_browsing_responses(inputs, outputs, prompt_redirect):
     prompt_redirect.set_inputs(inputs)
     MainPrompt().loop(PromptContext())

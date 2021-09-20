@@ -67,10 +67,7 @@ class JsonRepository(AbstractRepository):
     def list(self, **kwargs):
         table_data = self._read().get(self.table) or {}
 
-        return [
-            self.model(**data)
-            for data in table_data.values()
-        ]
+        return [self.model(**data) for data in table_data.values()]
 
     def update(self, model):
         json_data = self._read()
@@ -108,10 +105,8 @@ class JsonRepository(AbstractRepository):
 class MongoRepository(AbstractRepository):
     def __init__(self, **kwargs):
         self.model = kwargs.get("model")
-        self.collection = (
-            mongo_instance
-            .get_database()
-            .get_collection(kwargs.get("collection"))
+        self.collection = mongo_instance.get_database().get_collection(
+            kwargs.get("collection")
         )
 
     def add(self, model):
@@ -143,7 +138,9 @@ class MongoRepository(AbstractRepository):
         ]
 
     def update(self, model):
-        result = self.collection.update_one({"name": model.name}, {"$set": asdict(model)})
+        result = self.collection.update_one(
+            {"name": model.name}, {"$set": asdict(model)}
+        )
 
         return bool(result.modified_count)
 

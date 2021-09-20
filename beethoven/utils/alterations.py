@@ -20,7 +20,7 @@ def get_alteration_as_int(alteration: Optional[str]) -> int:
     elif alteration.count("#") == len(alteration):
         return alteration.count("#")
     elif alteration.count("b") == len(alteration):
-        return - alteration.count("b")
+        return -alteration.count("b")
     else:
         raise Exception("Mixed alteration")
 
@@ -58,7 +58,7 @@ def get_interval_alteration_as_int(interval: str, alteration: str) -> int:
     elif alteration.count("a") == len(alteration):
         return alteration.count("a")
     elif alteration.count("d") == len(alteration):
-        alteration_count = - alteration.count("d")
+        alteration_count = -alteration.count("d")
 
         if not is_perfect_interval:
             alteration_count -= 1

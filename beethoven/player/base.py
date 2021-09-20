@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
 from beethoven.objects import Duration, GridPart
-from beethoven.toolbox import time_section_generator
-from beethoven.utils.duration import NoLimit
+from beethoven.utils.duration import DurationLimit
 
 
 class Player(ABC):
@@ -31,10 +30,9 @@ class Player(ABC):
         return False
 
     def play(self):
-        for section, duration in time_section_generator(
-            self.time_signature,
+        for section, duration in self.time_signature.time_section_generator(
             self.duration,
-            limit=NoLimit,
+            limit=DurationLimit.NoLimit,
         ):
             if self.check():
                 continue

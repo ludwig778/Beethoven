@@ -21,10 +21,11 @@ class PromptContext:
     state: PromptStatus = PromptStatus.RUNNING
 
 
-session = PromptSession(
-    history=FileHistory(".beethoven_history"),
-    enable_suspend=True
+session: PromptSession = PromptSession(
+    history=FileHistory(".beethoven_history"), enable_suspend=True
 )
+print("!!!!" * 33)
+print(type(session))
 
 
 class BasePrompt:
@@ -70,10 +71,16 @@ class BasePrompt:
 
 class MainPrompt(BasePrompt):
     def dispatch(self, string, context):
-        if string in ("c", "compose",):
+        if string in (
+            "c",
+            "compose",
+        ):
             print_formatted_text("going to compose")
             ComposePrompt().loop(context)
-        elif string in ("t", "train",):
+        elif string in (
+            "t",
+            "train",
+        ):
             print_formatted_text("going to train")
             TrainingPrompt().loop(context)
 

@@ -1,14 +1,13 @@
-from collections import defaultdict
+from dataclasses import dataclass, field
 from fractions import Fraction
-from typing import Dict, Union
+from typing import Any, Dict, Union
 
 from mido import Message, MetaMessage, MidiFile, MidiTrack, open_output
 
 from beethoven.core.settings import MIDI_OUTPUT_NAME, TEST
 from beethoven.objects import Grid
 from beethoven.player.base import Player
-from beethoven.toolbox import get_base_time
-from beethoven.utils.duration import NoLimit
+from beethoven.utils.duration import DurationLimit
 
 
 class MidiRepository:
@@ -32,19 +31,28 @@ class MidiRepository:
         self.output.panic()
 
 
-midi = MidiRepository(
-    virtual=TEST
-)
+midi = MidiRepository(virtual=TEST)
+
+
+@dataclass
+class Messages:
+    values: Dict[Fraction, Any] = field(default_factory=dict)
+
+    def add(self, time, values):
+        if not self.values.get(time):
+            self.values[time] = []
+
+        self.values[time].append(values)
 
 
 def _get_messages(grid: Grid, players: Dict[int, Player]):
     timeline = Fraction()
-    messages = defaultdict(list)
+    messages = Messages()
 
     for part_index, part in enumerate(grid):
-        messages[timeline].append(('text', {"text": str(part_index)}))
+        messages.add(timeline, ("text", {"text": str(part_index)}))
 
-        base_time = get_base_time(part.bpm)
+        base_time = part.bpm.base_time
 
         limit = (
             part.duration.value
@@ -70,14 +78,19 @@ def _get_messages(grid: Grid, players: Dict[int, Player]):
                     end = limit
 
                 for note in notes:
-                    messages[timeline + start].append(('note_on', {"note": note, "channel": channel}))
-                    messages[timeline + end].append(('note_off', {"note": note, "channel": channel}))
+                    messages.add(
+                        timeline + start,
+                        ("note_on", {"note": note, "channel": channel}),
+                    )
+                    messages.add(
+                        timeline + end, ("note_off", {"note": note, "channel": channel})
+                    )
 
         timeline += limit
 
-    messages[timeline].append(('end_of_track', {}))
+    messages.add(timeline, ("end_of_track", {}))
 
-    return messages
+    return messages.values
 
 
 def _generate_midi_file(messages):
@@ -104,17 +117,9 @@ def _generate_midi_file(messages):
                 time *= Fraction(95864, 100000)
 
             if instruction not in ("note_on", "note_off"):
-                msg = MetaMessage(
-                    instruction,
-                    time=time,
-                    **event_kwargs
-                )
+                msg = MetaMessage(instruction, time=time, **event_kwargs)
             else:
-                msg = Message(
-                    instruction,
-                    time=time,
-                    **event_kwargs
-                )
+                msg = Message(instruction, time=time, **event_kwargs)
 
             track.append(msg)
 
@@ -126,7 +131,7 @@ def get_midi_file(grid: Grid, players: Dict[int, Player]):
     return _generate_midi_file(messages)
 
 
-def play_midi_file(midi_file, repeat: Union[int, NoLimit] = 1):
+def play_midi_file(midi_file, repeat: Union[int, DurationLimit] = 1):
     def _play(midi_file):
         for msg in midi_file.play(meta_messages=True):
             if msg.type == "text":
@@ -135,11 +140,11 @@ def play_midi_file(midi_file, repeat: Union[int, NoLimit] = 1):
 
             midi.send_msg(msg)
 
-    if repeat is NoLimit:
+    if repeat is DurationLimit.NoLimit:
         while 1:
             yield from _play(midi_file)
 
-    elif repeat > 0:
+    elif isinstance(repeat, int) and repeat > 0:
         for _ in range(repeat):
             yield from _play(midi_file)
 

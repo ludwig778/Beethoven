@@ -1,8 +1,12 @@
 from typing import Dict, List, Tuple
 
-from beethoven.core.mappings import (chord_mappings, degree_mappings,
-                                     interval_mappings, note_mappings,
-                                     scale_mappings)
+from beethoven.core.mappings import (
+    chord_mappings,
+    degree_mappings,
+    interval_mappings,
+    note_mappings,
+    scale_mappings,
+)
 from beethoven.utils.deepget import deepget
 from beethoven.utils.name_container import NameContainer
 

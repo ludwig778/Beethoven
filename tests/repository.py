@@ -17,10 +17,13 @@ def clean_local_file():
         os.unlink(TEST_LOCAL_FILE)
 
 
-@mark.parametrize("repository", [
-    JsonRepository(path=TEST_LOCAL_FILE, table="grid", model=GridModel),
-    MongoRepository(collection="grid", model=GridModel)
-])
+@mark.parametrize(
+    "repository",
+    [
+        JsonRepository(path=TEST_LOCAL_FILE, table="grid", model=GridModel),
+        MongoRepository(collection="grid", model=GridModel),
+    ],
+)
 def test_grid_model_repositories(repository):
     repository.delete_all()
 

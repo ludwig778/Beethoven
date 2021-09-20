@@ -24,7 +24,10 @@ isort:
 mypy:
 	mypy .
 
-sure: lint isort mypy
+black:
+	poetry run black .
+
+sure: lint isort mypy black
 
 test_on:
 	pytest ${TEST_ARGS} ${ARGS}

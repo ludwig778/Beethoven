@@ -1,5 +1,3 @@
-
-
 def is_perfect_interval_class(interval: str) -> bool:
     """
     Check if interval correspond to a perfect class interval,

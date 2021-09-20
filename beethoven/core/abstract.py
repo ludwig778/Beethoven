@@ -1,15 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator, List
+from typing import Any, List
 
 
 class AbstractObject(ABC):
     pass
-
-
-class AbstractGridComponent(AbstractObject):
-    @abstractmethod
-    def __iter__(self) -> Generator:
-        pass
 
 
 class AbstractModel(ABC):

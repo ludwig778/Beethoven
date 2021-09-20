@@ -1,5 +1,6 @@
 from typing import Optional
 
+from beethoven.exceptions import MixedAlteration
 from beethoven.utils.intervals import is_perfect_interval_class
 
 
@@ -22,7 +23,7 @@ def get_alteration_as_int(alteration: Optional[str]) -> int:
     elif alteration.count("b") == len(alteration):
         return -alteration.count("b")
     else:
-        raise Exception("Mixed alteration")
+        raise MixedAlteration()
 
 
 def get_interval_alteration_from_int(interval: str, alteration: int) -> str:

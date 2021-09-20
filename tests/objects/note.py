@@ -1,5 +1,6 @@
 from pytest import mark, raises
 
+from beethoven.exceptions import CouldNotParse, MixedAlteration
 from beethoven.objects import Interval, Note
 
 
@@ -35,11 +36,14 @@ def test_note_index_property(string, index):
 
 
 def test_note_parsing_exception():
-    with raises(Exception, match="Mixed alteration"):
+    with raises(MixedAlteration):
         Note.parse("F#b")
 
-    with raises(Exception, match="Couldn't parse string='empty' as Note"):
+    with raises(CouldNotParse, match="Couldn't parse string='empty' as Note"):
         Note.parse("empty")
+
+    with raises(CouldNotParse, match="Couldn't parse string='' as Note"):
+        Note.parse("")
 
 
 @mark.parametrize(

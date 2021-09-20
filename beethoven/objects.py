@@ -58,10 +58,7 @@ class Note:
 
     @classmethod
     def build(cls, parsed: dict) -> Note:
-        name = parsed.get("name")
-
-        if not name:
-            raise Exception("LMAO")
+        name = parsed["name"]
 
         alteration = get_alteration_as_int(parsed.get("alteration"))
 

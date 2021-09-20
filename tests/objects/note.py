@@ -18,6 +18,22 @@ def test_note_parsing(string, note):
     assert Note.parse(string) == note
 
 
+@mark.parametrize(
+    "string,index",
+    [
+        ("A", 9),
+        ("B#", 0),
+        ("Cbb", 10),
+        ("D", 2),
+        ("E4", 52),
+        ("F#5", 66),
+        ("C0", 0),
+    ],
+)
+def test_note_index_property(string, index):
+    assert Note.parse(string).index == index
+
+
 def test_note_parsing_exception():
     with raises(Exception, match="Mixed alteration"):
         Note.parse("F#b")

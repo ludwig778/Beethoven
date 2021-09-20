@@ -39,11 +39,12 @@ class Note:
 
     @property
     def index(self):
-        return (
-            note_mapping.get_semitones(self.name)
-            + self.alteration
-            + (self.octave or 0) * 12
-        )
+        semitones = note_mapping.get_semitones(self.name)
+
+        if self.octave:
+            return semitones + self.alteration + self.octave * 12
+
+        return (semitones + self.alteration) % 12
 
     @classmethod
     def parse(cls, value: str) -> Note:

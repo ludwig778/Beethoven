@@ -121,6 +121,19 @@ def test_full_chord_parsing(string, intervals, extensions, notes):
     assert chord.extensions == Interval.parse_list(extensions)
 
 
+def test_chord_serialization():
+    chord_name = "C4_maj7:i=3:b=A4:e=9,11,13"
+
+    assert Chord.parse(chord_name).serialize() == chord_name
+
+
+def test_chord_serialization_with_degrees():
+    chord_name = "V_maj7:i=3:s=ii:e=9,11,13"
+    scale = Scale.parse("C_ionian")
+
+    assert Chord.parse(chord_name, scale=scale).serialize() == chord_name
+
+
 @mark.parametrize(
     "intervals,chord_name",
     [
@@ -157,6 +170,11 @@ def test_get_chords_from_scale_with_triad_degrees(scale, chords):
     scale = Scale.parse(scale)
 
     assert Chord.serialize_list(scale.get_chords([1, 3, 5])) == chords
+
+
+def test_get_chords_from_non_diatonic_scale():
+    with raises(ScaleIsNotDiatonic, match="Scale A_pentatonic is not diatonic"):
+        Scale.parse("A_pentatonic").get_chords()
 
 
 @mark.parametrize(

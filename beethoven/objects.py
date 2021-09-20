@@ -365,7 +365,7 @@ class Chord:
         string += "_" + self.name
 
         if self.inversion:
-            string += ":i=" + self.inversion
+            string += ":i=" + str(self.inversion)
 
         if self.base_note:
             string += ":b=" + self.base_note.serialize()

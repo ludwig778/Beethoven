@@ -1,3 +1,4 @@
 [report]
 omit =
+    beethoven/core/types.py
     beethoven/players/*

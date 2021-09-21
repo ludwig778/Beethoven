@@ -16,6 +16,7 @@ class FakePlayer(Player):
         yield notes, section, duration
 
 
+@mark.skip
 @mark.parametrize(
     "players,grid,expected_midi_file,expected_elapsed",
     [

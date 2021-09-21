@@ -15,14 +15,14 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("A_maj7"),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=None,
+                        duration=Duration.parse("W"),
                     ),
                     GridPart(
                         scale=Scale.parse("C"),
                         chord=Chord.parse("G_7"),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=None,
+                        duration=Duration.parse("W"),
                     ),
                 ]
             ),
@@ -36,7 +36,7 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("A_dim7"),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=None,
+                        duration=Duration.parse("W"),
                     )
                 ]
             ),
@@ -50,7 +50,7 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("A"),
                         bpm=Bpm(90),
                         time_signature=TimeSignature(7, 8),
-                        duration=None,
+                        duration=Duration.parse("7/8W"),
                     )
                 ]
             ),
@@ -64,7 +64,7 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("A"),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=Duration.parse("W"),
+                        duration=Duration.parse("4"),
                     ),
                     GridPart(
                         scale=Scale.parse("C"),
@@ -78,7 +78,7 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("C"),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=None,
+                        duration=Duration.parse("11/3Q"),
                     ),
                 ]
             ),
@@ -92,7 +92,7 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("I", scale=Scale.parse("C")),
                         bpm=Bpm(120),
                         time_signature=TimeSignature(4, 4),
-                        duration=None,
+                        duration=Duration.parse("W"),
                     )
                 ]
             ),
@@ -106,14 +106,14 @@ from beethoven.objects import Bpm, Chord, Duration, Grid, GridPart, Scale, TimeS
                         chord=Chord.parse("I", scale=Scale.parse("C_dorian")),
                         bpm=Bpm(60),
                         time_signature=TimeSignature(3, 2),
-                        duration=None,
+                        duration=Duration.parse("3H"),
                     ),
                     GridPart(
                         scale=Scale.parse("D_lydian"),
                         chord=Chord.parse("V", scale=Scale.parse("D_lydian")),
                         bpm=Bpm(80),
                         time_signature=TimeSignature(3, 8),
-                        duration=None,
+                        duration=Duration.parse("3E"),
                     ),
                 ]
             ),

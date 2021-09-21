@@ -476,7 +476,7 @@ class Bpm(AbstractObject):
 
     @property
     def base_time(self) -> Fraction:
-        return Fraction(60, self.value)
+        return Duration(Fraction(60, self.value))
 
 
 @dataclass
@@ -572,7 +572,7 @@ class TimeSection:
         return Duration(total)
 
 
-@dataclass
+@dataclass(order=True)
 class Duration:
     value: Fraction
 
@@ -608,6 +608,18 @@ class Duration:
 
         return cls(value=value)
 
+    def __add__(self, other):
+        return replace(self, value=self.value + other.value)
+
+    def __sub__(self, other):
+        return replace(self, value=self.value - other.value)
+
+    def __mul__(self, other):
+        return replace(self, value=self.value * other.value)
+
+    def __mod__(self, other):
+        return replace(self, value=self.value % other.value)
+
 
 @dataclass
 class GridPart:
@@ -637,12 +649,15 @@ class Grid:
         return cls.build(parsed, default_settings=default_settings)
 
     @classmethod
-    def build(cls, parsed: dict, default_settings: Optional[dict] = None) -> Grid:
+    def build(cls, parsed: dict, default_settings: Optional[dict] = None) -> Grid:  # noqa: C901
         scale = None
         bpm = None
         time_signature = None
         duration = None
         chords: List[Tuple[Chord, Optional[Duration]]] = []
+
+        last_time_signature = None
+        time_signature_total_duration = Duration.parse("0")
 
         if default_settings:
             scale = default_settings.get("scale", scale)
@@ -678,8 +693,6 @@ class Grid:
 
                     chords.append((chord, duration))
 
-            repeat = grid_part.get("repeat", 1)
-
             if not bpm:
                 raise Exception("Bpm must be set")
 
@@ -689,17 +702,36 @@ class Grid:
             if not scale:
                 raise Exception("Scale must be set")
 
-            for chord, chord_duration in chords:
+            if last_time_signature != time_signature:
+                time_signature_total_duration = Duration.parse("0")
 
-                for _ in range(repeat):
+            repeat = grid_part.get("repeat", 1)
+
+            for _ in range(repeat):
+
+                for chord, chord_duration in chords:
+
+                    part_duration = chord_duration or duration
+                    if not part_duration:
+                        if time_signature_total_duration.value:
+                            part_duration = (
+                                time_signature.as_duration - (
+                                    time_signature_total_duration % time_signature.as_duration
+                                )
+                            )
+                        else:
+                            part_duration = time_signature.as_duration
+
                     parts.append(
                         GridPart(
                             scale=scale,
                             chord=chord,
                             bpm=bpm,
                             time_signature=time_signature,
-                            duration=chord_duration or duration,
+                            duration=part_duration
                         )
                     )
+
+                    time_signature_total_duration += part_duration
 
         return cls(parts)

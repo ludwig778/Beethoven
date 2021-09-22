@@ -514,7 +514,7 @@ class TimeSignature:
     def get_time_section(self, timeline: Fraction) -> TimeSection:
         reduction = Fraction(self.beat_unit, 4)
 
-        bar, raw_measure = divmod(timeline, self.as_duration.value)
+        bar, raw_measure = divmod(timeline, self.as_duration)
         measure, fraction = divmod(raw_measure * reduction, 1)
 
         return TimeSection(bar=bar + 1, measure=measure + 1, fraction=fraction)
@@ -536,10 +536,10 @@ class TimeSignature:
 
         timeline = Fraction(0)
         while 1:
-            next_timeline = timeline + duration.value
+            next_timeline = timeline + duration
 
-            if _limit and next_timeline >= _limit.value:
-                duration = Duration(_limit.value - timeline)
+            if _limit and next_timeline >= _limit:
+                duration = Duration(_limit - timeline)
 
                 yield self.get_time_section(timeline), duration
                 break
@@ -561,7 +561,7 @@ class TimeSection:
         time_signature_duration = time_signature.as_duration
 
         if self.bar > 1:
-            total += time_signature_duration.value * (self.bar - 1)
+            total += time_signature_duration * (self.bar - 1)
 
         if self.measure > 1:
             total += (self.measure - 1) / reduction
@@ -569,18 +569,10 @@ class TimeSection:
         if self.fraction:
             total += self.fraction
 
-        return Duration(total)
+        return total
 
 
-@dataclass(order=True)
-class Duration:
-    value: Fraction
-
-    def __init__(self, value: Union[Fraction, int]):
-        if isinstance(value, int):
-            value = Fraction(value)
-
-        self.value = value
+class Duration(Fraction):
 
     @classmethod
     def parse(cls, value: str) -> Duration:
@@ -596,29 +588,17 @@ class Duration:
         if denominator == 0:
             raise Exception("Duration denominator can't be equal to 0")
 
-        value = Fraction(numerator=numerator, denominator=denominator)
+        obj = cls(numerator=numerator, denominator=denominator)
 
         if base_duration := parsed.get("base_duration"):
             if duration := default_durations.get(base_duration):
-                value *= duration
+                obj *= duration
             else:
                 raise Exception(
                     f"Duration base_duration {base_duration} couldn't be found"
                 )
 
-        return cls(value=value)
-
-    def __add__(self, other):
-        return replace(self, value=self.value + other.value)
-
-    def __sub__(self, other):
-        return replace(self, value=self.value - other.value)
-
-    def __mul__(self, other):
-        return replace(self, value=self.value * other.value)
-
-    def __mod__(self, other):
-        return replace(self, value=self.value % other.value)
+        return obj
 
 
 @dataclass
@@ -713,7 +693,7 @@ class Grid:
 
                     part_duration = chord_duration or duration
                     if not part_duration:
-                        if time_signature_total_duration.value:
+                        if time_signature_total_duration:
                             part_duration = (
                                 time_signature.as_duration - (
                                     time_signature_total_duration % time_signature.as_duration

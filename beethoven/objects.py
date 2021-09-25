@@ -475,7 +475,7 @@ class Bpm(AbstractObject):
         return str(self.value)
 
     @property
-    def base_time(self) -> Fraction:
+    def base_time(self) -> Duration:
         return Duration(Fraction(60, self.value))
 
 
@@ -511,10 +511,10 @@ class TimeSignature:
 
         return Duration(Fraction(self.beats_per_bar, reduction))
 
-    def get_time_section(self, timeline: Fraction) -> TimeSection:
+    def get_time_section(self, timeline: Duration) -> TimeSection:
         reduction = Fraction(self.beat_unit, 4)
 
-        bar, raw_measure = divmod(timeline, self.as_duration.value)
+        bar, raw_measure = divmod(timeline, self.as_duration)
         measure, fraction = divmod(raw_measure * reduction, 1)
 
         return TimeSection(bar=bar + 1, measure=measure + 1, fraction=fraction)
@@ -523,23 +523,26 @@ class TimeSignature:
         self,
         duration: Duration,
         limit: Union[Duration, DurationLimit] = DurationLimit.TimeSignatureBound,
+        offset: Optional[Duration] = None,
     ) -> Generator[Tuple[TimeSection, Duration], None, None]:
-
-        self_duration = self.as_duration
 
         if limit is DurationLimit.NoLimit:
             _limit = None
         elif limit is DurationLimit.TimeSignatureBound:
-            _limit = self_duration
+            _limit = self.as_duration
         else:
             _limit = limit
 
-        timeline = Fraction(0)
-        while 1:
-            next_timeline = timeline + duration.value
+        if offset:
+            timeline = offset
+        else:
+            timeline = Duration(0)
 
-            if _limit and next_timeline >= _limit.value:
-                duration = Duration(_limit.value - timeline)
+        while 1:
+            next_timeline = timeline + duration
+
+            if _limit and next_timeline >= _limit:
+                duration = _limit - timeline
 
                 yield self.get_time_section(timeline), duration
                 break
@@ -556,7 +559,7 @@ class TimeSection:
     fraction: Fraction = Fraction()
 
     def as_duration(self, time_signature: TimeSignature) -> Duration:
-        total = Fraction()
+        total = Fraction(0)
         reduction = Fraction(time_signature.beat_unit, 4)
         time_signature_duration = time_signature.as_duration
 
@@ -564,12 +567,28 @@ class TimeSection:
             total += time_signature_duration.value * (self.bar - 1)
 
         if self.measure > 1:
-            total += (self.measure - 1) / reduction
+            total += (self.measure - 1) // reduction
 
         if self.fraction:
             total += self.fraction
 
         return Duration(total)
+
+    def __eq__(self, other):
+        return (
+            self.bar == other.bar and
+            self.measure == other.measure and
+            self.fraction == other.fraction
+        )
+
+    def __gt__(self, other):
+        if self.bar > other.bar:
+            return True
+
+        if self.measure > other.measure:
+            return True
+
+        return self.fraction > other.fraction
 
 
 @dataclass(order=True)
@@ -581,6 +600,9 @@ class Duration:
             value = Fraction(value)
 
         self.value = value
+
+    def __repr__(self):
+        return self.value.__repr__().replace("Fraction", "Duration")
 
     @classmethod
     def parse(cls, value: str) -> Duration:
@@ -609,16 +631,22 @@ class Duration:
         return cls(value=value)
 
     def __add__(self, other):
-        return replace(self, value=self.value + other.value)
+        return Duration(self.value + other.value)
 
     def __sub__(self, other):
-        return replace(self, value=self.value - other.value)
+        return Duration(self.value - other.value)
 
     def __mul__(self, other):
-        return replace(self, value=self.value * other.value)
+        return Duration(self.value * other.value)
+
+    def __floordiv__(self, other):
+        return Duration(self.value // other.value)
 
     def __mod__(self, other):
-        return replace(self, value=self.value % other.value)
+        return Duration(self.value % other.value)
+
+    def __divmod__(self, other):
+        return divmod(self.value, other.value)
 
 
 @dataclass
@@ -628,7 +656,7 @@ class GridPart:
 
     bpm: Bpm
     time_signature: TimeSignature
-    duration: Optional[Duration]
+    duration: Duration
 
     def __iter__(self) -> Generator[GridPart, None, None]:
         yield self

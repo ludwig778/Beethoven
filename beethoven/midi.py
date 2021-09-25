@@ -5,7 +5,7 @@ from typing import Any, Dict, Union
 from mido import Message, MetaMessage, MidiFile, MidiTrack, open_output
 
 from beethoven.core.settings import MIDI_OUTPUT_NAME, TEST
-from beethoven.objects import Grid
+from beethoven.objects import Duration, Grid
 from beethoven.player.base import Player
 from beethoven.utils.duration import DurationLimit
 
@@ -46,7 +46,7 @@ class Messages:
 
 
 def _get_messages(grid: Grid, players: Dict[int, Player]):
-    timeline = Fraction()
+    timeline = Duration(0)
     messages = Messages()
 
     for part_index, part in enumerate(grid):
@@ -54,11 +54,7 @@ def _get_messages(grid: Grid, players: Dict[int, Player]):
 
         base_time = part.bpm.base_time
 
-        limit = (
-            part.duration.value
-            if part.duration
-            else part.time_signature.as_duration.value
-        ) * base_time
+        limit = part.duration * base_time
 
         for channel, player in players.items():
             player.setup(part)
@@ -67,12 +63,12 @@ def _get_messages(grid: Grid, players: Dict[int, Player]):
 
             while 1:
                 notes, section, duration = next(play_gen)
-                start = section.as_duration(part.time_signature).value * base_time
+                start = section.as_duration(part.time_signature) * base_time
 
                 if start >= limit:
                     break
 
-                end = start + (duration.value * base_time)
+                end = start + (duration * base_time)
 
                 if end >= limit:
                     end = limit

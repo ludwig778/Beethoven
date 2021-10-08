@@ -110,6 +110,33 @@ def test_time_section_generator_with_limit():
     assert len(time_sections) == 12
 
 
+def test_time_section_generator_with_offset():
+    time_signature = TimeSignature.parse("4/4")
+    generator = time_signature.time_section_generator(
+        Duration.parse("Q"),
+        limit=Duration.parse("3W"),
+        offset=Duration.parse("W")
+    )
+    time_sections = list(generator)
+
+    assert time_sections[0] == (TimeSection(2, 1), Duration(1))
+    assert time_sections[-1] == (TimeSection(3, 4), Duration(1))
+
+    assert len(time_sections) == 8
+
+
+def test_time_section_generator_with_offset_over_limit():
+    time_signature = TimeSignature.parse("4/4")
+    generator = time_signature.time_section_generator(
+        Duration.parse("Q"),
+        limit=Duration.parse("3W"),
+        offset=Duration.parse("4W")
+    )
+    time_sections = list(generator)
+
+    assert time_sections == []
+
+
 def test_time_section_generator_with_big_limit():
     time_signature = TimeSignature.parse("4/4")
     generator = time_signature.time_section_generator(

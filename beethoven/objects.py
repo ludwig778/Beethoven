@@ -539,6 +539,9 @@ class TimeSignature:
             timeline = Duration(0)
 
         while 1:
+            if _limit and timeline >= _limit:
+                break
+
             next_timeline = timeline + duration
 
             if _limit and next_timeline >= _limit:

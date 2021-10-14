@@ -570,10 +570,10 @@ class TimeSection:
             total += time_signature_duration.value * (self.bar - 1)
 
         if self.measure > 1:
-            total += (self.measure - 1) // reduction
+            total += (self.measure - 1) / reduction
 
         if self.fraction:
-            total += self.fraction
+            total += self.fraction / reduction
 
         return Duration(total)
 

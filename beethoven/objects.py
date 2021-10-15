@@ -71,8 +71,7 @@ class Note:
 
         alteration = get_alteration_as_int(parsed.get("alteration"))
 
-        if octave := parsed.get("octave"):
-            octave = int(octave)
+        octave = parsed.get("octave")
 
         return cls(name=name, alteration=alteration, octave=octave)
 
@@ -315,7 +314,10 @@ class Chord:
 
         root = scale.notes[diatonic_degree_index]
 
-        if add_octave:
+        if octave := raw_degree.get("octave"):
+            root = replace(root, octave=octave)
+
+        elif add_octave:
             root += Interval.parse("8")
 
         if degree_alteration:

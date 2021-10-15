@@ -22,12 +22,17 @@ SCALE_EXTRA_CHARS = "_-#b"
 
 Integer = Word(nums).setParseAction(lambda t: int(t[0]))
 
-octave_pattern = Word(nums)("octave")
+octave_pattern = Integer(nums)("octave")
 alteration_pattern = Word("#b")("alteration")
 
 degree_pattern = Optional(alteration_pattern) + oneOf(
     "I II III IV V VI VII i ii iii iv v vi vi vii"
 )("name")
+degree_with_optional_octave_pattern = (
+    Optional(alteration_pattern)
+    + oneOf("I II III IV V VI VII i ii iii iv v vi vi vii")("name")
+    + Optional(octave_pattern)
+)
 
 note_pattern = (
     oneOf(ENGLISH_NOTE_NOTATION + SOLFEGE_NOTE_NOTATION)("name")
@@ -50,7 +55,7 @@ duration_pattern = Optional(
 ) + Optional(oneOf("W H Q E S")("base_duration"))
 
 chord_pattern = (
-    (Group(note_pattern)("root") | Group(degree_pattern)("degree"))
+    (Group(note_pattern)("root") | Group(degree_with_optional_octave_pattern)("degree"))
     + Optional(Suppress("_"))
     + Optional(Word(alphas + nums + CHORD_EXTRA_CHARS)("name"))
     + ZeroOrMore(

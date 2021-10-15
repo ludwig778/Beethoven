@@ -182,6 +182,7 @@ def test_get_chords_from_non_diatonic_scale():
     [
         ("C", "I", "C,E,G,B"),
         ("C", "V", "G,B,D,F"),
+        ("C", "V4", "G4,B4,D5,F5"),
         ("E4_lydian", "I", "E4,G#4,B4,D#5"),
         ("G2_minor", "II", "A2,C3,E3,G3"),
     ],
@@ -199,6 +200,7 @@ def test_chord_parsing_with_degrees(scale, chord, notes):
         ("C", "V:s=II", "A,C#,E,G"),
         ("C", "V:s=III", "B,D#,F#,A"),
         ("C", "V:s=IV", "C,E,G,Bb"),
+        ("C", "V4:s=IV", "C4,E4,G4,Bb4"),
         ("C4", "V:s=V", "D5,F#5,A5,C6"),
         ("C4", "V:s=VI", "E5,G#5,B5,D6"),
     ],

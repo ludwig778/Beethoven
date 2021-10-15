@@ -581,9 +581,9 @@ class TimeSection:
 
     def __eq__(self, other):
         return (
-            self.bar == other.bar and
-            self.measure == other.measure and
-            self.fraction == other.fraction
+            self.bar == other.bar
+            and self.measure == other.measure
+            and self.fraction == other.fraction
         )
 
     def __gt__(self, other):
@@ -681,8 +681,17 @@ class Grid:
 
         return cls.build(parsed, default_settings=default_settings)
 
+    def serialize(self) -> str:
+        strings = ["["]
+        for part in self.parts:
+            strings.append(f"  {part.serialize()}")
+        strings.append("]")
+        return "\n".join(strings)
+
     @classmethod
-    def build(cls, parsed: dict, default_settings: Optional[dict] = None) -> Grid:  # noqa: C901
+    def build(
+        cls, parsed: dict, default_settings: Optional[dict] = None
+    ) -> Grid:  # noqa: C901
         scale = None
         bpm = None
         time_signature = None
@@ -747,10 +756,9 @@ class Grid:
                     part_duration = chord_duration or duration
                     if not part_duration:
                         if time_signature_total_duration.value:
-                            part_duration = (
-                                time_signature.as_duration - (
-                                    time_signature_total_duration % time_signature.as_duration
-                                )
+                            part_duration = time_signature.as_duration - (
+                                time_signature_total_duration
+                                % time_signature.as_duration
                             )
                         else:
                             part_duration = time_signature.as_duration
@@ -761,7 +769,7 @@ class Grid:
                             chord=chord,
                             bpm=bpm,
                             time_signature=time_signature,
-                            duration=part_duration
+                            duration=part_duration,
                         )
                     )
 

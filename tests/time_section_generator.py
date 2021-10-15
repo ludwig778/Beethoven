@@ -113,9 +113,7 @@ def test_time_section_generator_with_limit():
 def test_time_section_generator_with_offset():
     time_signature = TimeSignature.parse("4/4")
     generator = time_signature.time_section_generator(
-        Duration.parse("Q"),
-        limit=Duration.parse("3W"),
-        offset=Duration.parse("W")
+        Duration.parse("Q"), limit=Duration.parse("3W"), offset=Duration.parse("W")
     )
     time_sections = list(generator)
 
@@ -128,9 +126,7 @@ def test_time_section_generator_with_offset():
 def test_time_section_generator_with_offset_over_limit():
     time_signature = TimeSignature.parse("4/4")
     generator = time_signature.time_section_generator(
-        Duration.parse("Q"),
-        limit=Duration.parse("3W"),
-        offset=Duration.parse("4W")
+        Duration.parse("Q"), limit=Duration.parse("3W"), offset=Duration.parse("4W")
     )
     time_sections = list(generator)
 

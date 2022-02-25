@@ -4,9 +4,9 @@ from typing import Any, Dict, Union
 
 from mido import Message, MetaMessage, MidiFile, MidiTrack, open_output
 
-from beethoven.core.settings import MIDI_OUTPUT_NAME, TEST
 from beethoven.objects import Duration, Grid
 from beethoven.player.base import Player
+from beethoven.settings import MIDI_OUTPUT_NAME, TEST
 from beethoven.utils.duration import DurationLimit
 
 

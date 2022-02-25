@@ -689,9 +689,9 @@ class Grid:
         return "\n".join(strings)
 
     @classmethod
-    def build(
+    def build(  # noqa: C901
         cls, parsed: dict, default_settings: Optional[dict] = None
-    ) -> Grid:  # noqa: C901
+    ) -> Grid:
         scale = None
         bpm = None
         time_signature = None

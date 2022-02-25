@@ -8,6 +8,7 @@ services:
       - /app/.poetry
     environment:
       - BEETHOVEN_TEST=true
+      - BEETHOVEN_MONGODB_DATABASE=beethoven
       - BEETHOVEN_MONGODB_HOST=mongodb
       - BEETHOVEN_MONGODB_USERNAME=user
       - BEETHOVEN_MONGODB_PASSWORD=password123

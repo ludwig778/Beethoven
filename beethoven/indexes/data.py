@@ -1,4 +1,4 @@
-note_mappings = [
+note_index_data = [
     (0, 0, "C", "Do"),
     (1, 2, "D", "Re"),
     (2, 4, "E", "Mi"),
@@ -9,7 +9,7 @@ note_mappings = [
 ]
 
 
-interval_mappings = [
+interval_index_data = [
     (0, 0, "1", "unisson"),
     (1, 2, "2", "second"),
     (2, 4, "3", "third"),
@@ -28,7 +28,7 @@ interval_mappings = [
 ]
 
 
-chord_mappings = [
+chord_index_data = [
     ("1,5", "power", "power chord", "add5"),
     ("1,5d", "dim power", "diminished power chord", "add5d"),
     ("1,5a", "aug power", "augmented power chord", "add5a"),
@@ -59,7 +59,7 @@ chord_mappings = [
 ]
 
 
-scale_mappings = [
+scale_index_data = [
     ("1,3m,4,5,7m", "", "pentatonic minor", "pentatonic"),
     ("1,2,3,5,6", "", "pentatonic major"),
     ("1,3m,4,5d,5,7m", "", "pentatonic blues minor", "blues minor", "blues"),
@@ -100,4 +100,4 @@ scale_mappings = [
 ]
 
 
-degree_mappings = ["i", "ii", "iii", "iv", "v", "vi", "vii"]
+degree_index_data = ["i", "ii", "iii", "iv", "v", "vi", "vii"]

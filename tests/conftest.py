@@ -3,6 +3,8 @@ from pathlib import Path
 from hartware_lib.adapters.directory import DirectoryAdapter
 from pytest import fixture
 
+from beethoven.indexes import get_indexes
+
 
 @fixture(scope="function", autouse=True)
 def clean_test_directory_():
@@ -12,3 +14,8 @@ def clean_test_directory_():
     yield
 
     test_directory.delete()
+
+
+@fixture
+def indexes():
+    return get_indexes()

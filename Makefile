@@ -41,10 +41,10 @@ test_on:
 	pytest ${TEST_ARGS} ${ARGS}
 
 cov:
-	pytest ${TEST_ARGS} --cov=hartware_lib
+	pytest ${TEST_ARGS} --cov=beethoven
 
 cov_html:
-	pytest ${TEST_ARGS} --cov=hartware_lib --cov-report html:coverage_html
+	pytest ${TEST_ARGS} --cov=beethoven --cov-report html:coverage_html
 
 clean:
 	rm -rf coverage_html .coverage .mypy_cache .pytest_cache

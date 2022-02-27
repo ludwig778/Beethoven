@@ -1,6 +1,12 @@
 from beethoven.indexes import interval_index
 
 
+def test_interval_index_is_valid():
+    assert interval_index.is_valid("1")
+
+    assert not interval_index.is_valid("0")
+
+
 def test_interval_index_get_names():
     assert interval_index.get_names("1") == ["1", "unisson"]
 

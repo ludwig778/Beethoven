@@ -1,6 +1,12 @@
 from beethoven.indexes import note_index
 
 
+def test_note_index_is_valid():
+    assert note_index.is_valid("C")
+
+    assert not note_index.is_valid("H")
+
+
 def test_note_index_get_names():
     assert note_index.get_names("C") == ["C", "Do"]
 

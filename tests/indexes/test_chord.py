@@ -1,6 +1,12 @@
 from beethoven.indexes import chord_index
 
 
+def test_chord_index_is_valid():
+    assert chord_index.is_valid("power")
+
+    assert not chord_index.is_valid("fake")
+
+
 def test_chord_index_get_names():
     assert chord_index.get_names("power") == ["power", "power chord", "add5"]
 

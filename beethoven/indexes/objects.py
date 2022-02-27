@@ -17,6 +17,9 @@ class NoteIndex:
 
             self.index_directory[index] = names[0]
 
+    def is_valid(self, name: str) -> bool:
+        return name in self.directory
+
     def get_names(self, name: str) -> List[str]:
         return self.directory[name][0]
 
@@ -54,6 +57,9 @@ class IntervalIndex:
 
             self.reverse_directory[index] = names[0]
 
+    def is_valid(self, name: str) -> bool:
+        return name in self.directory
+
     def get_names(self, name: str) -> List[str]:
         return self.directory[name][0]
 
@@ -90,6 +96,9 @@ class ChordIndex:
                 self.directory[name] = (name_container, intervals)
 
             self.reverse_directory[intervals] = names[0]
+
+    def is_valid(self, name: str) -> bool:
+        return name in self.directory
 
     def get_names(self, name: str) -> List[str]:
         return self.directory[name][0]
@@ -129,6 +138,9 @@ class ScaleIndex:
 
                 self.modes_directory[mode].append(names[0])
 
+    def is_valid(self, name: str) -> bool:
+        return name in self.directory
+
     def get_names(self, name: str) -> List[str]:
         return self.directory[name][0]
 
@@ -141,6 +153,9 @@ class DegreeIndex:
 
     def __init__(self, degree_mappings) -> None:
         self.directory = degree_mappings
+
+    def is_valid(self, name: str) -> bool:
+        return name.lower() in self.directory
 
     def get_name(self, index: int) -> str:
         return self.directory[index]

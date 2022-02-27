@@ -31,14 +31,6 @@ class NoteIndex:
 
     def get_name_from_index(self, index: int) -> str:
         return self.index_directory[index]
-        """
-        name = self.index_directory.get(index)
-
-        if not name:
-            raise Exception(f"Note index lookup unknown {index=}")
-
-        return name
-        """
 
 
 class IntervalIndex:
@@ -71,14 +63,6 @@ class IntervalIndex:
 
     def get_name_from_index(self, index: int) -> str:
         return self.reverse_directory[index]
-        """
-        name = self.reverse_directory.get(index)
-
-        if not name:
-            raise Exception(f"Interval index lookup unknown {index=}")
-
-        return name
-        """
 
 
 class ChordIndex:
@@ -108,14 +92,6 @@ class ChordIndex:
 
     def get_name_from_intervals(self, intervals: str) -> str:
         return self.reverse_directory[intervals]
-        """
-        name = self.reverse_directory.get(intervals)
-
-        if not name:
-            raise Exception(f"Chord intervals lookup unknown {intervals=}")
-
-        return name
-        """
 
 
 class ScaleIndex:

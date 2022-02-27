@@ -1,17 +1,10 @@
-from pytest import mark, raises
+from pytest import raises
 
 from beethoven.models import Note, Scale
 
 
-@mark.parametrize(
-    "tonic,name",
-    [
-        [Note(name="C"), "pentatonic"],
-        [Note(name="G"), "major"],
-    ],
-)
-def test_scale_model(tonic, name):
-    assert Scale(tonic=tonic, name=name)
+def test_scale_model():
+    assert Scale(tonic=Note(name="C"), name="major")
 
 
 def test_scale_model_raise_invalid_name():

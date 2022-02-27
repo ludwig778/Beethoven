@@ -87,6 +87,7 @@ class Chord(BaseModel):
     base_note: Optional[Note] = None
     extensions: List[Interval] = Field(default_factory=list)
 
+    # TODO: Remove default factories, should be provided by the controller
     notes: List[Note] = Field(default_factory=list)
     intervals: List[Interval] = Field(default_factory=list)
 
@@ -102,9 +103,10 @@ class Chord(BaseModel):
 
 
 class Scale(BaseModel):
-    tonic: "Note"
+    tonic: Note
     name: str
 
+    # TODO: Remove default factories, should be provided by the controller
     notes: List["Note"] = Field(default_factory=list)
     intervals: List["Interval"] = Field(default_factory=list)
 
@@ -131,27 +133,49 @@ class TimeSignature(BaseModel):
     beats_per_bar: int
     beat_unit: int
 
-    # TODO check beat unit multiple of 2
+    @validator("beat_unit")
+    def beat_unit_must_be_within_range(cls, beat_unit):
+        if 1 <= beat_unit <= 32:
+            return beat_unit
+
+        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be in range 1-32")
+
+    @validator("beat_unit")
+    def beat_unit_must_be_a_multiple_of_2(cls, beat_unit):
+        if beat_unit in (1, 2, 4, 8, 16, 32):
+            return beat_unit
+
+        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be a multiple of 2")
 
 
 class TimeSection(BaseModel):
     bar: int
     measure: int
-    fraction: Fraction
+    rest: Fraction
+
+    @validator("rest", pre=True)
+    def cast_int_to_fraction(cls, rest):
+        if isinstance(rest, int):
+            rest = Fraction(rest)
+
+        return rest
 
     class Config:
         arbitrary_types_allowed = True
-
-    # TODO cast int to fraction
 
 
 class Duration(BaseModel):
     value: Fraction
 
+    @validator("value", pre=True)
+    def cast_int_to_fraction(cls, value):
+        if isinstance(value, int):
+            value = Fraction(value)
+
+        return value
+
     class Config:
         arbitrary_types_allowed = True
-
-    # TODO cast int to fraction
 
 
 class GridPart(BaseModel):

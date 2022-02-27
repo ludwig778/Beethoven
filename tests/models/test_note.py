@@ -1,4 +1,3 @@
-from pydantic import ValidationError
 from pytest import mark, raises
 
 from beethoven.models import Note

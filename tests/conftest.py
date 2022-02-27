@@ -4,7 +4,6 @@ from hartware_lib.adapters.directory import DirectoryAdapter
 from pytest import fixture
 
 from beethoven.adapters import get_adapters
-from beethoven.indexes import get_indexes
 
 
 @fixture(scope="function", autouse=True)
@@ -24,8 +23,3 @@ def adapters():
     yield adapters
 
     adapters.midi.close_all_outputs()
-
-
-@fixture
-def indexes():
-    return get_indexes()

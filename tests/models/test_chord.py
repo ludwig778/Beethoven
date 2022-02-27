@@ -1,4 +1,4 @@
-from pytest import mark
+from pytest import mark, raises
 
 from beethoven.models import Chord, Note
 
@@ -12,3 +12,8 @@ from beethoven.models import Chord, Note
 )
 def test_chord_model(root, name):
     assert Chord(root=root, name=name)
+
+
+def test_chord_model_raise_invalid_name():
+    with raises(ValueError, match="Invalid name: fake"):
+        Chord(root=Note(name="C"), name="fake")

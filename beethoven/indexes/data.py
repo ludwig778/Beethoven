@@ -48,7 +48,7 @@ chord_index_data = [
     ("1,3m,5,7", "min maj7", "minor major 7", "-Δ"),
     ("1,3,5a,7", "maj7#5", "major 7 (#5)", "Δ#5"),
     ("1,3,5,6", "6", "major 6", "6"),
-    ("1,3m,5,6", "min 6", "minor 6", "-6"),
+    ("1,3m,5,6", "min6", "minor 6", "-6"),
     ("1,2,5,7m", "7sus2", "7 suspended 2", "7sus2"),
     ("1,4,5,7m", "7sus4", "7 suspended 4", "7sus4"),
     ("1,3d,5d,7d", "min dim7", "minor diminished 7", "-°7"),

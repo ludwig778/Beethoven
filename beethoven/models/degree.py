@@ -22,3 +22,7 @@ class Degree(BaseModel):
             return alteration
 
         raise ValueError(f"Invalid alteration: {alteration}, must be between -3 and 3")
+
+    @property
+    def index(self):
+        return degree_index.get_index(self.name)

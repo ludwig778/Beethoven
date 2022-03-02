@@ -25,3 +25,14 @@ def test_degree_model_raise_invalid_alteration(alteration):
         ValueError, match=f"Invalid alteration: {alteration}, must be between -3 and 3"
     ):
         Degree(name="i", alteration=alteration)
+
+
+@mark.parametrize(
+    "name,index",
+    [
+        ["i", 0],
+        ["vii", 6],
+    ],
+)
+def test_degree_model_index_property(name, index):
+    assert Degree(name=name).index == index

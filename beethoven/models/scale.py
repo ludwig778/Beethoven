@@ -23,3 +23,7 @@ class Scale(BaseModel):
             return name
 
         raise ValueError(f"Invalid name: {name}")
+
+    @property
+    def is_diatonic(self):
+        return len(self.notes) == 7

@@ -13,7 +13,6 @@ class Scale(BaseModel):
     tonic: Note
     name: str
 
-    # TODO: Remove default factories, should be provided by the controller
     notes: List[Note] = Field(default_factory=list)
     intervals: List[Interval] = Field(default_factory=list)
 

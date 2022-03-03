@@ -1,3 +1,5 @@
+from typing import Any
+
 from beethoven.models.bpm import Bpm
 from beethoven.models.chord import Chord
 from beethoven.models.degree import Degree
@@ -10,7 +12,7 @@ from beethoven.models.scale import Scale
 from beethoven.models.time_section import TimeSection
 from beethoven.models.time_signature import TimeSignature
 
-__all__ = (
+__all__: Any = (
     Bpm,
     Chord,
     Degree,

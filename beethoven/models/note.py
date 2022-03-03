@@ -50,8 +50,11 @@ class Note(BaseModel):
                 "Octaves must be present or absent in order to compare Notes"
             )
 
-    def __eq__(self, other: Note) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check notes pitch equality, since we check on the midi_index property"""
+
+        if not isinstance(other, Note):
+            return NotImplemented
 
         self.check_octave_states(other)
 

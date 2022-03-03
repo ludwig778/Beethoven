@@ -14,13 +14,12 @@ class Chord(BaseModel):
     root: Note
     name: str
 
+    notes: List[Note] = Field(default_factory=list)
+    intervals: List[Interval] = Field(default_factory=list)
+
     inversion: Optional[int] = None
     base_note: Optional[Note] = None
     extensions: List[Interval] = Field(default_factory=list)
-
-    # TODO: Remove default factories, should be provided by the controller
-    notes: List[Note] = Field(default_factory=list)
-    intervals: List[Interval] = Field(default_factory=list)
 
     degree: Optional[Degree] = Field(default=None, repr=False)
     base_degree: Optional[Degree] = Field(default=None, repr=False)

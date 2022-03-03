@@ -58,11 +58,13 @@ duration_pattern = Optional(
 
 chord_pattern = (
     (Group(note_pattern)("root") | Group(degree_with_optional_octave_pattern)("degree"))
-    + Optional(Suppress("_"))
-    + Optional(Word(alphas + nums + CHORD_EXTRA_CHARS)("name"))
+    + Optional(Suppress("_") + Word(alphas + nums + CHORD_EXTRA_CHARS)("name"))
     + ZeroOrMore(
         (Suppress(":i=") + Integer("inversion"))
-        | (Suppress(":e=") + delimitedList(Word(nums + alphas), delim=",")("extensions"))
+        | (
+            Suppress(":e=")
+            + delimitedList(Group(interval_pattern), delim=",")("extensions")
+        )
         | (Suppress(":b=") + Group(note_pattern)("base_note"))
         | (Suppress(":s=") + Group(degree_pattern)("base_degree"))
         | (Suppress(":d=") + Group(duration_pattern)("duration"))

@@ -38,6 +38,7 @@ pytest-env = "^0.6.2"
 mypy = "^0.910"
 black = "^21.9b0"
 pytest-mock = "^3.7.0"
+piprot = "^0.9.11"
 
 [tool.poetry.scripts]
 beethoven = "beethoven:main"

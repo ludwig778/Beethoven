@@ -1,3 +1,5 @@
+from typing import Any
+
 from beethoven.controllers.bpm import BpmController
 from beethoven.controllers.chord import ChordController
 from beethoven.controllers.degree import DegreeController
@@ -10,7 +12,7 @@ from beethoven.controllers.scale import ScaleController
 from beethoven.controllers.time_section import TimeSectionController
 from beethoven.controllers.time_signature import TimeSignatureController
 
-__all__ = (
+__all__: Any = (
     BpmController,
     ChordController,
     DegreeController,

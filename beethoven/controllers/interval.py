@@ -1,8 +1,8 @@
 from typing import List
 
-from beethoven.helpers.interval import interval_alteration_to_int
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import Interval
+from beethoven.utils.alterations import get_interval_alteration_int_from_str
+from beethoven.utils.parser import parse_model_string
 
 
 class IntervalController:
@@ -23,8 +23,8 @@ class IntervalController:
     def construct(cls, parsed: dict) -> Interval:
         return Interval(
             name=parsed["name"],
-            alteration=interval_alteration_to_int(
-                alteration=parsed.get("alteration", ""), interval=parsed.get("name")
+            alteration=get_interval_alteration_int_from_str(
+                alteration=parsed.get("alteration", ""), interval=parsed["name"]
             ),
             octave=parsed.get("octave"),
         )

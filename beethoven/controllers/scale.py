@@ -1,10 +1,9 @@
 from beethoven.controllers.interval import IntervalController
 from beethoven.controllers.note import NoteController
-from beethoven.helpers.interval import interval_alteration_to_int
 from beethoven.helpers.note import add_interval_to_note
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.indexes import scale_index
-from beethoven.models import Scale, interval
+from beethoven.models import Scale
+from beethoven.utils.parser import parse_model_string
 
 
 class ScaleController:

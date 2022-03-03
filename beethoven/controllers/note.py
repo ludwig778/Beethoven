@@ -1,8 +1,8 @@
 from typing import List
 
-from beethoven.helpers.note import note_alteration_to_int
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import Note
+from beethoven.utils.note import note_alteration_to_int
+from beethoven.utils.parser import parse_model_string
 
 
 class NoteController:

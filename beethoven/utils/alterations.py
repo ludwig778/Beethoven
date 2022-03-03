@@ -1,69 +1,68 @@
-from typing import Optional
-
-from beethoven.exceptions import MixedAlteration
-from beethoven.utils.intervals import is_perfect_interval_class
+from beethoven.utils.interval import is_interval_perfect
 
 
-def get_alteration_from_int(alteration: int) -> str:
-    if not alteration:
-        return ""
-    elif alteration > 0:
-        return "#" * alteration
-    elif alteration < 0:
-        return "b" * abs(alteration)
-
-    raise Exception(f"UNKNOWN CASE {alteration}")
-
-
-def get_alteration_as_int(alteration: Optional[str]) -> int:
-    if not alteration:
+def get_note_alteration_int_from_str(alteration: str) -> int:
+    if alteration == "":
         return 0
-    elif alteration.count("#") == len(alteration):
+    elif "#" in alteration:
         return alteration.count("#")
-    elif alteration.count("b") == len(alteration):
+    elif "b" in alteration:
         return -alteration.count("b")
-    else:
-        raise MixedAlteration()
+    if "a" in alteration:
+        return alteration.count("a")
+    elif "d" in alteration:
+        return -alteration.count("d")
+
+    raise ValueError(f"Error on getting note alteration int from str: {alteration}")
 
 
-def get_interval_alteration_from_int(interval: str, alteration: int) -> str:
-    is_perfect_interval = is_perfect_interval_class(interval)
+def get_interval_alteration_int_from_str(alteration: str, interval: int) -> int:
+    if alteration in ("", "M"):
+        return 0
+    if "m" == alteration:
+        return -1
+    elif "a" in alteration:
+        return alteration.count("a")
+    elif "d" in alteration:
+        alteration_count = -alteration.count("d")
 
+        if not is_interval_perfect(interval):
+            alteration_count -= 1
+
+        return alteration_count
+
+    raise ValueError(
+        f"Error on getting interval alteration int from str: {interval}{alteration}"
+    )
+
+
+def get_interval_alteration_str_from_int(alteration: int, interval: int) -> str:
     if not alteration:
         return ""
-    elif is_perfect_interval:
+    elif is_interval_perfect(interval):
         if alteration > 0:
             return "a" * alteration
         elif alteration < 0:
-            return "d" * alteration
+            return "d" * abs(alteration)
     else:
         if alteration > 0:
             return "a" * alteration
         elif alteration == -1:
             return "m"
         elif alteration < -1:
-            return "d" * (alteration + 1)
+            return "d" * abs(alteration + 1)
 
-    raise Exception(f"UNKNOWN CASE {interval} {alteration}")
+    raise ValueError(
+        f"Error on getting interval alteration str from int: {interval}{alteration}"
+    )
 
 
-def get_interval_alteration_as_int(interval: str, alteration: str) -> int:
-    is_perfect_interval = is_perfect_interval_class(interval)
-
-    if is_perfect_interval and alteration.lower() == "m":
-        raise Exception("LMMAO")
-    elif not alteration or alteration == "M":
+def get_degree_alteration_int_from_str(alteration: str) -> int:
+    if alteration == "":
         return 0
-    elif alteration == "m":
-        return -1
-    elif alteration.count("a") == len(alteration):
-        return alteration.count("a")
-    elif alteration.count("d") == len(alteration):
-        alteration_count = -alteration.count("d")
+    if "#" in alteration:
+        return alteration.count("#")
+    elif "b" in alteration:
+        return -alteration.count("b")
 
-        if not is_perfect_interval:
-            alteration_count -= 1
-
-        return alteration_count
-
-    raise Exception("LMAO")
+    raise ValueError(f"Error on getting degree alteration int from str: {alteration}")

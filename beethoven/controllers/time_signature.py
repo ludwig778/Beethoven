@@ -1,5 +1,5 @@
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import TimeSignature
+from beethoven.utils.parser import parse_model_string
 
 
 class TimeSignatureController:

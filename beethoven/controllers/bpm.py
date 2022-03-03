@@ -1,5 +1,5 @@
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import Bpm
+from beethoven.utils.parser import parse_model_string
 
 
 class BpmController:

@@ -1,7 +1,9 @@
-from pyparsing import Token
+from typing import Dict
+
+from beethoven.parsers import patterns
 
 
-def parse(pattern: Token, string: str, end: bool = False) -> dict:
-    data = pattern.parseString(string, parseAll=True)
+def parse_model_string(model_name: str, string: str) -> Dict:
+    pattern = getattr(patterns, f"{model_name}_pattern")
 
-    return data.asDict()
+    return pattern.parseString(string, parseAll=True).asDict()

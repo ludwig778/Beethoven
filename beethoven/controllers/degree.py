@@ -1,6 +1,6 @@
-from beethoven.helpers.degree import degree_alteration_to_int
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import Degree
+from beethoven.utils.alterations import get_degree_alteration_int_from_str
+from beethoven.utils.parser import parse_model_string
 
 
 class DegreeController:
@@ -14,5 +14,5 @@ class DegreeController:
     def construct(cls, parsed: dict) -> Degree:
         return Degree(
             name=parsed["name"],
-            alteration=degree_alteration_to_int(parsed.get("alteration", "")),
+            alteration=get_degree_alteration_int_from_str(parsed.get("alteration", "")),
         )

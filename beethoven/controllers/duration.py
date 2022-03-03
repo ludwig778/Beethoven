@@ -1,8 +1,8 @@
 from fractions import Fraction
 
 from beethoven.constants.duration import durations
-from beethoven.helpers.parsers import parse_model_string
 from beethoven.models import Duration
+from beethoven.utils.parser import parse_model_string
 
 
 class DurationController:
@@ -16,7 +16,7 @@ class DurationController:
     def construct(cls, parsed: dict) -> Duration:
         value = Fraction(1)
         if base_duration := parsed.get("base_duration"):
-            value = durations.get(base_duration)
+            value = durations[base_duration]
 
         if numerator := parsed.get("numerator"):
             value *= numerator

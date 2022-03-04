@@ -41,6 +41,7 @@ class Note(BaseModel):
             + (self.octave or 0) * 12
         )
 
+    # TODO: move to utils, setup a customized exception
     def check_octave_states(self, other: Note) -> None:
         """Check that both notes have or have not octaves"""
 

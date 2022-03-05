@@ -12,8 +12,6 @@ services:
       - BEETHOVEN_MONGODB_HOST=mongodb
       - BEETHOVEN_MONGODB_USERNAME=user
       - BEETHOVEN_MONGODB_PASSWORD=password123
-    devices:
-      - /dev/snd:/dev/snd
     depends_on:
       - mongodb
 

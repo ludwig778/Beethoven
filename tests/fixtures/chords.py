@@ -1,5 +1,20 @@
 from beethoven.models import Chord, Interval, Note
 
+c4_maj = Chord(
+    root=Note(name="C", octave=4),
+    name="maj",
+    notes=[
+        Note(name="C", octave=4),
+        Note(name="E", octave=4),
+        Note(name="G", octave=4),
+    ],
+    intervals=[
+        Interval(name="1"),
+        Interval(name="3"),
+        Interval(name="5"),
+    ],
+)
+
 c_maj7 = Chord(
     root=Note(name="C"),
     name="maj7",
@@ -118,3 +133,4 @@ b_min7b5 = Chord(
         Interval(name="7", alteration=-1),
     ],
 )
+c_major_7th_chords = [c_maj7, d_min7, e_min7, f_maj7, g_7, a_min7, b_min7b5]

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 from beethoven.models.bpm import Bpm
@@ -15,4 +17,4 @@ class GridPart(BaseModel):
 
     bpm: Bpm
     time_signature: TimeSignature
-    duration: Duration
+    duration: Optional[Duration]

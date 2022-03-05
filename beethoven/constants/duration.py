@@ -1,9 +1,15 @@
 from fractions import Fraction
 
-whole = Fraction(4, 1)
-half = Fraction(2, 1)
-quarter = Fraction(1, 1)
-eighth = Fraction(1, 2)
-sixteenth = Fraction(1, 4)
+whole_value = Fraction(4)
+half_value = Fraction(2)
+quarter_value = Fraction(1)
+eighth_value = Fraction(1, 2)
+sixteenth_value = Fraction(1, 4)
 
-durations = {"W": whole, "H": half, "Q": quarter, "E": eighth, "S": sixteenth}
+durations = {
+    "W": whole_value,
+    "H": half_value,
+    "Q": quarter_value,
+    "E": eighth_value,
+    "S": sixteenth_value,
+}

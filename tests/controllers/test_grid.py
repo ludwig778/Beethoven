@@ -105,6 +105,41 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                 ]
             ),
         ],
+        [
+            "p=II,V r=2",
+            Grid(
+                parts=[
+                    GridPart(
+                        bpm=Bpm(value=120),
+                        time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
+                        scale=c_major,
+                        chord=update_model(d_min7, degree=Degree(name="II")),
+                        duration=None,
+                    ),
+                    GridPart(
+                        bpm=Bpm(value=120),
+                        time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
+                        scale=c_major,
+                        chord=update_model(g_7, degree=Degree(name="V")),
+                        duration=None,
+                    ),
+                    GridPart(
+                        bpm=Bpm(value=120),
+                        time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
+                        scale=c_major,
+                        chord=update_model(d_min7, degree=Degree(name="II")),
+                        duration=None,
+                    ),
+                    GridPart(
+                        bpm=Bpm(value=120),
+                        time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
+                        scale=c_major,
+                        chord=update_model(g_7, degree=Degree(name="V")),
+                        duration=None,
+                    ),
+                ]
+            ),
+        ],
     ],
 )
 def test_grid_controller_parse(string, expected):

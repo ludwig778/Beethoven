@@ -26,26 +26,27 @@ class GridController:
         time_signature = DEFAULT_TIME_SIGNATURE
         scale = DEFAULT_SCALE
 
-        for parsed_grid_part in parsed["grid_parts"]:
-            if not parsed_grid_part:
+        for parsed_grid_section in parsed["grid_sections"]:
+            if not parsed_grid_section:
                 continue
 
-            if parsed_bpm := parsed_grid_part.get("bpm"):
+            if parsed_bpm := parsed_grid_section.get("bpm"):
                 bpm = BpmController.construct(parsed_bpm)
 
-            if parsed_time_signature := parsed_grid_part.get("time_signature"):
+            if parsed_time_signature := parsed_grid_section.get("time_signature"):
                 time_signature = TimeSignatureController.construct(
                     parsed_time_signature
                 )
 
-            if parsed_scale := parsed_grid_part.get("scale"):
+            if parsed_scale := parsed_grid_section.get("scale"):
                 scale = ScaleController.construct(parsed_scale)
 
-            parsed_chords = parsed_grid_part.get("chords")
+            parsed_chords = parsed_grid_section.get("chords")
 
             if not parsed_chords:
                 continue
 
+            grid_section_parts = []
             for parsed_chord in parsed_chords:
                 chord = ChordController.construct(parsed_chord, scale=scale)
 
@@ -53,7 +54,7 @@ class GridController:
                 if parsed_duration := parsed_chord.get("duration"):
                     duration = DurationController.construct(parsed_duration)
 
-                parts.append(
+                grid_section_parts.append(
                     GridPart(
                         bpm=bpm,
                         time_signature=time_signature,
@@ -62,5 +63,7 @@ class GridController:
                         duration=duration,
                     )
                 )
+
+            parts += grid_section_parts * int(parsed_grid_section.get("repeat") or 1)
 
         return Grid(parts=parts)

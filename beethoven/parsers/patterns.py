@@ -87,4 +87,4 @@ grid_pattern = delimitedList(
         )
     ),
     delim=";",
-)("grid_parts")
+)("grid_sections")

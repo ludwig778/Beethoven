@@ -1,2 +1,0 @@
-class TimeSectionController:
-    pass

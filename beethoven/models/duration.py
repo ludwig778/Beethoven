@@ -17,3 +17,12 @@ class Duration(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    def __add__(self, other: object) -> Duration:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
+        return Duration(value=self.value + other.value)
+
+    def __iadd__(self, other: object) -> Duration:
+        return Duration.__add__(self, other)

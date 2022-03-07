@@ -26,3 +26,9 @@ class Duration(BaseModel):
 
     def __iadd__(self, other: object) -> Duration:
         return Duration.__add__(self, other)
+
+    def __gt__(self, other: object) -> bool:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
+        return self.value > other.value

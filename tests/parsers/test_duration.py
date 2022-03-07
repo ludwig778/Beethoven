@@ -2,7 +2,7 @@ from fractions import Fraction
 
 from pytest import mark
 
-from beethoven.controllers import DurationController
+from beethoven import parsers
 from beethoven.models import Duration
 
 
@@ -23,5 +23,5 @@ from beethoven.models import Duration
         ["2/3S", Duration(value=Fraction(1, 6))],
     ],
 )
-def test_duration_controller_parse(string, expected):
-    assert DurationController.parse(string) == expected
+def test_duration_parser(string, expected):
+    assert parsers.duration.parse(string) == expected

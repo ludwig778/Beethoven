@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.controllers import ChordController
+from beethoven import parsers
 from beethoven.models import Chord, Interval, Note
 from beethoven.models.degree import Degree
 from tests.fixtures.scales import c_major
@@ -154,8 +154,8 @@ from tests.fixtures.scales import c_major
         ],
     ],
 )
-def test_chord_controller_parse(string, expected):
-    assert ChordController.parse(string) == expected
+def test_chord_parser(string, expected):
+    assert parsers.chord.parse(string) == expected
 
 
 @mark.parametrize(
@@ -227,5 +227,5 @@ def test_chord_controller_parse(string, expected):
         ],
     ],
 )
-def test_chord_controller_parse_with_scale_context(string, scale, expected):
-    assert ChordController.parse_with_scale_context(string, scale) == expected
+def test_chord_parser_with_scale_context(string, scale, expected):
+    assert parsers.chord.parse_with_scale_context(string, scale) == expected

@@ -2,8 +2,8 @@ from fractions import Fraction
 
 from pytest import mark
 
+from beethoven import parsers
 from beethoven.constants.duration import whole_value
-from beethoven.controllers import GridController
 from beethoven.helpers.model import update_model
 from beethoven.models import Bpm, Degree, Duration, Grid, GridPart, TimeSignature
 from tests.fixtures.chords import a_min7, c4_maj, c_maj7, d_min7, e_min7, g_7
@@ -142,5 +142,5 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
         ],
     ],
 )
-def test_grid_controller_parse(string, expected):
-    assert GridController.parse(string).dict() == expected.dict()
+def test_grid_parser(string, expected):
+    assert parsers.grid.parse(string) == expected

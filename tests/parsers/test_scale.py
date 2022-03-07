@@ -1,8 +1,7 @@
 from pytest import mark
 
-from beethoven.controllers import ScaleController
-from beethoven.models import Note, Scale
-from beethoven.models.interval import Interval
+from beethoven import parsers
+from beethoven.models import Interval, Note, Scale
 
 
 @mark.parametrize(
@@ -81,5 +80,5 @@ from beethoven.models.interval import Interval
         ],
     ],
 )
-def test_scale_controller_parse(string, expected):
-    assert ScaleController.parse(string) == expected
+def test_scale_parser(string, expected):
+    assert parsers.scale.parse(string) == expected

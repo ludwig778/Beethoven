@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.controllers import IntervalController
+from beethoven import parsers
 from beethoven.models import Interval
 
 
@@ -25,8 +25,8 @@ from beethoven.models import Interval
         ["15", Interval(name="15")],
     ],
 )
-def test_interval_controller_parse(string, expected):
-    assert IntervalController.parse(string) == expected
+def test_interval_parser(string, expected):
+    assert parsers.interval.parse(string) == expected
 
 
 @mark.parametrize(
@@ -68,5 +68,5 @@ def test_interval_controller_parse(string, expected):
         ],
     ],
 )
-def test_interval_controller_parse_list(string, expected):
-    assert IntervalController.parse_list(string) == expected
+def test_interval_list_parser(string, expected):
+    assert parsers.interval.parse_list(string) == expected

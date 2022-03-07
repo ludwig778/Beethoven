@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.controllers import NoteController
+from beethoven import parsers
 from beethoven.models import Note
 
 
@@ -16,8 +16,8 @@ from beethoven.models import Note
         ["G#4", Note(name="G", alteration=1, octave=4)],
     ],
 )
-def test_note_controller_parse(string, expected):
-    assert NoteController.parse(string) == expected
+def test_note_parser(string, expected):
+    assert parsers.note.parse(string) == expected
 
 
 @mark.parametrize(
@@ -61,5 +61,5 @@ def test_note_controller_parse(string, expected):
         ],
     ],
 )
-def test_note_controller_parse_list(string, expected):
-    assert NoteController.parse_list(string) == expected
+def test_note_list_parser(string, expected):
+    assert parsers.note.parse_list(string) == expected

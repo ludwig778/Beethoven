@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.controllers import BpmController
+from beethoven import parsers
 from beethoven.models import Bpm
 
 
@@ -8,5 +8,5 @@ from beethoven.models import Bpm
     "string,expected",
     [["20", Bpm(value=20)], ["60", Bpm(value=60)], ["120", Bpm(value=120)]],
 )
-def test_bpm_controller_parse(string, expected):
-    assert BpmController.parse(string) == expected
+def test_bpm_parser(string, expected):
+    assert parsers.bpm.parse(string) == expected

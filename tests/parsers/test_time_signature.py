@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven.controllers import TimeSignatureController
+from beethoven import parsers
 from beethoven.models import TimeSignature
 
 
@@ -13,5 +13,5 @@ from beethoven.models import TimeSignature
         ["5/16", TimeSignature(beats_per_bar=5, beat_unit=16)],
     ],
 )
-def test_time_signature_controller_parse(string, expected):
-    assert TimeSignatureController.parse(string) == expected
+def test_time_signature_parser(string, expected):
+    assert parsers.time_signature.parse(string) == expected

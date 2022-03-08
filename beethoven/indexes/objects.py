@@ -74,10 +74,10 @@ class ChordIndex:
         self.reverse_directory = {}
 
         for intervals, *names in chord_mappings:
-            name_container = list(names)
+            formatted_names = [name.replace(" ", "_") for name in names]
 
-            for name in names:
-                self.directory[name] = (name_container, intervals)
+            for name in formatted_names:
+                self.directory[name] = (formatted_names, intervals)
 
             self.reverse_directory[intervals] = names[0]
 
@@ -103,10 +103,10 @@ class ScaleIndex:
         self.modes_directory = {}
 
         for intervals, mode, *names in scale_mappings:
-            name_container = list(names)
+            formatted_names = [name.replace(" ", "_") for name in names]
 
-            for name in names:
-                self.directory[name] = (name_container, intervals)
+            for name in formatted_names:
+                self.directory[name] = (formatted_names, intervals)
 
             if mode:
                 if not self.modes_directory.get(mode):

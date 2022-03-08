@@ -27,19 +27,21 @@ from tests.fixtures.scales import c_major
             ),
         ],
         [
-            "B_sus4",
+            "B_min_maj7",
             Chord(
                 root=Note(name="B"),
-                name="sus4",
+                name="min_maj7",
                 notes=[
                     Note(name="B"),
-                    Note(name="E"),
+                    Note(name="D"),
                     Note(name="F", alteration=1),
+                    Note(name="A", alteration=1),
                 ],
                 intervals=[
                     Interval(name="1"),
-                    Interval(name="4"),
+                    Interval(name="3", alteration=-1),
                     Interval(name="5"),
+                    Interval(name="7"),
                 ],
             ),
         ],

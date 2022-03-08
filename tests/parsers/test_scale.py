@@ -33,10 +33,10 @@ from beethoven.models import Interval, Note, Scale
             ),
         ],
         [
-            "B_pentatonic",
+            "B_pentatonic_minor",
             Scale(
                 tonic=Note(name="B"),
-                name="pentatonic",
+                name="pentatonic_minor",
                 notes=[
                     Note(name="B"),
                     Note(name="D"),

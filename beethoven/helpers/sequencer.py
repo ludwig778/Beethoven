@@ -1,12 +1,34 @@
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from beethoven.helpers.midi import get_on_off_messages
-
-# from beethoven.sequencer.players.base import BasePlayer, PercussionPlayer
+from beethoven.models.duration import Duration
 from beethoven.types import Player
 
 NoteGenerator = Generator[Tuple[str, Any], None, None]
 NoteGenerators = Dict[Any, NoteGenerator]
+
+
+def note_repeater(cycle: Duration, messages, offset: Optional[Duration] = None):
+    timeline = offset or Duration(value=0)
+
+    while 1:
+        for message in messages:
+            yield timeline, message
+
+        timeline += cycle
+
+
+def note_sequencer(step: Duration, messages, round_robin: str):
+    timeline = Duration(value=0)
+    i = 0
+
+    while 1:
+        if round_robin[i % len(round_robin)] == "+":
+            for message in messages:
+                yield timeline, message
+
+        timeline += step
+        i += 1
 
 
 def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:

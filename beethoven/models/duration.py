@@ -18,6 +18,9 @@ class Duration(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+    def __hash__(self):
+        return hash(self.value)
+
     def __add__(self, other: object) -> Duration:
         if not isinstance(other, Duration):
             return NotImplemented
@@ -32,3 +35,18 @@ class Duration(BaseModel):
             return NotImplemented
 
         return self.value > other.value
+
+    def __ge__(self, other: object) -> bool:
+        return self.value == other.value or self.value > other.value
+
+    def __mul__(self, other: object) -> Duration:
+        return Duration(value=self.value * other)
+
+    def __sub__(self, other: object) -> Duration:
+        return Duration(value=self.value - other.value)
+
+    def __mod__(self, other) -> Duration:
+        return Duration(value=self.value % other.value)
+
+    def __floordiv__(self, other) -> Duration:
+        return Duration(value=self.value // other.value)

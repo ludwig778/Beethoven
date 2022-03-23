@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fractions import Fraction
+from typing import Union
 
 from pydantic import BaseModel, validator
 
@@ -37,16 +38,28 @@ class Duration(BaseModel):
         return self.value > other.value
 
     def __ge__(self, other: object) -> bool:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
         return self.value == other.value or self.value > other.value
 
-    def __mul__(self, other: object) -> Duration:
+    def __mul__(self, other: Union[Fraction, int]) -> Duration:
         return Duration(value=self.value * other)
 
     def __sub__(self, other: object) -> Duration:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
         return Duration(value=self.value - other.value)
 
-    def __mod__(self, other) -> Duration:
+    def __mod__(self, other: object) -> Duration:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
         return Duration(value=self.value % other.value)
 
-    def __floordiv__(self, other) -> Duration:
+    def __floordiv__(self, other: object) -> Duration:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
         return Duration(value=self.value // other.value)

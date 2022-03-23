@@ -16,6 +16,9 @@ def mock_open_midi_output(monkeypatch):
         def __init__(self, name, **kwargs):
             self.name = name
 
+        def closed(self):
+            return False
+
         close = void
 
     monkeypatch.setattr("beethoven.adapters.midi.Output", MockedOutput)

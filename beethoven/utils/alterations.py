@@ -8,18 +8,23 @@ def get_note_alteration_int_from_str(alteration: str) -> int:
         return alteration.count("#")
     elif "b" in alteration:
         return -alteration.count("b")
-    if "a" in alteration:
-        return alteration.count("a")
-    elif "d" in alteration:
-        return -alteration.count("d")
 
     raise ValueError(f"Error on getting note alteration int from str: {alteration}")
+
+
+def get_note_alteration_str_from_int(alteration: int) -> str:
+    if alteration > 0:
+        return "#" * alteration
+    elif alteration < 0:
+        return "b" * abs(alteration)
+    else:
+        return ""
 
 
 def get_interval_alteration_int_from_str(alteration: str, interval: int) -> int:
     if alteration in ("", "M"):
         return 0
-    if "m" == alteration:
+    elif "m" == alteration:
         return -1
     elif "a" in alteration:
         return alteration.count("a")
@@ -60,9 +65,20 @@ def get_interval_alteration_str_from_int(alteration: int, interval: int) -> str:
 def get_degree_alteration_int_from_str(alteration: str) -> int:
     if alteration == "":
         return 0
-    if "#" in alteration:
+    elif "#" in alteration:
         return alteration.count("#")
     elif "b" in alteration:
         return -alteration.count("b")
 
     raise ValueError(f"Error on getting degree alteration int from str: {alteration}")
+
+
+def get_degree_alteration_str_from_int(alteration: int) -> str:
+    if not alteration:
+        return ""
+    elif alteration > 0:
+        return alteration * "#"
+    elif alteration < 0:
+        return abs(alteration) * "b"
+
+    raise ValueError(f"Error on getting degree alteration str from int: {alteration}")

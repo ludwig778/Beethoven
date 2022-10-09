@@ -19,15 +19,16 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8, <3.10"
 mido = "^1.2.9"
-prompt-toolkit = "^3.0.18"
 colored = "^1.4.2"
 python-rtmidi = "^1.4.9"
 pymongo = "^3.11.4"
 dnspython = "^2.1.0"
 pydantic = "^1.9.0"
-hartware-lib = "^0.2.6"
+PySide6 = "^6.2.4"
+prompt-toolkit = "3.0.18"
+hartware-lib = "0.3.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"
@@ -36,7 +37,7 @@ pytest-cov = "^2.11.1"
 isort = "^5.8.0"
 pytest-env = "^0.6.2"
 mypy = "^0.910"
-black = "^21.9b0"
+black = "^22.3.0"
 pytest-mock = "^3.7.0"
 piprot = "^0.9.11"
 

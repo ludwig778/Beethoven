@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
-from mido import Message, MetaMessage, open_output
-from mido.backends.rtmidi import Output
+from mido import Message, MetaMessage, get_input_names, open_input, open_output
+from mido.backends.rtmidi import Input, Output
 from pydantic import BaseModel
 
 
@@ -34,12 +34,14 @@ class MidiMetaMessage(BaseModel):
 
 
 MidiMessageType = Union[MidiMessage, MidiMetaMessage]
-outputs: Dict[str, Output] = {}
+Inputs = Dict[str, Input]
+Outputs = Dict[str, Output]
 
 
 class MidiAdapter:
     def __init__(self) -> None:
-        self.outputs = outputs
+        self.inputs: Inputs = {}
+        self.outputs: Outputs = {}
 
     def open_output(self, name: str) -> Output:
         output = self.outputs.get(name)
@@ -50,11 +52,30 @@ class MidiAdapter:
 
         return output
 
+    @property
+    def available_inputs(self):
+        return get_input_names()
+
+    def open_input(self, name: str) -> Input:
+        input = self.inputs.get(name)
+
+        if not input and name in self.available_inputs:
+            input = open_input(name)
+            self.inputs[name] = input
+
+        return input
+
     def close_output(self, name: str) -> None:
         if name in self.outputs:
             self.outputs[name].close()
 
             del self.outputs[name]
+
+    def close_input(self, name: str) -> None:
+        if name in self.inputs:
+            self.inputs[name].close()
+
+            del self.inputs[name]
 
     def close_all_outputs(self) -> None:
         for name in list(self.outputs):
@@ -65,6 +86,10 @@ class MidiAdapter:
             message.output._send(message.to_mido())
         else:
             message.output.send(message.to_mido())
+
+    def reset(self) -> None:
+        for output in self.outputs.values():
+            output.reset()
 
     def shutdown(self) -> None:
         for output in self.outputs.values():

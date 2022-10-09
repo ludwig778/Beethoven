@@ -1,4 +1,4 @@
-from typing import List, Protocol, runtime_checkable
+from typing import List, Protocol
 
 from beethoven.models import GridPart
 
@@ -8,16 +8,13 @@ class NotesContainer(Protocol):
     def notes(self):
         ...
 
-
-@runtime_checkable
-class Player(Protocol):
-    time_signature_bound: bool
-
-    def setup(self, grid_part: GridPart):
-        ...
-
-    def play(self):
-        ...
+    def __hash__(self):
+        return hash(
+            ":".join([
+                str(hash(note))
+                for note in self.notes
+            ])
+        )
 
 
 GridParts = List[GridPart]

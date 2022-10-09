@@ -1,5 +1,5 @@
 from beethoven.models import TimeSignature
-from beethoven.utils.parser import parse_model_string
+from beethoven.parsers.parser import parse_model_string
 
 
 def parse(string: str) -> TimeSignature:

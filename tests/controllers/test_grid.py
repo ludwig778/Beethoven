@@ -2,7 +2,7 @@ from fractions import Fraction
 
 from pytest import mark
 
-from beethoven import parsers
+from beethoven import controllers
 from beethoven.constants.duration import whole_value
 from beethoven.helpers.model import update_model
 from beethoven.models import Bpm, Degree, Duration, Grid, GridPart, TimeSignature
@@ -13,7 +13,10 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
 @mark.parametrize(
     "string,expected",
     [
-        ["", Grid()],
+        [
+            "",
+            Grid()
+        ],
         [
             "bpm=90 ts=3/4 p=C4",
             Grid(
@@ -25,7 +28,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         chord=c4_maj,
                         duration=None,
                     )
-                ]
+                ],
             ),
         ],
         [
@@ -53,7 +56,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         chord=update_model(c_maj7, degree=Degree(name="I")),
                         duration=None,
                     ),
-                ]
+                ],
             ),
         ],
         [
@@ -81,7 +84,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         chord=update_model(c_maj7, degree=Degree(name="I")),
                         duration=Duration(value=whole_value),
                     ),
-                ]
+                ],
             ),
         ],
         [
@@ -102,7 +105,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         chord=update_model(e_min7, degree=Degree(name="II")),
                         duration=None,
                     ),
-                ]
+                ],
             ),
         ],
         [
@@ -137,10 +140,10 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         chord=update_model(g_7, degree=Degree(name="V")),
                         duration=None,
                     ),
-                ]
+                ],
             ),
         ],
     ],
 )
 def test_grid_parser(string, expected):
-    assert parsers.grid.parse(string) == expected
+    assert controllers.grid.parse(string) == expected

@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven import parsers
+from beethoven import controllers
 from beethoven.models import Interval, Note, Scale
 
 
@@ -36,7 +36,7 @@ from beethoven.models import Interval, Note, Scale
             "B_pentatonic_minor",
             Scale(
                 tonic=Note(name="B"),
-                name="pentatonic_minor",
+                name="pentatonic minor",
                 notes=[
                     Note(name="B"),
                     Note(name="D"),
@@ -81,4 +81,4 @@ from beethoven.models import Interval, Note, Scale
     ],
 )
 def test_scale_parser(string, expected):
-    assert parsers.scale.parse(string) == expected
+    assert controllers.scale.parse(string) == expected

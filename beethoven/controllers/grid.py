@@ -1,11 +1,11 @@
+from beethoven.controllers.bpm import construct as bpm_construct
+from beethoven.controllers.chord import construct as chord_construct
+from beethoven.controllers.duration import construct as duration_construct
+from beethoven.controllers.scale import construct as scale_construct
+from beethoven.controllers.scale import parse as scale_parser
+from beethoven.controllers.time_signature import construct as time_signature_construct
 from beethoven.models import Bpm, Grid, GridPart, TimeSignature
-from beethoven.parsers.bpm import construct as bpm_construct
-from beethoven.parsers.chord import construct as chord_construct
-from beethoven.parsers.duration import construct as duration_construct
-from beethoven.parsers.scale import construct as scale_construct
-from beethoven.parsers.scale import parse as scale_parser
-from beethoven.parsers.time_signature import construct as time_signature_construct
-from beethoven.utils.parser import parse_model_string
+from beethoven.parsers.parser import parse_model_string
 
 DEFAULT_BPM = Bpm(value=120)
 DEFAULT_TIME_SIGNATURE = TimeSignature(beats_per_bar=4, beat_unit=4)

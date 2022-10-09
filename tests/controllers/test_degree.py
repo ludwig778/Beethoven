@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven import parsers
+from beethoven import controllers
 from beethoven.models import Degree
 
 
@@ -17,4 +17,4 @@ from beethoven.models import Degree
     ],
 )
 def test_degree_parser(string, expected):
-    assert parsers.degree.parse(string) == expected
+    assert controllers.degree.parse(string) == expected

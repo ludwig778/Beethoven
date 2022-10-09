@@ -1,8 +1,8 @@
 from typing import List
 
 from beethoven.models import Interval
+from beethoven.parsers.parser import parse_model_string
 from beethoven.utils.alterations import get_interval_alteration_int_from_str
-from beethoven.utils.parser import parse_model_string
 
 
 def parse(interval_string: str) -> Interval:

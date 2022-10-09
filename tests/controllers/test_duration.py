@@ -2,7 +2,7 @@ from fractions import Fraction
 
 from pytest import mark
 
-from beethoven import parsers
+from beethoven import controllers
 from beethoven.models import Duration
 
 
@@ -24,4 +24,4 @@ from beethoven.models import Duration
     ],
 )
 def test_duration_parser(string, expected):
-    assert parsers.duration.parse(string) == expected
+    assert controllers.duration.parse(string) == expected

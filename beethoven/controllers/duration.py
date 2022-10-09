@@ -2,7 +2,7 @@ from fractions import Fraction
 
 from beethoven.constants.duration import durations
 from beethoven.models import Duration
-from beethoven.utils.parser import parse_model_string
+from beethoven.parsers.parser import parse_model_string
 
 
 def parse(string: str) -> Duration:

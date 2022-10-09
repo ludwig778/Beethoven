@@ -1,6 +1,6 @@
 from pytest import mark
 
-from beethoven import parsers
+from beethoven import controllers
 from beethoven.models import TimeSignature
 
 
@@ -14,4 +14,4 @@ from beethoven.models import TimeSignature
     ],
 )
 def test_time_signature_parser(string, expected):
-    assert parsers.time_signature.parse(string) == expected
+    assert controllers.time_signature.parse(string) == expected

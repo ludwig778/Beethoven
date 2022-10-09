@@ -1,6 +1,10 @@
 from typing import Optional
 
 from beethoven.constants.interval import octave
+from beethoven.controllers.degree import construct as degree_construct
+from beethoven.controllers.interval import construct as interval_construct
+from beethoven.controllers.interval import parse_list as interval_list_parser
+from beethoven.controllers.note import construct as note_construct
 from beethoven.helpers.degree import get_interval_from_degree
 from beethoven.helpers.note import add_interval_to_note
 from beethoven.helpers.scale import (
@@ -9,11 +13,7 @@ from beethoven.helpers.scale import (
 )
 from beethoven.indexes import chord_index
 from beethoven.models import Chord, Scale
-from beethoven.parsers.degree import construct as degree_construct
-from beethoven.parsers.interval import construct as interval_construct
-from beethoven.parsers.interval import parse_list as interval_list_parser
-from beethoven.parsers.note import construct as note_construct
-from beethoven.utils.parser import parse_model_string
+from beethoven.parsers.parser import parse_model_string
 
 
 def parse(string: str) -> Chord:
@@ -29,7 +29,9 @@ def parse_with_scale_context(string: str, scale: Scale) -> Chord:
 
 
 def construct(parsed: dict, scale: Optional[Scale] = None) -> Chord:
-    name = parsed.get("name")
+    if name := parsed.get("name"):
+        name = name.replace("_", " ")
+
     root = degree = base_degree = None
 
     if parsed_root := parsed.get("root"):

@@ -11,7 +11,6 @@ from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.chord_picker import ChordPicker
 from beethoven.ui.components.combobox import NoteComboBox, ScaleComboBox
 from beethoven.ui.components.harmony_grid import HarmonyGrid
-from beethoven.ui.constants import INITIAL_GRID_PART
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.models import HarmonyItems
@@ -184,11 +183,12 @@ class App(QWidget):
         harmony_item, chord_item = self.harmony_grid.get_current_item()
 
         grid = Grid(
-            initial_state=INITIAL_GRID_PART,
             parts=[
                 GridPart(
                     scale=harmony_item.scale,
                     chord=chord_item.as_chord(scale=harmony_item.scale),
+                    bpm=controllers.bpm.parse("90"),
+                    time_signature=controllers.time_signature.parse("4/4"),
                     duration=controllers.duration.parse("4W"),
                 )
             ],
@@ -222,7 +222,6 @@ class App(QWidget):
 
 
 def main():
-    logger.info("lmaooooo")
     app = QApplication([])
     app.setStyleSheet(get_stylesheet())
 
@@ -243,10 +242,11 @@ def main():
         ]
     )
     atexit.register(manager.midi.terminate_threads)
-    w = App(manager=manager, harmony_items=harmony_items)
+    window = App(manager=manager, harmony_items=harmony_items)
+    window.setWindowTitle("Beethoven")
 
     # set_size_policies([w], QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
-    w.show()
+    window.show()
     app.exec()
 
 

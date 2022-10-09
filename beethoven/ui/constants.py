@@ -1,6 +1,5 @@
 from beethoven import controllers
 from beethoven.indexes import chord_index, scale_index
-from beethoven.models.grid_part import GridPart
 
 DEFAULT_MIDI_INPUT = ""
 DEFAULT_MIDI_OUTPUT = ""
@@ -44,9 +43,3 @@ SCALE_LABELS = [
     "pentatonic",
     "alternative",
 ]
-
-INITIAL_GRID_PART = GridPart(
-    bpm=controllers.bpm.parse("90"),
-    time_signature=controllers.time_signature.parse("4/4"),
-    duration=controllers.duration.parse("4"),
-)

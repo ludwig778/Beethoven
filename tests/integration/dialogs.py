@@ -13,7 +13,6 @@ from beethoven.ui.main_window import ComposeWidget, MainWindow
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 
 from beethoven.ui.managers import AppManager
-from beethoven.ui.models import HarmonyItems
 from beethoven.ui.utils import get_default_harmony_item
 
 
@@ -77,15 +76,16 @@ def test_dialogs(application):
         "compose_widget": partial(
             ComposeWidget,
             manager=manager,
-            harmony_items=HarmonyItems(items=[default_harmony_item]),
         ),
         "main_window": partial(
             MainWindow,
             manager=manager,
         )
     }
+    BYPASS = False
+
     for name, widget_partial in widget_partials.items():
-        if name not in ("main_window"):
+        if BYPASS and name not in ("compose_widget", "main_window"):
             continue
 
         widget = widget_partial()

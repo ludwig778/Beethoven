@@ -27,7 +27,6 @@ from beethoven.ui.components.selectors import (
     MultipleChordSelector,
     MultipleNoteSelector,
 )
-from beethoven.ui.constants import INITIAL_GRID_PART
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.models import HarmonyItems
@@ -50,7 +49,6 @@ class Widget(QWidget):
 
 
 class ComposeWidget(QWidget):
-    # def __init__(self, *args, manager: AppManager, harmony_items: HarmonyItems, **kwargs):
     def __init__(self, *args, manager: AppManager, **kwargs):
         super(ComposeWidget, self).__init__(*args, **kwargs)
 
@@ -116,7 +114,6 @@ class ComposeWidget(QWidget):
         harmony_item, chord_item = self.harmony_grid.get_current_item()
 
         grid = Grid(
-            initial_state=INITIAL_GRID_PART,
             parts=[
                 GridPart(
                     scale=harmony_item.scale,

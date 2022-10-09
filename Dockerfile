@@ -16,12 +16,12 @@ RUN apt update && \
         libsqlite3-dev \
         libssl-dev \
         make && \
-    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-ENV PATH=$PATH:/root/.poetry/bin/
+ENV PATH=$PATH:/root/.local/bin/
 
 COPY pyproject.toml poetry.lock ./
 

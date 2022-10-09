@@ -4,7 +4,8 @@ from hartware_lib.adapters.directory import DirectoryAdapter
 from mido.backends.rtmidi import Output
 from pytest import fixture
 
-from beethoven.adapters import get_adapters
+from beethoven.adapters.factory import get_adapters
+from beethoven.adapters.local_file import LocalFileAdapter
 
 
 @fixture(scope="function", autouse=True)
@@ -28,11 +29,16 @@ def mock_open_midi_output(monkeypatch):
 @fixture(scope="function", autouse=True)
 def clean_test_directory_():
     test_directory = DirectoryAdapter(dir_path=Path(".testing"))
-    test_directory.create()
+    test_directory.create_dir()
 
     yield
 
-    test_directory.delete()
+    test_directory.delete_dir()
+
+
+@fixture(scope="session")
+def local_file_adapter():
+    return LocalFileAdapter(dir_path=Path("tests", "fixtures", "data"))
 
 
 @fixture

@@ -2,7 +2,10 @@ ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 TEST_ARGS= -vvss
 
-default: prompt
+default: ui
+
+ui:
+	poetry run python3 -m beethoven.ui
 
 prompt:
 	poetry run python3 beethoven/prompt/main.py
@@ -32,7 +35,7 @@ format: isort black
 sure: tests lint mypy piprot
 
 debug:
-	while :; do inotifywait -e modify -r .;clear;make tests;sleep .1 ;done
+	while :; do inotifywait -e modify -r .;clear;make ${ARGS};sleep .1 ;done
 
 tests:
 	pytest ${TEST_ARGS}

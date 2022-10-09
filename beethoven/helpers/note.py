@@ -1,3 +1,6 @@
+from copy import deepcopy
+from typing import List
+
 from beethoven.indexes import interval_index, note_index
 from beethoven.models import Interval, Note
 
@@ -65,3 +68,14 @@ def get_notes_interval(note1: Note, note2: Note) -> Interval:
     alteration = semitones_diff - semitones - note1.alteration + note2.alteration
 
     return Interval(name=name, alteration=alteration)
+
+
+def remove_note_octave(note: Note) -> Note:
+    note = deepcopy(note)
+    note.octave = None
+
+    return note
+
+
+def remove_notes_octave(notes: List[Note]) -> List[Note]:
+    return [remove_note_octave(note) for note in notes]

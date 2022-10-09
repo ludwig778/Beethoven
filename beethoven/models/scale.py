@@ -16,6 +16,9 @@ class Scale(BaseModel):
     notes: List[Note] = Field(default_factory=list)
     intervals: List[Interval] = Field(default_factory=list)
 
+    def __str__(self):
+        return f"{self.tonic} {self.name}"
+
     @validator("name")
     def name_must_be_valid(cls, name):
         if scale_index.is_valid(name):

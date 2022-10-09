@@ -24,6 +24,14 @@ class Chord(BaseModel):
     degree: Optional[Degree] = Field(default=None, repr=False)
     base_degree: Optional[Degree] = Field(default=None, repr=False)
 
+    def __hash__(self):
+        return hash(
+            f"{self.root}_{self.name}" f":notes={[str(note) for note in self.notes]}"
+        )
+
+    def __str__(self):
+        return f"{self.degree or self.root} {self.name}"
+
     @validator("name")
     def name_must_be_valid(cls, name):
         if chord_index.is_valid(name):

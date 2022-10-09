@@ -1,16 +1,23 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
 from beethoven.indexes import note_index
+from beethoven.utils.alterations import get_note_alteration_str_from_int
 
 
 class Note(BaseModel):
     name: str
     alteration: int = 0
     octave: Optional[int] = None
+
+    def __hash__(self):
+        return hash(self.name + str(self.alteration) + str(self.octave))
+
+    def __str__(self):
+        return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave or ''}"
 
     @validator("name")
     def name_must_be_valid(cls, name):
@@ -35,11 +42,10 @@ class Note(BaseModel):
 
     @property
     def midi_index(self) -> int:
-        return (
-            note_index.get_semitones(self.name)
-            + self.alteration
-            + (self.octave or 0) * 12
-        )
+        if not self.octave:
+            return (note_index.get_semitones(self.name) + self.alteration) % 12
+
+        return note_index.get_semitones(self.name) + self.alteration + self.octave * 12
 
     # TODO: move to utils, setup a customized exception
     def check_octave_states(self, other: Note) -> None:
@@ -70,3 +76,11 @@ class Note(BaseModel):
         self.check_octave_states(other)
 
         return self.midi_index >= other.midi_index
+
+
+class Notes(BaseModel):
+    notes: List[Note]
+    label: Optional[str]
+
+    def __hash__(self):
+        return hash("_".join(map(str, self.notes)))

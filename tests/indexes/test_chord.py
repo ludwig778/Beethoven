@@ -8,7 +8,7 @@ def test_chord_index_is_valid():
 
 
 def test_chord_index_get_names():
-    assert chord_index.get_names("power") == ["power", "power_chord", "add5"]
+    assert chord_index.get_names("power") == ["power", "power chord", "add5"]
 
 
 def test_chord_index_get_intervals():

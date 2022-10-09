@@ -8,7 +8,7 @@ def test_scale_index_is_valid():
 
 
 def test_scale_index_get_names():
-    assert scale_index.get_names("pentatonic") == ["pentatonic_minor", "pentatonic"]
+    assert scale_index.get_names("pentatonic") == ["pentatonic minor", "pentatonic"]
 
 
 def test_scale_index_get_intervals():

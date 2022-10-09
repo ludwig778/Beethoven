@@ -2,7 +2,7 @@ from dataclasses import replace
 from itertools import product
 from typing import List
 
-from beethoven.objects import Note, Scale
+from beethoven.models import Note, Scale
 
 
 def get_scale_notes_within_range(
@@ -17,10 +17,10 @@ def get_scale_notes_within_range(
         range(low_range.octave - 1, high_range.octave + 1), scale.notes
     ):
         note = replace(note, octave=octave)
-        notes_by_index[note.index] = note
+        notes_by_index[note.midi_index] = note
 
-    low_range_index = low_range.index
-    high_range_index = high_range.index
+    low_range_index = low_range.midi_index
+    high_range_index = high_range.midi_index
 
     notes = [
         note

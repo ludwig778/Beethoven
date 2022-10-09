@@ -29,5 +29,5 @@ def test_grid_model():
                 time_signature=TimeSignature(beats_per_bar=5, beat_unit=8),
                 duration=Duration(value=Fraction(3, 2)),
             ),
-        ]
+        ],
     )

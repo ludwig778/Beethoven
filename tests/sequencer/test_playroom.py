@@ -73,30 +73,29 @@ def test_playroom(adapters, monkeypatch):
                 chord=c4_maj,
                 bpm=bpm,
                 time_signature=time_signatures[0],
-                duration=None,
             ),
             GridPart(
                 scale=a_minor,
                 chord=e_min7,
                 bpm=bpm,
                 time_signature=time_signatures[1],
-                duration=None,
             ),
             GridPart(
                 scale=a_minor,
                 chord=c_maj7,
                 bpm=bpm,
                 time_signature=time_signatures[2],
-                duration=None,
             ),
-        ]
+        ],
     )
     players = [
-        Piano(output=adapters.midi.open_output("Chords"), channel=1),
-        Metronome(output=adapters.midi.open_output("Percussion"), channel=2),
+        Piano().setup_midi(output=adapters.midi.open_output("Chords"), channel=1),
+        Metronome().setup_midi(
+            output=adapters.midi.open_output("Percussion"), channel=2
+        ),
     ]
 
-    play_grid(adapters, players, grid)
+    play_grid(adapters.midi, players, grid)
 
     assert sleep_call_params == [
         0.375,

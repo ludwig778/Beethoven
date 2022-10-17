@@ -8,7 +8,7 @@ from beethoven import controllers
 from beethoven.adapters.midi import MidiAdapter
 from beethoven.sequencer.players.base import BasePlayer
 from beethoven.sequencer.players.registry import RegisteredPlayer
-from beethoven.ui.models import ChordItem, HarmonyItem
+from beethoven.ui.models import ChordItem, HarmonyItem, HarmonyItems
 from beethoven.ui.settings import PlayerSetting
 
 
@@ -82,4 +82,15 @@ def get_default_harmony_item() -> HarmonyItem:
     return HarmonyItem(
         scale=controllers.scale.parse("C4_major"),
         chord_items=[get_default_chord_item()],
+    )
+
+
+def get_default_harmony_items() -> HarmonyItems:
+    return HarmonyItems(
+        items=[
+            HarmonyItem(
+                scale=controllers.scale.parse("C4_major"),
+                chord_items=[get_default_chord_item()],
+            )
+        ]
     )

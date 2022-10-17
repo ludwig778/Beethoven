@@ -1,7 +1,7 @@
 from typing import Sequence, Union
 
 from pydantic import BaseModel
-from PySide6.QtWidgets import QHBoxLayout, QLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QVBoxLayout, QWidget, QStackedLayout
 
 
 class Stretch(BaseModel):
@@ -51,6 +51,14 @@ def horizontal_layout(layout_items: Sequence[LayoutItem], **kwargs):
 def vertical_layout(layout_items: Sequence[LayoutItem], **kwargs):
     return layout_widget_factory(
         QVBoxLayout(),
+        layout_items,
+        **kwargs,
+    )
+
+
+def stacked_layout(layout_items: Sequence[QWidget], **kwargs):
+    return layout_widget_factory(
+        QStackedLayout(),
         layout_items,
         **kwargs,
     )

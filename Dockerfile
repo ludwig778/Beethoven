@@ -11,10 +11,16 @@ RUN apt update && \
         inotify-tools \
         libasound-dev \
         libbz2-dev \
+	libdbus-1-3 \
+	libegl1 \
         libffi-dev \
+	libfontconfig1 \
+	libglib2.0-0 \
+	libgl1 \
         libreadline-dev \
         libsqlite3-dev \
         libssl-dev \
+	libxkbcommon0 \
         make && \
     curl -sSL https://install.python-poetry.org | python3 - && \
     rm -rf /var/lib/apt/lists/*

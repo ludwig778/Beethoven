@@ -12,6 +12,8 @@ services:
       - BEETHOVEN_MONGODB_HOST=mongodb
       - BEETHOVEN_MONGODB_USERNAME=user
       - BEETHOVEN_MONGODB_PASSWORD=password123
+      - QT_QPA_PLATFORM=offscreen
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
     depends_on:
       - mongodb
 

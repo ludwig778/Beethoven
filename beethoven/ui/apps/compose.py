@@ -11,26 +11,20 @@ from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.models import HarmonyItems
+from beethoven.ui.utils import get_default_harmony_items
 
 
 class ComposeWidget(QWidget):
-    def __init__(self, *args, manager: AppManager, **kwargs):
+    def __init__(
+        self,
+        *args,
+        manager: AppManager,
+        harmony_items: HarmonyItems = get_default_harmony_items(),
+        **kwargs
+    ):
         super(ComposeWidget, self).__init__(*args, **kwargs)
 
         self.manager = manager
-
-        harmony_items = HarmonyItems.from_list([
-            {
-                "scale": "C4_ionian",
-                "chord_items": [
-                    {"root": "I", "name": ""},
-                    # {"root": "III", "name": "maj7"},
-                    # {"root": "A", "name": ""},
-                    # {"root": "D", "name": ""},
-                    # {"root": "E", "name": ""},
-                ]
-            },
-        ])
 
         self.harmony_grid = HarmonyGrid(
             manager=manager,
@@ -83,6 +77,8 @@ class ComposeWidget(QWidget):
                 GridPart(
                     scale=harmony_item.scale,
                     chord=chord_item.as_chord(scale=harmony_item.scale),
+                    bpm=controllers.bpm.parse("90"),
+                    time_signature=controllers.time_signature.parse("4/4"),
                     duration=controllers.duration.parse("4W")
                 )
             ]

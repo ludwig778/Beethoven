@@ -1,7 +1,7 @@
 from random import shuffle
 from typing import List, Protocol
 
-from PySide6.QtWidgets import QWidget, QComboBox, QStackedLayout
+from PySide6.QtWidgets import QComboBox, QStackedLayout, QWidget
 
 from beethoven.helpers.chord import chord_product
 from beethoven.helpers.scale import scale_product
@@ -10,7 +10,11 @@ from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiInputComboBox
 from beethoven.ui.components.frame import FramedChord, FramedNotes, FramedScale
-from beethoven.ui.components.selectors import ExclusiveScaleSelector, MultipleChordSelector, MultipleNoteSelector
+from beethoven.ui.components.selectors import (
+    ExclusiveScaleSelector,
+    MultipleChordSelector,
+    MultipleNoteSelector,
+)
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
@@ -279,12 +283,14 @@ class TrainingWindow(QWidget):
         self.combobox.currentTextChanged.connect(self.update_training)
 
         self.setLayout(
-            vertical_layout([
-                self.input_combobox,
-                self.combobox,
-                self.training_layout,
-                # Stretch()
-            ])
+            vertical_layout(
+                [
+                    self.input_combobox,
+                    self.combobox,
+                    self.training_layout,
+                    # Stretch()
+                ]
+            )
         )
 
     def notes_changed(self, notes):

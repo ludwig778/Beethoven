@@ -51,7 +51,9 @@ def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:
             del values[key]
 
 
-def split_player_by_types(players: List[BasePlayer]) -> Tuple[List[BasePlayer], List[BasePlayer]]:
+def split_player_by_types(
+    players: List[BasePlayer],
+) -> Tuple[List[BasePlayer], List[BasePlayer]]:
     regular = []
     time_signature_bound = []
 

@@ -1,5 +1,3 @@
-
-
 from beethoven.ui.components.selectors.exclusive.base import ExclusiveSelector
 from beethoven.ui.constants import (
     NOTE_LABELS,

@@ -1,7 +1,7 @@
 from typing import Sequence, Union
 
 from pydantic import BaseModel
-from PySide6.QtWidgets import QHBoxLayout, QLayout, QVBoxLayout, QWidget, QStackedLayout
+from PySide6.QtWidgets import QHBoxLayout, QLayout, QStackedLayout, QVBoxLayout, QWidget
 
 
 class Stretch(BaseModel):

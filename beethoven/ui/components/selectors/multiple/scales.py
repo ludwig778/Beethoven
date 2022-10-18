@@ -1,9 +1,5 @@
 from beethoven.ui.components.selectors.multiple.base import MultipleSelector
-from beethoven.ui.constants import (
-    SCALE_LABELS,
-    SCALES_DATA,
-    SELECTED_SCALE_LABELS,
-)
+from beethoven.ui.constants import SCALE_LABELS, SCALES_DATA, SELECTED_SCALE_LABELS
 
 
 class MultipleScaleSelector(MultipleSelector):

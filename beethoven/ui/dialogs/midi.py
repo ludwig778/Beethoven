@@ -2,15 +2,15 @@ from logging import getLogger
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QWidget
-from beethoven.ui.components.combobox.midi_input import MidiInputComboBox
-from beethoven.ui.dialogs.midi_add import MidiAddDialog
 
-from beethoven.ui.utils import block_signal
 from beethoven.ui.components.buttons import Button
+from beethoven.ui.components.combobox.midi_input import MidiInputComboBox
 from beethoven.ui.components.selectors import MidiOutputSelector
 from beethoven.ui.constants import DEFAULT_MIDI_INPUT
+from beethoven.ui.dialogs.midi_add import MidiAddDialog
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
+from beethoven.ui.utils import block_signal
 
 logger = getLogger("dialog.midi")
 
@@ -23,7 +23,9 @@ class MidiDialog(QWidget):
 
         self.manager = manager
 
-        self.input_combobox = MidiInputComboBox(manager=manager, value=self.manager.settings.midi.selected_input)
+        self.input_combobox = MidiInputComboBox(
+            manager=manager, value=self.manager.settings.midi.selected_input
+        )
         # self.setup_inputs()
 
         self.input_refresh_button = Button("Refresh")
@@ -40,20 +42,26 @@ class MidiDialog(QWidget):
         self.delete_output_button.clicked.connect(self.delete_output)
 
         self.setLayout(
-            vertical_layout([
-                QLabel("Midi Input"),
-                horizontal_layout([
-                    self.input_combobox,
-                    self.input_refresh_button,
-                ]),
-                QLabel("Midi Outputs"),
-                self.output_selector,
-                horizontal_layout([
-                    self.ok_button,
-                    self.add_output_button,
-                    self.delete_output_button,
-                ]),
-            ])
+            vertical_layout(
+                [
+                    QLabel("Midi Input"),
+                    horizontal_layout(
+                        [
+                            self.input_combobox,
+                            self.input_refresh_button,
+                        ]
+                    ),
+                    QLabel("Midi Outputs"),
+                    self.output_selector,
+                    horizontal_layout(
+                        [
+                            self.ok_button,
+                            self.add_output_button,
+                            self.delete_output_button,
+                        ]
+                    ),
+                ]
+            )
         )
 
     def setup_inputs(self):

@@ -1,7 +1,13 @@
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QListWidget, QWidget, QAbstractItemView, QListWidgetItem, QLabel
-from beethoven.ui.layouts import vertical_layout
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QWidget,
+)
 
+from beethoven.ui.layouts import vertical_layout
 from beethoven.ui.models import ChordItem, HarmonyItem, HarmonyItems
 
 
@@ -140,12 +146,7 @@ class HarmonyListWidgetItem(QWidget):
         self.scale_label.setAlignment(Qt.AlignCenter)  # type: ignore
         self.progression_label.setAlignment(Qt.AlignCenter)  # type: ignore
 
-        self.setLayout(
-            vertical_layout([
-                self.scale_label,
-                self.progression_label
-            ])
-        )
+        self.setLayout(vertical_layout([self.scale_label, self.progression_label]))
         self.update_labels()
 
     def update_labels(self):

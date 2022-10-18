@@ -1,16 +1,10 @@
 from logging import getLogger
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
-from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.combobox import TuningComboBox
+from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.spinbox import StringNumberSpinBox
 from beethoven.ui.dialogs.tuning_save import TuningSaveDialog
 from beethoven.ui.settings import TuningSettings
@@ -103,10 +97,15 @@ class TuningDialog(QWidget):
         self.update_delete_button_state()
 
     def update_delete_button_state(self):
-        is_default_tuning = self.tuning_selector.current_tuning_name not in self.tuning_settings.defaults
+        is_default_tuning = (
+            self.tuning_selector.current_tuning_name
+            not in self.tuning_settings.defaults
+        )
 
         if self.delete_button.isEnabled() != is_default_tuning:
-            logger.debug(f"update tuning delete button {'active' if is_default_tuning else 'inactive'}")
+            logger.debug(
+                f"update tuning delete button {'active' if is_default_tuning else 'inactive'}"
+            )
 
             return self.delete_button.setEnabled(is_default_tuning)
 

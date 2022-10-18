@@ -1,4 +1,5 @@
 from typing import Optional
+
 from PySide6.QtWidgets import QComboBox
 
 from beethoven.ui.constants import DEFAULT_MIDI_OUTPUT

@@ -1,6 +1,6 @@
 import json
-from logging import getLogger
 import logging
+from logging import getLogger
 from pathlib import Path
 
 from hartware_lib.adapters.file import FileAdapter

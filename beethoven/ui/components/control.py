@@ -1,5 +1,6 @@
-from logging import getLogger
 from enum import Enum, auto
+from logging import getLogger
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QPushButton, QWidget
 
@@ -21,21 +22,17 @@ class PlayerControlWidget(QWidget):
     play_grid_step = Signal()
     stop_grid = Signal()
 
-    def __init__(self, *args, harmony_items: HarmonyItems, playing_type: PlayingType, **kwargs):
+    def __init__(
+        self, *args, harmony_items: HarmonyItems, playing_type: PlayingType, **kwargs
+    ):
         super(PlayerControlWidget, self).__init__(*args, **kwargs)
 
         self.harmony_items = harmony_items
 
         self.step_player_button = PushPullButton(
-            pressed="Step",
-            released="Step",
-            state=playing_type == PlayingType.step
+            pressed="Step", released="Step", state=playing_type == PlayingType.step
         )
-        self.play_button = PushPullButton(
-            pressed="Play",
-            released="Play",
-            state=False
-        )
+        self.play_button = PushPullButton(pressed="Play", released="Play", state=False)
         self.stop_button = QPushButton("Stop")
 
         self.step_player_button.toggled.connect(self.step_play)
@@ -43,11 +40,13 @@ class PlayerControlWidget(QWidget):
         self.stop_button.clicked.connect(self.stop)
 
         self.setLayout(
-            horizontal_layout([
-                self.step_player_button,
-                self.play_button,
-                self.stop_button,
-            ])
+            horizontal_layout(
+                [
+                    self.step_player_button,
+                    self.play_button,
+                    self.stop_button,
+                ]
+            )
         )
 
     def step_play(self, state):

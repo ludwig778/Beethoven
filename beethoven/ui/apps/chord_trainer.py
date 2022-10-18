@@ -1,11 +1,6 @@
 from random import shuffle
 
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from beethoven.helpers.chord import chord_product
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
@@ -52,23 +47,31 @@ class ChordTrainerWidget(QWidget):
         self.stop_button.clicked.connect(self.stop)
 
         self.setLayout(
-            vertical_layout([
-                self.input_combobox,
-                horizontal_layout([
-                    self.chord_selector,
-                    self.note_selector,
-                ]),
-                horizontal_layout([
-                    self.playing_notes_frame,
-                    self.target_chord_frame,
-                ]),
-                Stretch(),
-                horizontal_layout([
+            vertical_layout(
+                [
+                    self.input_combobox,
+                    horizontal_layout(
+                        [
+                            self.chord_selector,
+                            self.note_selector,
+                        ]
+                    ),
+                    horizontal_layout(
+                        [
+                            self.playing_notes_frame,
+                            self.target_chord_frame,
+                        ]
+                    ),
                     Stretch(),
-                    self.start_button,
-                    self.stop_button,
-                ]),
-            ])
+                    horizontal_layout(
+                        [
+                            Stretch(),
+                            self.start_button,
+                            self.stop_button,
+                        ]
+                    ),
+                ]
+            )
         )
 
     def get_layout(self):

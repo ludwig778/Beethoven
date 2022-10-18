@@ -28,14 +28,13 @@ class MidiAddDialog(QDialog):
         self.cancel_button.clicked.connect(self.reject)
 
         self.setLayout(
-            vertical_layout([
-                self.text_label,
-                self.input_box,
-                horizontal_layout([
-                    self.ok_button,
-                    self.cancel_button
-                ]),
-            ])
+            vertical_layout(
+                [
+                    self.text_label,
+                    self.input_box,
+                    horizontal_layout([self.ok_button, self.cancel_button]),
+                ]
+            )
         )
 
     def on_text_change(self, output_name):

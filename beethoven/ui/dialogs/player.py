@@ -2,20 +2,15 @@ from logging import getLogger
 from typing import Optional
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import (
-    QComboBox,
-    QLabel,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QComboBox, QLabel, QVBoxLayout, QWidget
 
 from beethoven.sequencer.players.registry import RegisteredPlayer
-from beethoven.ui.utils import block_signal
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.settings import PlayerSetting
+from beethoven.ui.utils import block_signal
 
 logger = getLogger("dialog.players")
 
@@ -29,7 +24,7 @@ class PlayerRow(QWidget):
         manager: AppManager,
         settings: PlayerSetting,
         system_player: bool = False,
-        **kwargs
+        **kwargs,
     ):
         super(PlayerRow, self).__init__(*args, **kwargs)
 
@@ -50,7 +45,9 @@ class PlayerRow(QWidget):
         self.set_instrument_styles()
 
         self.instrument_combobox.currentTextChanged.connect(self.update_instrument_name)
-        self.instrument_style_combobox.currentTextChanged.connect(self.update_instrument_style)
+        self.instrument_style_combobox.currentTextChanged.connect(
+            self.update_instrument_style
+        )
         self.output_name_combobox.currentTextChanged.connect(self.setting_changed)
         self.channel_combobox.currentTextChanged.connect(self.setting_changed)
 
@@ -102,12 +99,19 @@ class PlayerRow(QWidget):
 
             return
 
-        player_style_names = list(RegisteredPlayer.get_instrument_styles(self.settings.instrument_name).keys())
+        player_style_names = list(
+            RegisteredPlayer.get_instrument_styles(self.settings.instrument_name).keys()
+        )
 
         self.instrument_style_combobox.addItems(player_style_names)
 
-        if (self.settings.instrument_style and self.settings.instrument_style in player_style_names):
-            self.instrument_style_combobox.setCurrentText(self.settings.instrument_style)
+        if (
+            self.settings.instrument_style
+            and self.settings.instrument_style in player_style_names
+        ):
+            self.instrument_style_combobox.setCurrentText(
+                self.settings.instrument_style
+            )
 
     def update_instrument_name(self, name: Optional[str]):
         logger.info(f"instrument name set to {name or 'none'}")
@@ -164,31 +168,39 @@ class PlayerDialog(QWidget):
 
         # self.setup()
         self.setLayout(
-            vertical_layout([
-                horizontal_layout([
-                    QLabel("Preview"),
-                    PlayerRow(
-                        manager=self.manager,
-                        settings=self.manager.settings.player.preview,
-                        system_player=True,
+            vertical_layout(
+                [
+                    horizontal_layout(
+                        [
+                            QLabel("Preview"),
+                            PlayerRow(
+                                manager=self.manager,
+                                settings=self.manager.settings.player.preview,
+                                system_player=True,
+                            ),
+                        ]
                     ),
-                ]),
-                horizontal_layout([
-                    QLabel("Metronome"),
-                    PlayerRow(
-                        manager=self.manager,
-                        settings=self.manager.settings.player.metronome,
-                        system_player=True,
+                    horizontal_layout(
+                        [
+                            QLabel("Metronome"),
+                            PlayerRow(
+                                manager=self.manager,
+                                settings=self.manager.settings.player.metronome,
+                                system_player=True,
+                            ),
+                        ]
                     ),
-                ]),
-                QLabel("Players"),
-                self.player_list,
-                Stretch(),
-                horizontal_layout([
-                    self.ok_button,
-                    self.add_button,
-                ]),
-            ])
+                    QLabel("Players"),
+                    self.player_list,
+                    Stretch(),
+                    horizontal_layout(
+                        [
+                            self.ok_button,
+                            self.add_button,
+                        ]
+                    ),
+                ]
+            )
         )
 
         for player_setting in self.manager.settings.player.players:
@@ -237,6 +249,8 @@ class PlayerDialog(QWidget):
         room_for_player = self.room_for_player()
 
         if self.add_button.isEnabled() != room_for_player:
-            logger.debug(f"update player add button {'active' if room_for_player else 'inactive'}")
+            logger.debug(
+                f"update player add button {'active' if room_for_player else 'inactive'}"
+            )
 
             self.add_button.setEnabled(room_for_player)

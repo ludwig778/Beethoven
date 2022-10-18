@@ -2,8 +2,8 @@ from typing import List
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTreeWidgetItem
-from beethoven.ui.components.selectors.base import BaseSelector
 
+from beethoven.ui.components.selectors.base import BaseSelector
 from beethoven.ui.utils import block_signal
 
 

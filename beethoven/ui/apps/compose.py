@@ -1,7 +1,7 @@
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QWidget
-from beethoven import controllers
 
+from beethoven import controllers
 from beethoven.models.grid import Grid
 from beethoven.models.grid_part import GridPart
 from beethoven.ui.components.chord_picker import ChordPicker
@@ -26,18 +26,14 @@ class ComposeWidget(QWidget):
 
         self.manager = manager
 
-        self.harmony_grid = HarmonyGrid(
-            manager=manager,
-            harmony_items=harmony_items
-        )
+        self.harmony_grid = HarmonyGrid(manager=manager, harmony_items=harmony_items)
         self.harmony_grid.harmony_item_changed.connect(self.update_harmony)
         self.harmony_grid.chord_item_changed.connect(self.update_chord)
 
         harmony_item, chord_item = self.harmony_grid.get_current_item()
 
         self.player_widget = PlayerControlWidget(
-            harmony_items=harmony_items,
-            playing_type=PlayingType.step
+            harmony_items=harmony_items, playing_type=PlayingType.step
         )
 
         self.chord_picker = ChordPicker(
@@ -45,9 +41,7 @@ class ComposeWidget(QWidget):
             current_chord_item=chord_item,
             current_scale=harmony_item.scale,
         )
-        self.scale_selector = ScalePicker(
-            current_scale=harmony_item.scale
-        )
+        self.scale_selector = ScalePicker(current_scale=harmony_item.scale)
 
         self.chord_picker.chord_item_changed.connect(self.selected_chord_item_changed)
         self.scale_selector.scale_changed.connect(self.selected_scale_changed)
@@ -59,14 +53,18 @@ class ComposeWidget(QWidget):
         self.action_binding.activated.connect(self.handle_binding_action)
 
         self.setLayout(
-            vertical_layout([
-                self.chord_picker,
-                horizontal_layout([
-                    self.scale_selector,
-                    self.player_widget,
-                ]),
-                self.harmony_grid,
-            ])
+            vertical_layout(
+                [
+                    self.chord_picker,
+                    horizontal_layout(
+                        [
+                            self.scale_selector,
+                            self.player_widget,
+                        ]
+                    ),
+                    self.harmony_grid,
+                ]
+            )
         )
 
     def play_current_item(self):
@@ -79,7 +77,7 @@ class ComposeWidget(QWidget):
                     chord=chord_item.as_chord(scale=harmony_item.scale),
                     bpm=controllers.bpm.parse("90"),
                     time_signature=controllers.time_signature.parse("4/4"),
-                    duration=controllers.duration.parse("4W")
+                    duration=controllers.duration.parse("4W"),
                 )
             ]
         )

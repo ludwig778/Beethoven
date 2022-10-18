@@ -38,13 +38,17 @@ class ChordPickerDialog(QDialog):
         self.cancel_button.clicked.connect(self.reject)
 
         self.setLayout(
-            vertical_layout([
-                self.widget,
-                horizontal_layout([
-                    self.ok_button,
-                    self.cancel_button,
-                ]),
-            ])
+            vertical_layout(
+                [
+                    self.widget,
+                    horizontal_layout(
+                        [
+                            self.ok_button,
+                            self.cancel_button,
+                        ]
+                    ),
+                ]
+            )
         )
 
     def get_new_chord(self) -> Tuple[bool, ChordItem]:

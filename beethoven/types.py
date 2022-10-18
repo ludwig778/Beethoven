@@ -9,12 +9,7 @@ class NotesContainer(Protocol):
         ...
 
     def __hash__(self):
-        return hash(
-            ":".join([
-                str(hash(note))
-                for note in self.notes
-            ])
-        )
+        return hash(":".join([str(hash(note)) for note in self.notes]))
 
 
 GridParts = List[GridPart]

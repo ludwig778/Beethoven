@@ -12,7 +12,6 @@ from beethoven.ui.components.selectors.multiple.notes import MultipleNoteSelecto
 from beethoven.ui.components.selectors.multiple.scales import MultipleScaleSelector
 from beethoven.ui.components.selectors.strings import StringSelector
 
-
 __all__: Any = [
     "ExclusiveChordSelector",
     "ExclusiveNoteSelector",

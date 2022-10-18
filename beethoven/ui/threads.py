@@ -26,7 +26,9 @@ class TestThread(QThread):
 
 
 class MidiInputThread(QThread):
-    def __init__(self, *args, midi_input: Input, note_changed_signal: SignalInstance, **kwargs):
+    def __init__(
+        self, *args, midi_input: Input, note_changed_signal: SignalInstance, **kwargs
+    ):
         super(MidiInputThread, self).__init__(*args, **kwargs)
 
         self.midi_input = midi_input

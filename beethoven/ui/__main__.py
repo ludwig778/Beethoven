@@ -1,6 +1,7 @@
 import atexit
-from pathlib import Path
 from logging import getLogger
+from pathlib import Path
+
 from PySide6.QtWidgets import QApplication
 
 from beethoven.ui.apps.main_window import MainWindow

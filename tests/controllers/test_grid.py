@@ -13,10 +13,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
 @mark.parametrize(
     "string,expected",
     [
-        [
-            "",
-            Grid()
-        ],
+        ["", Grid()],
         [
             "bpm=90 ts=3/4 p=C4",
             Grid(

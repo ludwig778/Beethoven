@@ -1,9 +1,5 @@
 from beethoven.ui.components.selectors.multiple.base import MultipleSelector
-from beethoven.ui.constants import (
-    CHORD_LABELS,
-    CHORDS_DATA,
-    SELECTED_CHORD_LABELS,
-)
+from beethoven.ui.constants import CHORD_LABELS, CHORDS_DATA, SELECTED_CHORD_LABELS
 
 
 class MultipleChordSelector(MultipleSelector):

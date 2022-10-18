@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Type
 from logging import getLogger
-
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 if TYPE_CHECKING:
     from beethoven.sequencer.players.base import BasePlayer
@@ -36,5 +34,7 @@ class RegisteredPlayer(type):
         return cls.instances.get(instrument_name, {})
 
     @classmethod
-    def get_instrument_style(cls, instrument_name, style_name) -> Optional[Type[BasePlayer]]:
+    def get_instrument_style(
+        cls, instrument_name, style_name
+    ) -> Optional[Type[BasePlayer]]:
         return cls.instances.get(instrument_name, {}).get(style_name, None)

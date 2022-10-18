@@ -26,7 +26,7 @@ class ChordPicker(QWidget):
         manager: AppManager,
         current_chord_item: ChordItem,
         current_scale: Scale,
-        **kwargs
+        **kwargs,
     ):
         super(ChordPicker, self).__init__(*args, **kwargs)
 
@@ -45,11 +45,13 @@ class ChordPicker(QWidget):
         self.chord_grid_selector.chord_name_changed.connect(self.update_chord_name)
 
         self.setLayout(
-            vertical_layout([
-                self.chord_grid_selector,
-                self.root_grid_selector,
-                self.degree_grid_selector,
-            ])
+            vertical_layout(
+                [
+                    self.chord_grid_selector,
+                    self.root_grid_selector,
+                    self.degree_grid_selector,
+                ]
+            )
         )
 
     def set_chord_item(self, chord_item: ChordItem):

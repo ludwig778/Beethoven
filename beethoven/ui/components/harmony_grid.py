@@ -9,7 +9,12 @@ from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.models import ChordItem, HarmonyItem, HarmonyItems
 from beethoven.ui.sizing import VerticalExplandPolicy, set_size_policies
-from beethoven.ui.utils import block_signal, get_default_chord_item, get_default_harmony_item, run_method_on_widgets
+from beethoven.ui.utils import (
+    block_signal,
+    get_default_chord_item,
+    get_default_harmony_item,
+    run_method_on_widgets,
+)
 
 
 class HarmonyGrid(QWidget):
@@ -72,22 +77,32 @@ class HarmonyGrid(QWidget):
         )
 
         self.setLayout(
-            vertical_layout([
-                horizontal_layout([
-                    self.harmony_list,
-                    vertical_layout([
-                        self.add_harmony_button,
-                        self.delete_harmony_button,
-                    ]),
-                ]),
-                horizontal_layout([
-                    self.chord_list,
-                    vertical_layout([
-                        self.add_chord_button,
-                        self.delete_chord_button,
-                    ]),
-                ]),
-            ])
+            vertical_layout(
+                [
+                    horizontal_layout(
+                        [
+                            self.harmony_list,
+                            vertical_layout(
+                                [
+                                    self.add_harmony_button,
+                                    self.delete_harmony_button,
+                                ]
+                            ),
+                        ]
+                    ),
+                    horizontal_layout(
+                        [
+                            self.chord_list,
+                            vertical_layout(
+                                [
+                                    self.add_chord_button,
+                                    self.delete_chord_button,
+                                ]
+                            ),
+                        ]
+                    ),
+                ]
+            )
         )
 
     def next(self):

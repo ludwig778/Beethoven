@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from hartware_lib.adapters.directory import DirectoryAdapter
-from PySide6.QtWidgets import QApplication
 from mido.backends.rtmidi import Output
+from PySide6.QtWidgets import QApplication
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
@@ -58,6 +58,8 @@ def qt_application(monkeypatch):
         pass
 
     monkeypatch.setattr(MidiAdapter, "send_message", mock_send_message)
-    monkeypatch.setattr(MidiAdapter, "available_inputs", ["test_input_1", "test_input_2"])
+    monkeypatch.setattr(
+        MidiAdapter, "available_inputs", ["test_input_1", "test_input_2"]
+    )
 
     yield QApplication([])

@@ -1,4 +1,3 @@
-
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QSpinBox, QWidget
 
@@ -15,7 +14,9 @@ class ScalePicker(QWidget):
     def __init__(self, *args, current_scale: Scale, **kwargs):
         super(ScalePicker, self).__init__(*args, **kwargs)
 
-        self.root_combobox = NoteComboBox(selected_note=remove_note_octave(current_scale.tonic))
+        self.root_combobox = NoteComboBox(
+            selected_note=remove_note_octave(current_scale.tonic)
+        )
         self.name_combobox = ScaleComboBox(selected_scale_name=current_scale.name)
         self.octave_spinbox = QSpinBox()
         self.octave_spinbox.setMinimum(0)
@@ -27,11 +28,13 @@ class ScalePicker(QWidget):
         self.octave_spinbox.valueChanged.connect(self.update_scale)
 
         self.setLayout(
-            horizontal_layout([
-                self.root_combobox,
-                self.name_combobox,
-                self.octave_spinbox,
-            ])
+            horizontal_layout(
+                [
+                    self.root_combobox,
+                    self.name_combobox,
+                    self.octave_spinbox,
+                ]
+            )
         )
 
     def set_scale(self, scale):

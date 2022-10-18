@@ -7,7 +7,6 @@ from beethoven.ui.components.combobox.note import NoteComboBox
 from beethoven.ui.components.combobox.scale import ScaleComboBox
 from beethoven.ui.components.combobox.tuning import TuningComboBox
 
-
 __all__: Any = [
     "MidiChannelComboBox",
     "MidiInputComboBox",

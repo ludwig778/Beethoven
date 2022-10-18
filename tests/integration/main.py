@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication
-from beethoven.ui.__main__ import main as run_main_window
+from beethoven.ui.setup import setup_main_window
 
 from beethoven.ui.stylesheet import get_stylesheet
 
@@ -10,7 +10,8 @@ def test_main_ui():
     qt_application = QApplication([])
     qt_application.setStyleSheet(get_stylesheet())
 
-    run_main_window()
+    main_window = setup_main_window()
+    main_window.show()
 
     qt_application.exec()
 

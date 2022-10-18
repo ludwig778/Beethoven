@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QMainWindow
+from PySide6.QtGui import QAction
 
 from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
 from beethoven.ui.apps.compose import ComposeWidget
@@ -12,6 +13,7 @@ class MainWindow(QMainWindow):
 
         self.manager = manager
 
+        self.set_menubar()
         self.setWindowTitle("Beethoven")
         self.setFixedSize(500, 500)
 
@@ -24,3 +26,14 @@ class MainWindow(QMainWindow):
                 },
             )
         )
+
+    def set_menubar(self):
+        menubar = self.menuBar()
+
+        file = menubar.addMenu("File")
+
+        quit = QAction("Quit", self)
+        quit.setShortcut("Q")
+        quit.triggered.connect(self.close)
+
+        file.addAction(quit)

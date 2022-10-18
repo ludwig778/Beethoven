@@ -86,11 +86,4 @@ def get_default_harmony_item() -> HarmonyItem:
 
 
 def get_default_harmony_items() -> HarmonyItems:
-    return HarmonyItems(
-        items=[
-            HarmonyItem(
-                scale=controllers.scale.parse("C4_major"),
-                chord_items=[get_default_chord_item()],
-            )
-        ]
-    )
+    return HarmonyItems(items=[get_default_harmony_item()])

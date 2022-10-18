@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtWidgets import QLabel, QDialog
 
 from beethoven.ui.components.buttons import Button
 from beethoven.ui.components.combobox.midi_input import MidiInputComboBox
@@ -15,7 +15,7 @@ from beethoven.ui.utils import block_signal
 logger = getLogger("dialog.midi")
 
 
-class MidiDialog(QWidget):
+class MidiDialog(QDialog):
     configuration_changed = Signal()
 
     def __init__(self, *args, manager: AppManager, **kwargs):

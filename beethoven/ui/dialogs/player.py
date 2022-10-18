@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Optional
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QComboBox, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QVBoxLayout, QWidget, QDialog
 
 from beethoven.sequencer.players.registry import RegisteredPlayer
 from beethoven.ui.components.buttons import Button, PushPullButton
@@ -149,7 +149,7 @@ class PlayerRow(QWidget):
         self.manager.configuration_changed.emit()
 
 
-class PlayerDialog(QWidget):
+class PlayerDialog(QDialog):
     player_changed = Signal(PlayerSetting)
 
     def __init__(self, *args, manager: AppManager, **kwargs):

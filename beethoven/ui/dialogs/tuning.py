@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
 from beethoven.ui.components.combobox import TuningComboBox
 from beethoven.ui.components.selectors import StringSelector
@@ -13,7 +13,7 @@ from beethoven.ui.utils import block_signal
 logger = getLogger("dialog.tuning")
 
 
-class TuningDialog(QWidget):
+class TuningDialog(QDialog):
     configuration_changed = Signal()
 
     def __init__(self, *args, manager: AppManager, **kwargs):

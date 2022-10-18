@@ -7,7 +7,7 @@ from beethoven.ui.components.combobox import TuningComboBox
 from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.spinbox import StringNumberSpinBox
 from beethoven.ui.dialogs.tuning_save import TuningSaveDialog
-from beethoven.ui.settings import TuningSettings
+from beethoven.ui.managers.app import AppManager
 from beethoven.ui.utils import block_signal
 
 logger = getLogger("dialog.tuning")
@@ -16,10 +16,10 @@ logger = getLogger("dialog.tuning")
 class TuningDialog(QWidget):
     configuration_changed = Signal()
 
-    def __init__(self, *args, tuning_settings: TuningSettings, **kwargs):
+    def __init__(self, *args, manager: AppManager, **kwargs):
         super(TuningDialog, self).__init__(*args, **kwargs)
 
-        self.tuning_settings = tuning_settings
+        self.tuning_settings = manager.settings.tuning
 
         self.setup()
 

@@ -40,7 +40,7 @@ def test_uis():
     # ])
 
     widget_partials = {
-        "tuning": partial(TuningDialog, tuning_settings=manager.settings.tuning),
+        "tuning": partial(TuningDialog, manager=manager),
         "chord_picker": partial(
             ChordPickerDialog,
             manager=manager,

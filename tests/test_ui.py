@@ -26,7 +26,7 @@ def test_ui_instanciation():
     manager = AppManager(setting_path=setting_path)
 
     widget_partials = {
-        "tuning": partial(TuningDialog, tuning_settings=manager.settings.tuning),
+        "tuning": partial(TuningDialog, manager=manager),
         "chord_picker": partial(
             ChordPickerDialog,
             manager=manager,

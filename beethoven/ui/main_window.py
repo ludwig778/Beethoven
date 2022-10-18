@@ -24,8 +24,8 @@ class MainWindow(QMainWindow):
             ComboBoxSelectedWidget(
                 manager=manager,
                 widgets={
-                    "Chord Trainer": ChordTrainerWidget(manager=manager),
                     "Composer": ComposeWidget(manager=manager),
+                    "Chord Trainer": ChordTrainerWidget(manager=manager),
                 },
             )
         )

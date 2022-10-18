@@ -1,33 +1,20 @@
-from pytest import fixture
 from pathlib import Path
 from functools import partial
-from beethoven.adapters.midi import MidiAdapter
+from beethoven.ui.apps.training import TrainingWidget
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.dialogs import TuningDialog
-from PySide6.QtWidgets import QApplication
 from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
 from beethoven.ui.dialogs.midi import MidiDialog
 from beethoven.ui.dialogs.player import PlayerDialog
-from beethoven.ui.main_window import ComposeWidget, MainWindow
+from beethoven.ui.apps.main_window import ComposeWidget, MainWindow
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 
 from beethoven.ui.managers import AppManager
 from beethoven.ui.utils import get_default_harmony_item
 
 
-@fixture
-def application(monkeypatch):
-    def lmao(*args, **kwargs):
-        pass
-        # print("LMAO", args, kwargs)
-
-    monkeypatch.setattr(MidiAdapter, "send_message", lmao)
-
-    yield QApplication([])
-
-
-def test_dialogs(application):
+def test_dialogs(qt_application):
     print("\n\n")
 
     setting_path = Path(".", "config.ui.json")
@@ -77,6 +64,10 @@ def test_dialogs(application):
             ComposeWidget,
             manager=manager,
         ),
+        "training_widget": partial(
+            TrainingWidget,
+            manager=manager,
+        ),
         "main_window": partial(
             MainWindow,
             manager=manager,
@@ -92,4 +83,4 @@ def test_dialogs(application):
         widget.setWindowTitle("LMAO")
         widget.show()
 
-        application.exec()
+        qt_application.exec()

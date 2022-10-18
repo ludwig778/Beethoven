@@ -1,6 +1,8 @@
 from functools import partial
 from pathlib import Path
 
+from PySide6.QtWidgets import QApplication
+
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
 from beethoven.ui.apps.main_window import ComposeWidget, MainWindow
@@ -11,17 +13,19 @@ from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
 from beethoven.ui.dialogs.midi import MidiDialog
 from beethoven.ui.dialogs.player import PlayerDialog
 from beethoven.ui.managers import AppManager
+from beethoven.ui.stylesheet import get_stylesheet
 from beethoven.ui.utils import get_default_harmony_item
 
 
-def test_dialogs(qt_application):
+def test_uis():
     print("\n\n")
 
-    setting_path = Path(".", "config.ui.json")
+    qt_application = QApplication([])
+    qt_application.setStyleSheet(get_stylesheet())
+
+    manager = AppManager(setting_path=Path(".", "config.ui.json"))
 
     default_harmony_item = get_default_harmony_item()
-
-    manager = AppManager(setting_path=setting_path)
 
     # harmony_items = HarmonyItems.from_list([
     #     {
@@ -80,7 +84,9 @@ def test_dialogs(qt_application):
             continue
 
         widget = widget_partial()
-        widget.setWindowTitle("LMAO")
+        widget.setWindowTitle("Beethoven")
         widget.show()
 
         qt_application.exec()
+
+    print("\n\n")

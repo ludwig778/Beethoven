@@ -1,30 +1,17 @@
 from pathlib import Path
 
 from hartware_lib.adapters.directory import DirectoryAdapter
-from mido.backends.rtmidi import Output
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
 from beethoven.adapters.local_file import LocalFileAdapter
-from beethoven.adapters.midi import MidiAdapter
+from tests.mocks.midi_adapter import MockedOutput, MockedMidiAdapter
 
 
 @fixture(scope="function", autouse=True)
-def mock_open_midi_output(monkeypatch):
-    def void(self, *args, **kwargs):
-        pass
-
-    class MockedOutput(Output):
-        def __init__(self, name, **kwargs):
-            self.name = name
-
-        def closed(self):
-            return False
-
-        close = void
-
-    monkeypatch.setattr("beethoven.adapters.midi.Output", MockedOutput)
+def mock_midi_adapter(monkeypatch):
     monkeypatch.setattr("beethoven.adapters.midi.open_output", MockedOutput)
+    monkeypatch.setattr("beethoven.adapters.midi.MidiAdapter", MockedMidiAdapter)
 
 
 @fixture(scope="function", autouse=True)
@@ -49,16 +36,3 @@ def adapters():
     yield adapters
 
     adapters.midi.close_all_outputs()
-
-
-@fixture
-def qt_application(monkeypatch):
-    def mock_send_message(*args, **kwargs):
-        pass
-
-    monkeypatch.setattr(MidiAdapter, "send_message", mock_send_message)
-    monkeypatch.setattr(
-        MidiAdapter, "available_inputs", ["test_input_1", "test_input_2"]
-    )
-
-    yield QApplication([])

@@ -12,11 +12,7 @@ logger = getLogger("ui.main")
 
 
 def main():
-    app = QApplication([])
-    app.setStyleSheet(get_stylesheet())
-
-    setting_path = Path(".", "config.ui.json")
-    manager = AppManager(setting_path=setting_path)
+    manager = AppManager(setting_path=Path(".", "config.ui.json"))
 
     atexit.register(manager.midi.terminate_threads)
 
@@ -25,8 +21,12 @@ def main():
 
     # set_size_policies([w], QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
     window.show()
-    app.exec()
 
 
 if __name__ == "__main__":
+    app = QApplication([])
+    app.setStyleSheet(get_stylesheet())
+
     main()
+
+    app.exec()

@@ -1,6 +1,8 @@
 from functools import partial
 from pathlib import Path
 
+from PySide6.QtWidgets import QApplication
+
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
 from beethoven.ui.apps.main_window import ComposeWidget, MainWindow
@@ -14,7 +16,9 @@ from beethoven.ui.managers import AppManager
 from beethoven.ui.utils import get_default_harmony_item
 
 
-def test_ui_instanciation(qt_application):
+def test_ui_instanciation():
+    _ = QApplication([])
+
     setting_path = Path(".", "config.ui.json")
 
     default_harmony_item = get_default_harmony_item()

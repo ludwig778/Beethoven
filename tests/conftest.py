@@ -2,7 +2,6 @@ from pathlib import Path
 
 from hartware_lib.adapters.directory import DirectoryAdapter
 from mido.backends.rtmidi import Output
-from PySide6.QtWidgets import QApplication
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters

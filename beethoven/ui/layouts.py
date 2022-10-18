@@ -40,7 +40,7 @@ def layout_widget_factory(
     return layout
 
 
-def horizontal_layout(layout_items: Sequence[LayoutItem], **kwargs):
+def horizontal_layout(layout_items: Sequence[LayoutItem], **kwargs) -> QHBoxLayout:
     return layout_widget_factory(
         QHBoxLayout(),
         layout_items,
@@ -48,7 +48,7 @@ def horizontal_layout(layout_items: Sequence[LayoutItem], **kwargs):
     )
 
 
-def vertical_layout(layout_items: Sequence[LayoutItem], **kwargs):
+def vertical_layout(layout_items: Sequence[LayoutItem], **kwargs) -> QVBoxLayout:
     return layout_widget_factory(
         QVBoxLayout(),
         layout_items,
@@ -56,7 +56,7 @@ def vertical_layout(layout_items: Sequence[LayoutItem], **kwargs):
     )
 
 
-def stacked_layout(layout_items: Sequence[QWidget], **kwargs):
+def stacked_layout(layout_items: Sequence[QWidget], **kwargs) -> QStackedLayout:
     return layout_widget_factory(
         QStackedLayout(),
         layout_items,

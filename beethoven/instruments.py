@@ -26,7 +26,7 @@ class BasicPiano(BasePlayer):
     def play(self):
         timeline = Duration(value=0)
 
-        duration = Duration(value=2)
+        duration = Duration(value=4)
 
         while True:
             for note in self.grid_part.chord.notes:

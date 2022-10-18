@@ -1,6 +1,6 @@
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
-TEST_ARGS= -vvss
+TEST_ARGS= -vs --show-capture=no
 
 default: ui
 

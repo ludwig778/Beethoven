@@ -1,5 +1,10 @@
 import logging.config
 
+from beethoven.settings import get_settings
+
+settings = get_settings()
+
+
 logging.config.dictConfig(
     {
         "version": 1,
@@ -18,7 +23,7 @@ logging.config.dictConfig(
         "loggers": {
             "": {
                 "handlers": ["default"],
-                "level": "DEBUG",
+                "level": logging.CRITICAL if settings.test else logging.DEBUG,
             },
         },
     }

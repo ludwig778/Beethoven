@@ -94,8 +94,12 @@ class ComposeWidget(QWidget):
     def selected_chord_item_changed(self, chord_item):
         self.harmony_grid.update_current_chord(chord_item)
 
+        self.play_current_item()
+
     def selected_scale_changed(self, scale):
         self.harmony_grid.update_current_scale(scale)
+
+        self.play_current_item()
 
     def update_harmony(self):
         harmony_item, chord_item = self.harmony_grid.get_current_item()

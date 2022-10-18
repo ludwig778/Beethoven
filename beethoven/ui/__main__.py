@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
-from beethoven.ui.apps.main_window import MainWindow
+from beethoven.ui.main_window import MainWindow
 from beethoven.ui.managers import AppManager
 from beethoven.ui.stylesheet import get_stylesheet
 

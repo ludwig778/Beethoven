@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication
 
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
-from beethoven.ui.apps.main_window import ComposeWidget, MainWindow
+from beethoven.ui.main_window import ComposeWidget, MainWindow
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.dialogs import TuningDialog

@@ -1,6 +1,6 @@
 from pathlib import Path
 from functools import partial
-from beethoven.ui.apps.training import TrainingWidget
+from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.dialogs import TuningDialog
@@ -51,7 +51,7 @@ def test_ui_instanciation(qt_application):
             manager=manager,
         ),
         "training_widget": partial(
-            TrainingWidget,
+            ChordTrainerWidget,
             manager=manager,
         ),
         "main_window": partial(

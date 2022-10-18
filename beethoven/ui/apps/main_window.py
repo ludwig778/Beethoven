@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QPushButton
 
 from beethoven.ui.apps.compose import ComposeWidget
-from beethoven.ui.apps.training import TrainingWidget
+from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
 from beethoven.ui.layouts import horizontal_layout, stacked_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         self.compose_button = QPushButton("Compose")
 
         self.stacked_layout = stacked_layout([
-            TrainingWidget(manager=self.manager),
+            ChordTrainerWidget(manager=self.manager),
             ComposeWidget(manager=self.manager),
         ])
 

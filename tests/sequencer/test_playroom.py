@@ -1,3 +1,5 @@
+from pytest import fixture
+
 from beethoven.constants.duration import sixteenth_value
 from beethoven.models import Bpm, Grid, GridPart, TimeSignature
 from beethoven.models.duration import Duration
@@ -5,6 +7,11 @@ from beethoven.sequencer.players.base import BasePlayer, PercussionPlayer
 from beethoven.sequencer.playroom import play_grid
 from tests.fixtures.chords import c4_maj, c_maj7, d_min7, e_min7
 from tests.fixtures.scales import a_minor, c_major
+
+
+@fixture(scope="function", autouse=True)
+def mock_midi_adapter(mock_midi_adapter):
+    pass
 
 
 class Piano(BasePlayer):

@@ -8,7 +8,7 @@ from beethoven.adapters.local_file import LocalFileAdapter
 from tests.mocks.midi_adapter import MockedOutput, MockedMidiAdapter
 
 
-@fixture(scope="function", autouse=True)
+@fixture(scope="function")
 def mock_midi_adapter(monkeypatch):
     monkeypatch.setattr("beethoven.adapters.midi.open_output", MockedOutput)
     monkeypatch.setattr("beethoven.adapters.midi.MidiAdapter", MockedMidiAdapter)

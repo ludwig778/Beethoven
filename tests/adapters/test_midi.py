@@ -1,4 +1,11 @@
+from pytest import fixture
+
 from beethoven.adapters.midi import MidiMessage, MidiMetaMessage
+
+
+@fixture(scope="function", autouse=True)
+def mock_midi_adapter(mock_midi_adapter):
+    pass
 
 
 def test_midi_adapter_open_output(adapters):

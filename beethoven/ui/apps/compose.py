@@ -67,7 +67,7 @@ class ComposeWidget(QWidget):
             )
         )
 
-    def play_current_item(self):
+    def play_current_item(self, continuous: bool = False):
         harmony_item, chord_item = self.harmony_grid.get_current_item()
 
         grid = Grid(
@@ -77,7 +77,7 @@ class ComposeWidget(QWidget):
                     chord=chord_item.as_chord(scale=harmony_item.scale),
                     bpm=controllers.bpm.parse("90"),
                     time_signature=controllers.time_signature.parse("4/4"),
-                    duration=controllers.duration.parse("4W"),
+                    duration=controllers.duration.parse("160W" if continuous else "1W"),
                 )
             ]
         )
@@ -89,7 +89,7 @@ class ComposeWidget(QWidget):
     def handle_binding_action(self):
         self.harmony_grid.next()
 
-        self.play_current_item()
+        self.play_current_item(continuous=True)
 
     def selected_chord_item_changed(self, chord_item):
         self.harmony_grid.update_current_chord(chord_item)

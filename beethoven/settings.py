@@ -17,7 +17,7 @@ class MongoSettings(BaseSettings):
     database: str = ""
     host: str = ""
     port: int = 27017
-    srv_mode: BooleanFromString = Field(default=False)
+    srv_mode: BooleanFromString = Field(default=False)  # type: ignore
     timeout_ms: int = 2000
 
     @property
@@ -55,8 +55,8 @@ class LocalStoreSettings(BaseSettings):
 
 
 class AppSettings(BaseSettings):
-    test: BooleanFromString = Field(default=False)
-    debug: BooleanFromString = Field(default=False)
+    test: BooleanFromString = Field(default=False)  # type: ignore
+    debug: BooleanFromString = Field(default=False)  # type: ignore
 
     midi: MidiSettings = Field(default_factory=MidiSettings)
 

@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from beethoven.helpers.chord import chord_product
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
-from beethoven.ui.components.combobox import MidiInputComboBox
 from beethoven.ui.components.frame import FramedChord, FramedNotes
 from beethoven.ui.components.selectors import (
     MultipleChordSelector,
@@ -26,10 +25,6 @@ class ChordTrainerWidget(QWidget):
         self.setup()
 
     def setup(self):
-        self.input_combobox = MidiInputComboBox(
-            manager=self.manager, value=self.manager.settings.midi.selected_input
-        )
-
         self.playing_notes_frame = FramedNotes()
         self.target_chord_frame = FramedChord()
 
@@ -41,7 +36,6 @@ class ChordTrainerWidget(QWidget):
         )
         self.stop_button = Button("Stop", object_name="stop_button")
 
-        self.input_combobox.currentTextChanged.connect(self.changed_midi_input)
         self.manager.midi.notes_changed.connect(self.notes_changed)
         self.start_button.clicked.connect(self.start)
         self.stop_button.clicked.connect(self.stop)
@@ -49,7 +43,6 @@ class ChordTrainerWidget(QWidget):
         self.setLayout(
             vertical_layout(
                 [
-                    self.input_combobox,
                     horizontal_layout(
                         [
                             self.chord_selector,
@@ -92,7 +85,6 @@ class ChordTrainerWidget(QWidget):
             selectors.addWidget(self.note_selector)
 
         main_layout.addWidget(QLabel("Training"))
-        main_layout.addWidget(self.input_combobox)
         main_layout.addLayout(selectors)
         main_layout.addLayout(note_frames)
         main_layout.addStretch()
@@ -112,10 +104,6 @@ class ChordTrainerWidget(QWidget):
                 self.start_button.setChecked(False)
             elif current_chord := self.notes_checker.current:
                 self.target_chord_frame.set_chord(current_chord)
-
-    def changed_midi_input(self, input_name):
-        self.manager.midi.update_input(input_name)
-        self.manager.midi.notes_changed.emit({})
 
     def start(self, *args):
         print("START ARGS", args)

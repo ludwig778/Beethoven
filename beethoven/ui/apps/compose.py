@@ -6,7 +6,7 @@ from beethoven.models.grid import Grid
 from beethoven.models.grid_part import GridPart
 from beethoven.ui.components.chord_picker import ChordPicker
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
-from beethoven.ui.components.harmony_grid import HarmonyGrid
+from beethoven.ui.components.composer_grid import ComposerGrid
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
@@ -26,11 +26,11 @@ class ComposeWidget(QWidget):
 
         self.manager = manager
 
-        self.harmony_grid = HarmonyGrid(manager=manager, harmony_items=harmony_items)
-        self.harmony_grid.harmony_item_changed.connect(self.update_harmony)
-        self.harmony_grid.chord_item_changed.connect(self.update_chord)
+        self.composer_grid = ComposerGrid(manager=manager, harmony_items=harmony_items)
+        self.composer_grid.harmony_item_changed.connect(self.update_harmony)
+        self.composer_grid.chord_item_changed.connect(self.update_chord)
 
-        harmony_item, chord_item = self.harmony_grid.get_current_item()
+        harmony_item, chord_item = self.composer_grid.get_current_item()
 
         self.player_widget = PlayerControlWidget(
             harmony_items=harmony_items, playing_type=PlayingType.step
@@ -62,13 +62,13 @@ class ComposeWidget(QWidget):
                             self.player_widget,
                         ]
                     ),
-                    self.harmony_grid,
+                    self.composer_grid,
                 ]
             )
         )
 
     def play_current_item(self, continuous: bool = False):
-        harmony_item, chord_item = self.harmony_grid.get_current_item()
+        harmony_item, chord_item = self.composer_grid.get_current_item()
 
         grid = Grid(
             parts=[
@@ -87,27 +87,27 @@ class ComposeWidget(QWidget):
         self.manager.midi.terminate_output_thread()
 
     def handle_binding_action(self):
-        self.harmony_grid.next()
+        self.composer_grid.next()
 
         self.play_current_item(continuous=True)
 
     def selected_chord_item_changed(self, chord_item):
-        self.harmony_grid.update_current_chord(chord_item)
+        self.composer_grid.update_current_chord(chord_item)
 
         self.play_current_item()
 
     def selected_scale_changed(self, scale):
-        self.harmony_grid.update_current_scale(scale)
+        self.composer_grid.update_current_scale(scale)
 
         self.play_current_item()
 
     def update_harmony(self):
-        harmony_item, chord_item = self.harmony_grid.get_current_item()
+        harmony_item, chord_item = self.composer_grid.get_current_item()
 
         self.scale_selector.set_scale(harmony_item.scale)
         self.chord_picker.set_chord_item(chord_item)
 
     def update_chord(self):
-        _, chord_item = self.harmony_grid.get_current_item()
+        _, chord_item = self.composer_grid.get_current_item()
 
         self.chord_picker.set_chord_item(chord_item)

@@ -14,9 +14,9 @@ from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
 
-class ChordTrainerWidget(QWidget):
+class PianoTrainerWidget(QWidget):
     def __init__(self, *args, manager: AppManager, **kwargs):
-        super(ChordTrainerWidget, self).__init__(*args, **kwargs)
+        super(PianoTrainerWidget, self).__init__(*args, **kwargs)
 
         self.manager = manager
 

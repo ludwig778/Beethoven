@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow
 from PySide6.QtGui import QAction
 
-from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
+from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
 from beethoven.ui.apps.compose import ComposeWidget
 from beethoven.ui.components.widget_selector import ComboBoxSelectedWidget
 from beethoven.ui.dialogs.midi import MidiDialog
@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
                 manager=manager,
                 widgets={
                     "Composer": ComposeWidget(manager=manager),
-                    "Chord Trainer": ChordTrainerWidget(manager=manager),
+                    "Piano Trainer": PianoTrainerWidget(manager=manager),
                 },
             )
         )

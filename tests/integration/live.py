@@ -3,7 +3,7 @@ from typing import Dict
 
 from PySide6.QtWidgets import QComboBox, QWidget, QApplication
 
-from beethoven.ui.apps.chord_trainer import ChordTrainerWidget
+from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
 from beethoven.ui.apps.compose import ComposeWidget
 from beethoven.ui.components.widget_selector import ComboBoxSelectedWidget
 from beethoven.ui.layouts import stacked_layout, vertical_layout
@@ -20,7 +20,7 @@ def test_live_ui():
     manager = AppManager(setting_path=Path(".", "config.ui.json"))
 
     widgets = {
-        "Chord Trainer": ChordTrainerWidget(manager=manager),
+        "Chord Trainer": PianoTrainerWidget(manager=manager),
         "Composer": ComposeWidget(manager=manager),
     }
 

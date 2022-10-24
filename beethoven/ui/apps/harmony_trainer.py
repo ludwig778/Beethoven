@@ -1,3 +1,5 @@
+from copy import deepcopy
+from random import shuffle
 from typing import Optional
 from PySide6.QtWidgets import QWidget, QComboBox
 from beethoven import controllers
@@ -10,27 +12,60 @@ from beethoven.ui.components.buttons import Button
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
 from beethoven.ui.components.frame import FramedChord, FramedDegree, FramedNotes
 from beethoven.ui.components.scale_picker import ScalePicker
-from beethoven.ui.constants import C_MAJOR4
+from beethoven.ui.constants import C_MAJOR4, ROOTS_WITH_SHARPS
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from PySide6.QtGui import QKeySequence, QShortcut
 
 
+def note_cycle_generator_factory(interval_semitones):
+    def wrapper(start_note):
+        note = remove_note_octave(start_note)
+
+        yield start_note
+
+        while 1:
+            note_index = ROOTS_WITH_SHARPS.index(note)
+
+            next_note_index = (note_index + interval_semitones) % 12
+
+            note = ROOTS_WITH_SHARPS[next_note_index]
+
+            yield controllers.note.parse(f"{str(note)}{start_note.octave}")
+
+    return wrapper
+
+
+def random_note_cycle_generator(start_note):
+    note = remove_note_octave(start_note)
+
+    notes = deepcopy(ROOTS_WITH_SHARPS)
+    notes.remove(note)
+
+    while 1:
+        yield start_note
+
+        shuffle(notes)
+
+        for note in notes:
+            yield controllers.note.parse(f"{str(note)}{start_note.octave}")
+
+
 class HarmonyTrainerWidget(QWidget):
-    intervals = {
-        "5": 7,
-        "4": 5,
-        "4a": 6,
-        "3": 4,
-        "3m": 3,
-        "6": 9,
-        "6m": 8,
-        "2": 2,
-        "2m": 1,
-        "7": 11,
-        "7m": 10,
+    interval_generators = {
+        "5": note_cycle_generator_factory(7),
+        "4": note_cycle_generator_factory(5),
+        "random": random_note_cycle_generator,
+        "4a": note_cycle_generator_factory(6),
+        "3": note_cycle_generator_factory(4),
+        "3m": note_cycle_generator_factory(3),
+        "6": note_cycle_generator_factory(9),
+        "6m": note_cycle_generator_factory(8),
+        "2": note_cycle_generator_factory(2),
+        "2m": note_cycle_generator_factory(1),
+        "7": note_cycle_generator_factory(11),
+        "7m": note_cycle_generator_factory(10),
     }
-    notes = controllers.note.parse_list("A,A#,B,C,C#,D,D#,E,F,F#,G,G#")
 
     def __init__(self, *args, manager: AppManager, **kwargs):
         super(HarmonyTrainerWidget, self).__init__(*args, **kwargs)
@@ -46,6 +81,7 @@ class HarmonyTrainerWidget(QWidget):
         self.scale_picker = ScalePicker(
             current_scale=C_MAJOR4
         )
+        self.scale_picker.scale_changed.connect(self.reset)
 
         self.player_widget = PlayerControlWidget(playing_type=PlayingType.step)
 
@@ -53,7 +89,7 @@ class HarmonyTrainerWidget(QWidget):
         self.reset_button.pressed.connect(self.reset)
 
         self.mode_combobox = QComboBox()
-        self.mode_combobox.addItems(list(self.intervals.keys()))
+        self.mode_combobox.addItems(list(self.interval_generators.keys()))
         self.mode_combobox.currentTextChanged.connect(self.mode_changed)
 
         self.action_binding = QShortcut(QKeySequence("Space"), self)
@@ -79,36 +115,38 @@ class HarmonyTrainerWidget(QWidget):
         )
 
     def reset(self):
-        self.current_root = self.scale_picker.get_scale().tonic
+        self.current_root = None
         self.current_scale = None
 
         self.playing_root_frame.set_notes([])
 
+        mode_index = self.mode_combobox.currentText()
+
+        self.note_generator = self.interval_generators[mode_index](
+            self.scale_picker.get_scale().tonic
+        )
+
     def next(self):
+        self.current_root = next(self.note_generator)
+
         if self.current_scale:
-            mode_index = self.mode_combobox.currentText()
-            mode_offset = self.intervals[mode_index]
-
-            octave = self.scale_picker.get_scale().tonic.octave
-            note_index = self.notes.index(remove_note_octave(self.current_root))
-
-            next_index = (note_index + mode_offset) % 12
-
-            current_root = controllers.note.parse(str(self.notes[next_index]) + str(octave))
-
-            self.current_root = current_root
-            self.current_scale = controllers.scale.parse(f"{str(current_root)}_{self.current_scale.name}")
+            self.current_scale = controllers.scale.parse(f"{str(self.current_root)}_{self.current_scale.name}")
         else:
             self.current_scale = self.scale_picker.get_scale()
 
+        print(self.current_root)
         self.playing_root_frame.set_notes([self.current_root])
         self.play_current_harmony(continuous=True)
 
     def mode_changed(self):
         print("mode changed")
 
+        self.reset()
+
     def root_changed(self):
         print("root_changed")
+
+        self.reset()
 
     def play_current_harmony(self, continuous: bool = False):
         if not self.current_scale:

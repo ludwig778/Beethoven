@@ -6,6 +6,7 @@ DEFAULT_MIDI_OUTPUT = ""
 
 DEGREES = controllers.degree.parse_list("I,II,III,IV,V,VI,VII")
 ROOTS = controllers.note.parse_list("C,Db,D,Eb,E,F,Gb,G,Ab,A,Bb,B")
+ROOTS_WITH_SHARPS = controllers.note.parse_list("C,C#,D,D#,E,F,F#,G,G#,A,A#,B")
 
 NOTES_DATA = {
     "normal": controllers.note.parse_list("C,D,E,F,G,A,B"),

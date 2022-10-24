@@ -32,9 +32,7 @@ class ComposeWidget(QWidget):
 
         harmony_item, chord_item = self.composer_grid.get_current_item()
 
-        self.player_widget = PlayerControlWidget(
-            harmony_items=harmony_items, playing_type=PlayingType.step
-        )
+        self.player_widget = PlayerControlWidget(playing_type=PlayingType.step)
 
         self.chord_picker = ChordPicker(
             manager=manager,

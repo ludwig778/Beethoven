@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QPushButton, QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
 from beethoven.ui.layouts import horizontal_layout
-from beethoven.ui.models import HarmonyItems
 from beethoven.ui.utils import block_signal
 
 logger = getLogger("control")
@@ -23,11 +22,9 @@ class PlayerControlWidget(QWidget):
     stop_grid = Signal()
 
     def __init__(
-        self, *args, harmony_items: HarmonyItems, playing_type: PlayingType, **kwargs
+        self, *args, playing_type: PlayingType, **kwargs
     ):
         super(PlayerControlWidget, self).__init__(*args, **kwargs)
-
-        self.harmony_items = harmony_items
 
         self.step_player_button = PushPullButton(
             pressed="Step", released="Step", state=playing_type == PlayingType.step

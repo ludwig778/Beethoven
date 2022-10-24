@@ -4,6 +4,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLineEdit
 
 from beethoven.models import Chord, Note, Scale
+from beethoven.models.degree import Degree
+from beethoven.utils.alterations import get_degree_alteration_str_from_int
 
 
 class FramedLineEdit(QLineEdit):
@@ -25,6 +27,11 @@ class FramedNotes(FramedLineEdit):
 class FramedChord(FramedNotes):
     def set_chord(self, chord: Chord):
         self.setText(f"{str(chord.root)} {chord.name}")
+
+
+class FramedDegree(FramedNotes):
+    def set_degree(self, degree: Degree):
+        self.setText(f"{get_degree_alteration_str_from_int(degree.alteration)}{degree.name}")
 
 
 class FramedScale(FramedNotes):

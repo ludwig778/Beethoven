@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QMainWindow
 from PySide6.QtGui import QAction
 
+from beethoven.ui.apps.harmony_trainer import HarmonyTrainerWidget
 from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
 from beethoven.ui.apps.compose import ComposeWidget
 from beethoven.ui.components.widget_selector import ComboBoxSelectedWidget
@@ -24,6 +25,7 @@ class MainWindow(QMainWindow):
             ComboBoxSelectedWidget(
                 manager=manager,
                 widgets={
+                    "Harmony Trainer": HarmonyTrainerWidget(manager=manager),
                     "Composer": ComposeWidget(manager=manager),
                     "Piano Trainer": PianoTrainerWidget(manager=manager),
                 },

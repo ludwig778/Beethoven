@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QApplication
 
 import beethoven.instruments  # noqa # pylint: disable=unused-import
 from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
+from beethoven.ui.apps.harmony_trainer import HarmonyTrainerWidget
 from beethoven.ui.main_window import ComposeWidget, MainWindow
 from beethoven.ui.components.control import PlayerControlWidget, PlayingType
 from beethoven.ui.components.scale_picker import ScalePicker
@@ -70,6 +71,10 @@ def test_uis():
         ),
         "piano_trainer_widget": partial(
             PianoTrainerWidget,
+            manager=manager,
+        ),
+        "harmony_trainer_widget": partial(
+            HarmonyTrainerWidget,
             manager=manager,
         ),
         "main_window": partial(

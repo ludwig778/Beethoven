@@ -43,3 +43,5 @@ SCALE_LABELS = [
     "pentatonic",
     "alternative",
 ]
+
+C_MAJOR4 = controllers.scale.parse("C4_major")

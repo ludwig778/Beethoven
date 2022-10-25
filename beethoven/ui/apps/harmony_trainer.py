@@ -84,6 +84,7 @@ class HarmonyTrainerWidget(QWidget):
         self.scale_picker.scale_changed.connect(self.reset)
 
         self.player_widget = PlayerControlWidget(playing_type=PlayingType.step)
+        self.player_widget.stop_grid.connect(self.manager.midi.terminate_output_thread)
 
         self.reset_button = Button("Reset")
         self.reset_button.pressed.connect(self.reset)

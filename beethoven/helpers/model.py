@@ -1,9 +1,7 @@
 from copy import deepcopy
 
-from beethoven.models import __all__ as Model
 
-
-def update_model(object: Model, **kwargs) -> Model:
+def update_model(object, **kwargs):
     object_data = deepcopy(object.dict())
     object_data.update(kwargs)
 

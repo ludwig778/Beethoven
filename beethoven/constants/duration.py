@@ -6,7 +6,7 @@ quarter_value = Fraction(1)
 eighth_value = Fraction(1, 2)
 sixteenth_value = Fraction(1, 4)
 
-durations = {
+base_values = {
     "W": whole_value,
     "H": half_value,
     "Q": quarter_value,

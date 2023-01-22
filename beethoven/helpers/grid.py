@@ -1,9 +1,7 @@
 from copy import deepcopy
 from typing import List, Tuple
 
-from beethoven.helpers.time_signature import get_time_signature_duration
-from beethoven.models import Grid, TimeSignature
-from beethoven.models.duration import Duration
+from beethoven.models import Duration, Grid, TimeSignature
 from beethoven.types import GridParts
 
 
@@ -38,7 +36,7 @@ def fix_grid_parts_durations(grid: Grid) -> Grid:
             time_signature_timeline = Duration(value=0)
 
         if not grid_part.duration:
-            grid_part.duration = get_time_signature_duration(last_time_signature)
+            grid_part.duration = last_time_signature.get_duration()
 
             rest = time_signature_timeline % grid_part.duration
 

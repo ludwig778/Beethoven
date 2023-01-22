@@ -1,9 +1,12 @@
+from typing import Dict
+
 from pyparsing import (
     Combine,
     Empty,
     Group,
     Literal,
     Optional,
+    ParserElement,
     Suppress,
     Word,
     ZeroOrMore,
@@ -13,7 +16,7 @@ from pyparsing import (
     oneOf,
 )
 
-from beethoven.constants.duration import durations
+from beethoven.constants import duration
 
 ENGLISH_NOTE_NOTATION = ("A", "B", "C", "D", "E", "F", "G")
 SOLFEGE_NOTE_NOTATION = ("La", "Si", "Do", "Re", "Mi", "Fa", "Sol")
@@ -54,7 +57,7 @@ time_signature_pattern = Integer("beats_per_bar") + Suppress("/") + Integer("bea
 
 duration_pattern = Optional(
     Integer("numerator") + Optional(Suppress("/") + Integer("denominator"))
-) + Optional(oneOf(" ".join(durations))("base_duration"))
+) + Optional(oneOf(" ".join(duration.base_values))("base_duration"))
 
 chord_pattern = (
     (Group(note_pattern)("root") | Group(degree_with_optional_octave_pattern)("degree"))
@@ -88,3 +91,7 @@ grid_pattern = delimitedList(
     ),
     delim=";",
 )("grid_sections")
+
+
+def parse(parser_pattern: ParserElement, string: str) -> Dict:
+    return parser_pattern.parseString(string, parseAll=True).asDict()

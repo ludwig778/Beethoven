@@ -6,7 +6,7 @@ from beethoven.models import Bpm, Chord, Duration, GridPart, Note, Scale, TimeSi
 
 
 @mark.parametrize(
-    "change_attributes",
+    "part_attributes",
     [
         {
             "scale": Scale(tonic=Note(name="C"), name="major"),
@@ -24,5 +24,5 @@ from beethoven.models import Bpm, Chord, Duration, GridPart, Note, Scale, TimeSi
         },
     ],
 )
-def test_grid_part_model(change_attributes):
-    assert GridPart(**change_attributes)
+def test_grid_part_model(part_attributes):
+    assert GridPart(**part_attributes)

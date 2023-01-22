@@ -1,8 +1,7 @@
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, Optional, Tuple
 
 from beethoven.helpers.midi import get_on_off_messages
-from beethoven.models.duration import Duration
-from beethoven.sequencer.players.base import BasePlayer
+from beethoven.models import Duration
 
 NoteGenerator = Generator[Tuple[str, Any], None, None]
 NoteGenerators = Dict[Any, NoteGenerator]
@@ -49,21 +48,6 @@ def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:
             values[key] = next(generators[key])
         except StopIteration:
             del values[key]
-
-
-def split_player_by_types(
-    players: List[BasePlayer],
-) -> Tuple[List[BasePlayer], List[BasePlayer]]:
-    regular = []
-    time_signature_bound = []
-
-    for player in players:
-        if player.time_signature_bound:
-            time_signature_bound.append(player)
-        else:
-            regular.append(player)
-
-    return regular, time_signature_bound
 
 
 def update_timeline_for_player(timeline_events, player, limit, offset) -> None:

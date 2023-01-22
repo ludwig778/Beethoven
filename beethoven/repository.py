@@ -1,6 +1,9 @@
 import json
 from dataclasses import asdict
 from pathlib import Path
+from typing import Type
+
+from pydantic import BaseModel
 
 from beethoven.core.abstract import AbstractRepository
 from beethoven.mongo import mongo_instance
@@ -8,21 +11,15 @@ from beethoven.utils.deepget import deepget
 
 
 class JsonRepository(AbstractRepository):
-    def __init__(self, **kwargs):
-        self.path = self._setup_file(kwargs.get("path"))
-        self.model = kwargs.get("model")
-        self.table = kwargs.get("table")
-
-    @staticmethod
-    def _setup_file(raw_path: str) -> Path:
-        path = Path(raw_path)
-
+    def __init__(self, path: Path, model: Type[BaseModel], table: str):
         path.parent.mkdir(parents=True, exist_ok=True)
 
         if not path.exists():
             path.touch(exist_ok=True)
 
-        return path
+        self.path = path
+        self.model = model
+        self.table = table
 
     def _read(self):
         with open(self.path, "r") as fd:
@@ -103,11 +100,9 @@ class JsonRepository(AbstractRepository):
 
 
 class MongoRepository(AbstractRepository):
-    def __init__(self, **kwargs):
-        self.model = kwargs.get("model")
-        self.collection = mongo_instance.get_database().get_collection(
-            kwargs.get("collection")
-        )
+    def __init__(self, model: Type[BaseModel], collection_name: str):
+        self.model = model
+        self.collection = mongo_instance.get_database().get_collection(collection_name)
 
     def add(self, model):
         if obj := self.get(model.name):

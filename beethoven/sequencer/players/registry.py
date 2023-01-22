@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 from logging import getLogger
-from typing import TYPE_CHECKING, Dict, List, Optional, Type
-
-if TYPE_CHECKING:
-    from beethoven.sequencer.players.base import BasePlayer
+from typing import Dict, List, Optional
 
 logger = getLogger("players.registry")
 
 
 class RegisteredPlayer(type):
-    instances: Dict[str, Dict[str, Type[BasePlayer]]] = {}
+    instances: Dict[str, Dict[str, RegisteredPlayer]] = {}
 
     def __new__(cls, clsname, superclasses, attributedict):
         newclass = type.__new__(cls, clsname, superclasses, attributedict)
@@ -30,11 +27,11 @@ class RegisteredPlayer(type):
         return list(cls.instances.keys())
 
     @classmethod
-    def get_instrument_styles(cls, instrument_name) -> Dict[str, Type[BasePlayer]]:
+    def get_instrument_styles(cls, instrument_name) -> Dict[str, RegisteredPlayer]:
         return cls.instances.get(instrument_name, {})
 
     @classmethod
     def get_instrument_style(
         cls, instrument_name, style_name
-    ) -> Optional[Type[BasePlayer]]:
-        return cls.instances.get(instrument_name, {}).get(style_name, None)
+    ) -> Optional[RegisteredPlayer]:
+        return cls.instances.get(instrument_name, {}).get(style_name)

@@ -4,14 +4,19 @@ from beethoven.models import Degree
 
 
 @mark.parametrize(
-    "name,alteration",
+    "string,expected_obj",
     [
-        ["i", 0],
-        ["vii", 1],
+        ["i", Degree(name="i")],
+        ["v", Degree(name="v")],
+        ["vii", Degree(name="vii")],
+        ["#i", Degree(name="i", alteration=1)],
+        ["biii", Degree(name="iii", alteration=-1)],
+        ["###iii", Degree(name="iii", alteration=3)],
+        ["bbbiii", Degree(name="iii", alteration=-3)],
     ],
 )
-def test_degree_model(name, alteration):
-    assert Degree(name=name, alteration=alteration)
+def test_degree_parsing(string, expected_obj):
+    assert Degree.parse(string) == expected_obj
 
 
 def test_degree_model_raise_invalid_name():

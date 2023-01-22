@@ -1,7 +1,7 @@
 from collections import defaultdict
 from fractions import Fraction
 from time import sleep
-from typing import Any, List
+from typing import Any, Callable, List, Optional
 
 from pydantic import BaseModel
 
@@ -10,10 +10,8 @@ from beethoven.helpers.grid import (
     fix_grid_parts_durations,
     get_ordered_grid_parts_by_time_signature,
 )
-from beethoven.helpers.sequencer import (
-    split_player_by_types,
-    update_timeline_for_player,
-)
+from beethoven.helpers.player import split_player_by_types
+from beethoven.helpers.sequencer import update_timeline_for_player
 from beethoven.models import Duration, Grid, GridPart
 from beethoven.sequencer.players.base import BasePlayer, PercussionPlayer
 
@@ -54,11 +52,13 @@ class PlayerSettings(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def setup_player(self):
-        self.player.setup()
 
-
-def play_grid(midi_adapter: MidiAdapter, players: List[BasePlayer], grid: Grid) -> None:
+def play_grid(
+    midi_adapter: MidiAdapter,
+    players: List[BasePlayer],
+    grid: Grid,
+    on_grid_part_change: Optional[Callable] = None,
+) -> None:
     grid = fix_grid_parts_durations(grid)
     grid_part_by_time_signatures = get_ordered_grid_parts_by_time_signature(grid)
 
@@ -68,10 +68,14 @@ def play_grid(midi_adapter: MidiAdapter, players: List[BasePlayer], grid: Grid) 
 
     timeline_events: Any = defaultdict(list)
 
+    total_durations = Duration(value=0)
+
     for _, grid_parts in grid_part_by_time_signatures:
-        total_duration = sum(
-            [grid_part.duration for grid_part in grid_parts], start=Duration(value=0)
+        total_duration: Duration = sum(
+            [grid_part.duration for grid_part in grid_parts if grid_part.duration],
+            start=Duration(value=0),
         )
+        total_durations += total_duration
 
         for player in percussion_players:
             player.setup(grid_parts[0])
@@ -108,9 +112,22 @@ def play_grid(midi_adapter: MidiAdapter, players: List[BasePlayer], grid: Grid) 
             if isinstance(event, GridPart):
                 if event.bpm and event.bpm != current_bpm:
                     current_bpm = event.bpm
+
+                if on_grid_part_change:
+                    on_grid_part_change(event)
+
             elif isinstance(event, MidiMessage):
                 midi_adapter.send_message(event)
 
         last_time_cursor = time_cursor
+
+    # TODO CHECK IF USED
+    if True:
+        sleep_time = total_durations - last_time_cursor
+
+        if sleep_time.value != Fraction(0):
+            sleep_time *= Fraction(60, current_bpm.value)
+
+            sleep(float(sleep_time.value))
 
     return

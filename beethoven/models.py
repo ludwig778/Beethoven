@@ -635,16 +635,6 @@ class Scale(BaseModel):
         return chords
 
 
-"""
-class Notes(BaseModel):
-    notes: List[Note]
-    label: Optional[str]
-
-    def __hash__(self):
-        return hash("_".join(map(str, self.notes)))
-"""
-
-
 class Bpm(BaseModel):
     value: int
 

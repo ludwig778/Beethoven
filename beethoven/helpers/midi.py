@@ -1,9 +1,8 @@
 from time import sleep
-from typing import Tuple
+from typing import List, Tuple
 
 from beethoven.adapters.midi import MidiMessage, Output
-from beethoven.models import Duration
-from beethoven.types import NotesContainer
+from beethoven.models import Duration, Note
 
 
 def get_on_off_messages(
@@ -41,7 +40,7 @@ def play_note(
 
 
 def play_notes(
-    notes_container: NotesContainer,
+    notes: List[Note],
     output: Output,
     channel: int,
     velocity: int = 127,
@@ -50,7 +49,7 @@ def play_notes(
     notes_on = []
     notes_off = []
 
-    for note in notes_container.notes:
+    for note in notes:
         note_on, note_off = get_on_off_messages(
             note.midi_index, output, channel, velocity=velocity
         )

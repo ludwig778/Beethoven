@@ -574,8 +574,11 @@ class Scale(BaseModel):
         return cls.build(**parsed)
 
     @staticmethod
-    def build(tonic: Dict, name: str) -> Scale:
-        return Scale(tonic=Note.build(**tonic), name=name.replace("_", " "))
+    def build(tonic: Union[Dict, Note], name: str) -> Scale:
+        return Scale(
+            tonic=Note.build(**tonic) if isinstance(tonic, dict) else tonic,
+            name=name.replace("_", " ")
+        )
 
     @property
     def intervals(self):

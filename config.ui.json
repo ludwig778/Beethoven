@@ -1,0 +1,44 @@
+{
+  "tuning": {
+    "defaults": {
+      "E Standard": "E,A,D,G,B,E",
+      "E Standard 4str": "E,A,D,G",
+      "E Standard 5str": "E,A,D,G,C",
+      "D Dropped": "D,A,D,G,B,E",
+      "B Standard": "B,E,A,D,F#,B",
+      "B Standard 7str": "B,E,A,D,G,B,E",
+      "F# Standard 8str": "F#,B,E,A,D,G,B,E"
+    },
+    "user_defined": {
+      "aaaa": "E,A,E,G,B,E"
+    }
+  },
+  "midi": {
+    "selected_input": null,
+    "opened_outputs": [
+      "Guitar",
+      "Drums",
+      "Metronome",
+      "Piano",
+      "qsddd"
+    ]
+  },
+  "player": {
+    "max_players": 4,
+    "metronome": {
+      "instrument_name": "Metronome",
+      "instrument_style": "Basic",
+      "output_name": "Metronome",
+      "channel": 0,
+      "enabled": true
+    },
+    "preview": {
+      "instrument_name": "Piano",
+      "instrument_style": "Basic",
+      "output_name": "Piano",
+      "channel": 0,
+      "enabled": true
+    },
+    "players": []
+  }
+}

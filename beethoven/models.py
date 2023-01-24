@@ -386,6 +386,8 @@ class Chord(BaseModel):
             if not scale:
                 raise Exception("Scale must be set")
 
+            parsed_degree.pop("octave", None)
+
             degree = Degree.build(**parsed_degree)
             root = scale.get_note_from_degree(degree)
 

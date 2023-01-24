@@ -261,6 +261,13 @@ class Note(BaseModel):
         return [note.remove_octave() for note in notes]
 
 
+class NotesList(BaseModel):
+    notes: List[Note]
+
+    def __hash__(self):
+        return hash("_".join(map(str, self.notes)))
+
+
 class Interval(BaseModel):
     name: str
     alteration: int = 0
@@ -330,7 +337,9 @@ class Chord(BaseModel):
 
     def __hash__(self):
         return hash(
-            f"{self.root}_{self.name}" f":notes={[str(note) for note in self.notes]}"
+            f"{self.root}_{self.name}:"
+            f"{self.inversion}:{self.base_note}:{self.degree}:{self.base_degree}:"
+            f"{'.'.join(map(str, self.extensions))}"
         )
 
     def __str__(self):
@@ -538,6 +547,9 @@ class Scale(BaseModel):
 
     # notes: List[Note] = Field(default_factory=list)
     # intervals: List[Interval] = Field(default_factory=list)
+
+    def __hash__(self):
+        return hash(f"{self.tonic}_{self.name}")
 
     def __str__(self):
         return f"{self.tonic} {self.name}"

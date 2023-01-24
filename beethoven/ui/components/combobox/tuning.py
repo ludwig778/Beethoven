@@ -1,48 +1,45 @@
 from logging import getLogger
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
 
 from beethoven.ui.settings import TuningSettings
-from beethoven.ui.utils import set_object_name
+from beethoven.ui.utils import block_signal
 
 logger = getLogger("combobox.tuning")
 
 
 class TuningComboBox(QComboBox):
+    value_changed = Signal(str)
+
     def __init__(self, *args, tuning_settings: TuningSettings, **kwargs):
         super(TuningComboBox, self).__init__(*args, **kwargs)
 
-        set_object_name(self, **kwargs)
+        self.addItems(tuning_settings.tunings.keys())
 
-        self.tuning_settings = tuning_settings
+        self.set(list(tuning_settings.defaults.keys())[0])
 
-        for tuning_name in self.tuning_settings.tunings.keys():
-            self.addItem(tuning_name)
+        self.currentTextChanged.connect(self.handle_tuning_change)
 
-        self.setCurrentIndex(0)
-
-        self.currentTextChanged.connect(self.on_tuning_change)
-
-    @property
-    def current_tuning_name(self):
-        return self.currentText()
-
-    @property
-    def current_tuning(self):
-        return self.tuning_settings.tunings.get(self.currentText())
-
-    def add_tuning(self, tuning_name):
+    def add(self, tuning_name):
         if self.findText(tuning_name) == -1:
             self.addItem(tuning_name)
 
-    def set_tuning(self, tuning_name):
-        self.setCurrentText(tuning_name)
+    def set(self, tuning_name: str):
+        self.value = tuning_name
 
-    def delete_current_tuning(self):
+        with block_signal([self]):
+            self.setCurrentText(tuning_name)
+
+    def delete_current(self):
         current_index = self.currentIndex()
 
         self.setCurrentIndex(current_index - 1)
         self.removeItem(current_index)
 
-    def on_tuning_change(self, tuning_name):
+    def handle_tuning_change(self, tuning_name):
         logger.debug(f"change to {tuning_name}")
+
+        self.value = tuning_name
+
+        self.value_changed.emit(tuning_name)

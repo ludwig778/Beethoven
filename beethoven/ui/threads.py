@@ -1,10 +1,10 @@
+from logging import getLogger
 from pprint import pprint
 from time import sleep
-from typing import Dict, List
+from typing import Callable, Dict, List, Optional
 
 from PySide6.QtCore import QThread, SignalInstance
 
-from beethoven import controllers
 from beethoven.adapters.midi import Input, MidiAdapter
 from beethoven.models import Grid, Note
 from beethoven.sequencer.players.base import BasePlayer
@@ -27,12 +27,14 @@ class TestThread(QThread):
 
 class MidiInputThread(QThread):
     def __init__(
-        self, *args, midi_input: Input, note_changed_signal: SignalInstance, **kwargs
+        self, *args, midi_input: Input, on_note_change: SignalInstance, **kwargs
     ):
         super(MidiInputThread, self).__init__(*args, **kwargs)
 
+        self.logger = getLogger("threads.midi_input")
+
         self.midi_input = midi_input
-        self.note_changed_signal = note_changed_signal
+        self.on_note_change = on_note_change
 
     def run(self):
         midi_notes: Dict[int, Note] = dict()
@@ -41,7 +43,7 @@ class MidiInputThread(QThread):
             if message.type not in ("note_on", "note_off"):
                 continue
 
-            note = controllers.note.from_midi_index(message.note)
+            note = Note.from_midi_index(message.note)
 
             if message.type == "note_on":
                 midi_notes[message.note] = note
@@ -50,7 +52,7 @@ class MidiInputThread(QThread):
                 if message.note in midi_notes:
                     del midi_notes[message.note]
 
-            self.note_changed_signal.emit(midi_notes)
+            self.on_note_change.emit(midi_notes)
 
 
 class MidiOutputThread(QThread):
@@ -60,22 +62,26 @@ class MidiOutputThread(QThread):
         midi_adapter: MidiAdapter,
         players: List[BasePlayer],
         grid: Grid,
+        on_grid_part_change: Optional[Callable] = None,
+        on_grid_part_end: Optional[Callable] = None,
         **kwargs
     ):
         super(MidiOutputThread, self).__init__()  # *args, **kwargs)
 
+        self.logger = getLogger("threads.midi_output")
+
         self.midi_adapter = midi_adapter
         self.players = players
         self.grid = grid
+        self.on_grid_part_change = on_grid_part_change
+
+        self.finished.connect(on_grid_part_end)
 
     def run(self):
-        play_grid(
-            self.midi_adapter,
-            self.players,
-            self.grid,
-        )
-        print("END")
+        self.logger.info("run start")
+        play_grid(self.midi_adapter, self.players, self.grid, self.on_grid_part_change)
 
     def clean(self):
-        print("CLEAN")
+        self.logger.info("clean midi output")
+
         self.midi_adapter.reset()

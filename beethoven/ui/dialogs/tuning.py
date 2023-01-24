@@ -1,12 +1,13 @@
 from logging import getLogger
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QDialog, QLabel, QPushButton
 
 from beethoven.ui.components.combobox import TuningComboBox
 from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.spinbox import StringNumberSpinBox
 from beethoven.ui.dialogs.tuning_save import TuningSaveDialog
+from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers.app import AppManager
 from beethoven.ui.utils import block_signal
 
@@ -19,17 +20,16 @@ class TuningDialog(QDialog):
     def __init__(self, *args, manager: AppManager, **kwargs):
         super(TuningDialog, self).__init__(*args, **kwargs)
 
+        self.setAttribute(Qt.WA_StyledBackground)
+
         self.tuning_settings = manager.settings.tuning
 
-        self.setup()
-
-    def setup(self):
-        logger.debug("setup")
-
         self.tuning_selector = TuningComboBox(tuning_settings=self.tuning_settings)
-        self.current_tuning = self.tuning_selector.current_tuning
+        self.current_tuning = self.tuning_settings.defaults[self.tuning_selector.value]
 
-        self.string_spinbox = StringNumberSpinBox(value=len(self.current_tuning.notes))
+        self.string_spinbox = StringNumberSpinBox(
+            string_number=len(self.current_tuning.notes)
+        )
         self.string_selectors = StringSelector(initial_tuning=self.current_tuning)
         self.ok_button = QPushButton("OK")
         self.save_button = QPushButton("Save")
@@ -39,12 +39,40 @@ class TuningDialog(QDialog):
         self.save_button.clicked.connect(self.save_tuning)
         self.delete_button.clicked.connect(self.delete_tuning)
 
-        self.tuning_selector.currentTextChanged.connect(self.update_tuning_setting)
-        self.string_spinbox.valueChanged.connect(self.update_string_widgets)
+        self.tuning_selector.value_changed.connect(self.handle_tuning_name_change)
+        self.string_spinbox.value_changed.connect(self.handle_string_number_change)
 
         self.update_delete_button_state()
 
-        self.setLayout(self.get_layout())
+        self.setLayout(
+            vertical_layout(
+                [
+                    self.tuning_selector,
+                    Spacing(size=8),
+                    horizontal_layout(
+                        [
+                            Stretch(),
+                            QLabel("String number :"),
+                            Spacing(size=10),
+                            self.string_spinbox,
+                            Stretch(),
+                        ]
+                    ),
+                    Spacing(size=12),
+                    self.string_selectors,
+                    Spacing(size=10),
+                    Stretch(),
+                    horizontal_layout(
+                        [
+                            self.ok_button,
+                            self.save_button,
+                            self.delete_button,
+                        ]
+                    ),
+                ],
+                margins=(10, 10, 10, 10),
+            )
+        )
 
     def save_tuning(self):
         logger.debug("saving tuning...")
@@ -58,7 +86,7 @@ class TuningDialog(QDialog):
 
             return
 
-        current_tuning = self.string_selectors.get_tuning()
+        current_tuning = self.string_selectors.value
 
         logger.info(f"saving tuning: {tuning_name} => {current_tuning.dict()}")
 
@@ -66,40 +94,41 @@ class TuningDialog(QDialog):
 
         self.configuration_changed.emit()
 
-        self.tuning_selector.add_tuning(tuning_name)
-        self.tuning_selector.set_tuning(tuning_name)
+        self.tuning_selector.add(tuning_name)
+        self.tuning_selector.set(tuning_name)
+
+        self.update_delete_button_state()
 
     def delete_tuning(self):
-        tuning_name = self.tuning_selector.current_tuning_name
+        tuning_name = self.tuning_selector.value
 
         logger.info(f"deleting tuning: {tuning_name}")
 
         del self.tuning_settings.user_defined[tuning_name]
 
-        self.tuning_selector.delete_current_tuning()
+        self.tuning_selector.delete_current()
 
-    def update_string_widgets(self, string_number):
+    def handle_string_number_change(self, string_number):
         logger.info(f"update tuning string count to {string_number}")
 
-        self.string_selectors.update_string_widgets(string_number)
+        self.string_selectors.update_string_number(string_number)
 
-    def update_tuning_setting(self, tuning_name):
+    def handle_tuning_name_change(self, tuning_name):
         logger.info(f"update tuning setting to {tuning_name}")
 
         tuning = self.tuning_settings.tunings[tuning_name]
 
         self.current_tuning = tuning
 
-        with block_signal([self.string_selectors]):
+        with block_signal([self.string_spinbox, self.string_selectors]):
             self.string_spinbox.setValue(len(tuning.notes))
-            self.string_selectors.set_tuning(tuning)
+            self.string_selectors.set(tuning)
 
         self.update_delete_button_state()
 
     def update_delete_button_state(self):
         is_default_tuning = (
-            self.tuning_selector.current_tuning_name
-            not in self.tuning_settings.defaults
+            self.tuning_selector.value not in self.tuning_settings.defaults
         )
 
         if self.delete_button.isEnabled() != is_default_tuning:
@@ -108,23 +137,3 @@ class TuningDialog(QDialog):
             )
 
             return self.delete_button.setEnabled(is_default_tuning)
-
-    def get_layout(self):
-        main_layout = QVBoxLayout()
-
-        spinbox_layout = QHBoxLayout()
-        spinbox_layout.addWidget(QLabel("Strings :"))
-        spinbox_layout.addWidget(self.string_spinbox)
-
-        buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.ok_button)
-        buttons_layout.addWidget(self.save_button)
-        buttons_layout.addWidget(self.delete_button)
-
-        main_layout.addWidget(self.tuning_selector)
-        main_layout.addLayout(spinbox_layout)
-        main_layout.addWidget(self.string_selectors)
-
-        main_layout.addLayout(buttons_layout)
-
-        return main_layout

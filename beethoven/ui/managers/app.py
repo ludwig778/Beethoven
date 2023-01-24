@@ -2,11 +2,12 @@ import json
 import logging
 from logging import getLogger
 from pathlib import Path
+from typing import Callable, Optional
 
 from hartware_lib.adapters.file import FileAdapter
 from PySide6.QtCore import QObject, Signal
 
-from beethoven.adapters.factory import get_adapters
+from beethoven.adapters.factory import Adapters
 from beethoven.models import Grid
 from beethoven.ui.managers.midi import MidiManager
 from beethoven.ui.settings import AppSettings, get_default_settings
@@ -17,9 +18,10 @@ logger = getLogger("manager.app")
 
 
 class AppManager(QObject):
+    grid_ended = Signal()
     configuration_changed = Signal()
 
-    def __init__(self, *args, setting_path: Path, **kwargs):
+    def __init__(self, *args, setting_path: Path, adapters: Adapters, **kwargs):
         # adapters: Adapters, settings: AppSettings, **kwargs):
         super(AppManager, self).__init__(*args, **kwargs)
 
@@ -34,7 +36,7 @@ class AppManager(QObject):
             self.settings = get_default_settings()
             self.setting_file.save_json(self.settings.dict())
 
-        self.adapters = get_adapters()
+        self.adapters = adapters
 
         self.midi = MidiManager(settings=self.settings, midi_adapter=self.adapters.midi)
 
@@ -67,7 +69,13 @@ class AppManager(QObject):
         self.adapters.midi.close_all_outputs()
         self.adapters.midi.close_input(self.midi_input_handler.current_input)
 
-    def play_grid(self, grid: Grid, preview: bool = False):
+    def play_grid(
+        self,
+        grid: Grid,
+        preview: bool = False,
+        on_grid_part_change: Optional[Callable] = None,
+        on_grid_part_end: Optional[Callable] = None,
+    ):
         self.midi.terminate_output_thread()
 
         if preview:
@@ -80,6 +88,10 @@ class AppManager(QObject):
         )
 
         self.midi.output_thread = MidiOutputThread(
-            midi_adapter=self.adapters.midi, grid=grid, players=players
+            midi_adapter=self.adapters.midi,
+            grid=grid,
+            players=players,
+            on_grid_part_change=on_grid_part_change,
+            on_grid_part_end=self.grid_ended.emit,
         )
         self.midi.output_thread.start()

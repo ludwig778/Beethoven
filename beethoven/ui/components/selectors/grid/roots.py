@@ -11,7 +11,7 @@ from beethoven.ui.utils import block_signal
 
 
 class RootGridSelector(BaseGridSelector):
-    root_changed = Signal(Note)
+    value_changed = Signal(Note)
 
     def __init__(self, *args, grid_width: int, **kwargs):
         super(RootGridSelector, self).__init__(*args, **kwargs)
@@ -22,28 +22,24 @@ class RootGridSelector(BaseGridSelector):
         for root in ROOTS:
             root_name = str(root)
 
-            button = PushPullButton(
-                pressed=root_name,
-                released=root_name,
-                state=False,
-                object_name="grid_item",
-            )
-            button.toggled.connect(partial(self.handle_root_click, button, root))
+            button = PushPullButton(root_name)
+            button.toggled.connect(partial(self.handle_root_change, button, root))
 
             self.buttons.append(button)
             self.root_buttons[root] = button
 
         layout = vertical_layout(self.format_grid_rows(self.buttons, grid_width))
-        layout.setSpacing(0)
 
         self.setLayout(layout)
 
-    def handle_root_click(self, button, root, state):
+    def handle_root_change(self, button, root, state):
         self.handle_button_states(button)
 
-        if state:
-            self.root_changed.emit(root)
+        self.value = root
 
-    def set_root(self, root: Note):
+        if state:
+            self.value_changed.emit(self.value)
+
+    def set(self, root: Note):
         with block_signal(self.buttons):
             self.handle_button_states(self.root_buttons[root])

@@ -1,34 +1,49 @@
-from typing import Optional
-
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
 
 from beethoven.ui.constants import DEFAULT_MIDI_INPUT
 from beethoven.ui.managers import AppManager
-from beethoven.ui.utils import set_object_name
+from beethoven.ui.utils import block_signal
 
 
 class MidiInputComboBox(QComboBox):
-    def __init__(self, *args, manager: AppManager, value: Optional[str], **kwargs):
+    value_changed = Signal(str)
+
+    def __init__(self, *args, manager: AppManager, **kwargs):
         super(MidiInputComboBox, self).__init__(*args, **kwargs)
 
-        set_object_name(self, **kwargs)
-
         self.manager = manager
+        self.value = DEFAULT_MIDI_INPUT
 
-        self.setup_items()
+        self.refresh()
 
-        if value:
-            self.setCurrentText(value)
+        self.currentTextChanged.connect(self.handle_input_name_change)
 
-    def setup_items(self):
-        current_input = self.manager.settings.midi.selected_input
+    def set(self, name: str):
+        self.value = name
 
-        self.clear()
-        self.addItem(DEFAULT_MIDI_INPUT)
+        with block_signal([self]):
+            self.setCurrentText(name)
 
-        input_names = list(set(sorted(self.manager.adapters.midi.available_inputs)))
+    def handle_input_name_change(self, name: str):
+        self.value = name
 
-        self.addItems(input_names)
+        self.value_changed.emit(name)
 
-        if current_input in input_names:
-            self.setCurrentText(current_input)
+    def refresh(self):
+        with block_signal([self]):
+            self.clear()
+            self.addItem(DEFAULT_MIDI_INPUT)
+
+            input_names = list(set(sorted(self.manager.adapters.midi.available_inputs)))
+
+            self.addItems(input_names)
+
+            selected_input = self.value or self.manager.settings.midi.selected_input
+
+            if selected_input and selected_input in input_names:
+                self.set(selected_input)
+            else:
+                self.set("")
+
+                self.value_changed.emit(None)

@@ -1,4 +1,4 @@
-from beethoven.ui.components.selectors.exclusive.base import ExclusiveSelector
+from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
 from beethoven.ui.constants import (
     SCALE_LABELS,
     SCALES_DATA,
@@ -7,9 +7,9 @@ from beethoven.ui.constants import (
 )
 
 
-class ExclusiveScaleSelector(ExclusiveSelector):
+class ScaleExclusiveSelector(BaseExclusiveSelector):
     def __init__(self, *args, **kwargs):
-        super(ExclusiveScaleSelector, self).__init__(
+        super(ScaleExclusiveSelector, self).__init__(
             *args,
             data=SCALES_DATA,
             labels=SCALE_LABELS,

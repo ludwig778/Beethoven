@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QTreeWidgetItem
 from beethoven.ui.components.selectors.base import BaseSelector
 
 
-class MultipleSelector(BaseSelector):
+class BaseMultipleSelector(BaseSelector):
     def __init__(
         self,
         *args,
@@ -16,7 +16,7 @@ class MultipleSelector(BaseSelector):
         checked_labels: List[str],
         **kwargs
     ):
-        super(MultipleSelector, self).__init__(*args, **kwargs)
+        super(BaseMultipleSelector, self).__init__(*args, **kwargs)
 
         for label in labels:
             expanded_state = label in expanded_labels

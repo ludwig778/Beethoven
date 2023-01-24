@@ -1,39 +1,36 @@
 from logging import getLogger
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QComboBox
 
-import beethoven.controllers.note as note_controller
-from beethoven.helpers.note import remove_note_octave
-from beethoven.models.note import Note
-from beethoven.ui.utils import set_object_name
+from beethoven.models import Note
+from beethoven.ui.utils import block_signal
 
 logger = getLogger("combobox.note")
 
 
 class NoteComboBox(QComboBox):
-    note_changed = Signal(Note)
-    AVAILABLE_NOTES = note_controller.parse_list("A,A#,B,C,C#,D,D#,E,F,F#,G,G#")
+    value_changed = Signal(Note)
+    available_notes = Note.parse_list("A,A#,B,C,C#,D,D#,E,F,F#,G,G#")
 
-    def __init__(self, *args, selected_note: Note, **kwargs):
+    def __init__(self, *args, note: Note, **kwargs):
         super(NoteComboBox, self).__init__(*args, **kwargs)
 
-        set_object_name(self, **kwargs)
+        self.setAttribute(Qt.WA_StyledBackground)
 
-        for note in self.AVAILABLE_NOTES:
-            self.addItem(str(note))
+        self.addItems([str(n) for n in self.available_notes])
 
-        self.set_note(selected_note)
+        self.set(note)
 
-        self.currentTextChanged.connect(self.on_note_change)
+        self.currentIndexChanged.connect(self.handle_note_change)
 
-    def set_note(self, note: Note):
-        self.setCurrentIndex(self.AVAILABLE_NOTES.index(remove_note_octave(note)))
+    def set(self, note: Note):
+        self.value = note
 
-    def get_note(self):
-        return self.AVAILABLE_NOTES[self.currentIndex()]
+        with block_signal([self]):
+            self.setCurrentIndex(self.available_notes.index(note.remove_octave()))
 
-    def on_note_change(self, note):
-        logger.debug(f"change to {note}")
+    def handle_note_change(self, value):
+        self.value = self.available_notes[value]
 
-        self.note_changed.emit(note)
+        self.value_changed.emit(self.value)

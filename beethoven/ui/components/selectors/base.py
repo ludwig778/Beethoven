@@ -4,14 +4,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 from beethoven.indexes.models import IndexDataModels, ScaleData
-from beethoven.ui.utils import set_object_name
 
 
 class BaseSelector(QTreeWidget):
     def __init__(self, *args, **kwargs):
         super(BaseSelector, self).__init__(*args, **kwargs)
-
-        set_object_name(self, **kwargs)
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 

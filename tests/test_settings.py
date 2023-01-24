@@ -113,7 +113,7 @@ def test_settings_with_mixed_source(monkeypatch):
     config_file = FileAdapter(file_path=Path(".testing/beethoven/config.json"))
     config_file.create_parent_dir()
 
-    config_file.write_json(
+    config_file.save_json(
         {
             "local_store": {"path": ".testing/beethoven/store.json"},
             "midi": {"default_output": "Beethoven Default Output"},

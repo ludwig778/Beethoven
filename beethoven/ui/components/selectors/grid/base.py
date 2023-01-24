@@ -1,7 +1,7 @@
 from math import ceil
 from typing import List
 
-from PySide6.QtWidgets import QPushButton, QWidget
+from PySide6.QtWidgets import QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
 from beethoven.ui.layouts import horizontal_layout
@@ -15,7 +15,7 @@ class BaseGridSelector(QWidget):
         super(BaseGridSelector, self).__init__(*args, **kwargs)
 
     def get_enabled_buttons(self):
-        return list(filter(QPushButton.isChecked, self.buttons))
+        return list(filter(lambda button: button.pressed, self.buttons))
 
     @staticmethod
     def format_grid_rows(objects, num):
@@ -28,18 +28,18 @@ class BaseGridSelector(QWidget):
 
     def clear(self):
         for button in self.buttons:
-            if not button.isChecked():
+            if not button.pressed:
                 continue
 
             with block_signal([button]):
-                button.setChecked(False)
+                button.toggle()
 
     def handle_button_states(self, updated_button, empty_allowed=False):
         enabled_buttons = self.get_enabled_buttons()
 
         if not enabled_buttons and not empty_allowed:
             with block_signal([updated_button]):
-                updated_button.setChecked(True)
+                updated_button.toggle()
 
         else:
             if updated_button in enabled_buttons:
@@ -47,4 +47,4 @@ class BaseGridSelector(QWidget):
 
             for enabled_button in enabled_buttons:
                 with block_signal([enabled_button]):
-                    enabled_button.setChecked(False)
+                    enabled_button.toggle()

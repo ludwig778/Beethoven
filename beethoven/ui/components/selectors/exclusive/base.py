@@ -7,7 +7,7 @@ from beethoven.ui.components.selectors.base import BaseSelector
 from beethoven.ui.utils import block_signal
 
 
-class ExclusiveSelector(BaseSelector):
+class BaseExclusiveSelector(BaseSelector):
     def __init__(
         self,
         *args,
@@ -17,7 +17,7 @@ class ExclusiveSelector(BaseSelector):
         checked: str,
         **kwargs
     ):
-        super(ExclusiveSelector, self).__init__(*args, **kwargs)
+        super(BaseExclusiveSelector, self).__init__(*args, **kwargs)
 
         self.checked_item = None
 

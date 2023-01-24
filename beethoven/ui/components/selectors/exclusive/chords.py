@@ -1,4 +1,4 @@
-from beethoven.ui.components.selectors.exclusive.base import ExclusiveSelector
+from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
 from beethoven.ui.constants import (
     CHORD_LABELS,
     CHORDS_DATA,
@@ -7,9 +7,9 @@ from beethoven.ui.constants import (
 )
 
 
-class ExclusiveChordSelector(ExclusiveSelector):
+class ChordExclusiveSelector(BaseExclusiveSelector):
     def __init__(self, *args, **kwargs):
-        super(ExclusiveChordSelector, self).__init__(
+        super(ChordExclusiveSelector, self).__init__(
             *args,
             data=CHORDS_DATA,
             labels=CHORD_LABELS,

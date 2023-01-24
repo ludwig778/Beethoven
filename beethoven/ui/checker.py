@@ -1,9 +1,7 @@
 from enum import Enum, auto
-from functools import lru_cache
-from typing import Dict, List
+from typing import List
 
-from beethoven.helpers.note import remove_notes_octave
-from beethoven.models import Note, Notes
+from beethoven.models import Note
 from beethoven.types import NotesContainer
 
 
@@ -14,11 +12,7 @@ class NoteCheckerType(Enum):
 
 class NotesContainerChecker:
     def __init__(
-        self,
-        *args,
-        notes_containers: List[NotesContainer],
-        type_check: NoteCheckerType,
-        **kwargs
+        self, notes_containers: List[NotesContainer], type_check: NoteCheckerType
     ):
         self.i = 0
         self.type_check = type_check
@@ -26,28 +20,25 @@ class NotesContainerChecker:
         self.done = False
 
     @staticmethod
-    @lru_cache
-    def to_base_notes(notes_container: NotesContainer) -> Notes:
-        return Notes(notes=remove_notes_octave(sorted(notes_container.notes)))
+    def to_base_notes(notes: List[Note]) -> List[Note]:
+        return Note.remove_notes_octave(notes)
 
     @staticmethod
-    @lru_cache
-    def to_midi_index(notes_container: NotesContainer) -> List[int]:
-        return [note.midi_index for note in notes_container.notes]
+    def to_midi_index(notes: List[Note]) -> List[int]:
+        return [note.midi_index for note in notes]
 
     @property
     def current(self) -> NotesContainer:
         return self.notes_containers[self.i]
 
-    def check(self, indexed_notes: Dict[int, Note]) -> bool:
+    def check(self, notes_container: NotesContainer) -> bool:
         if self.done:
             return False
 
         if self.type_check == NoteCheckerType.BY_BASE_NOTE:
-            notes = Notes(notes=list(indexed_notes.values()))
-
-            if self.to_midi_index(self.to_base_notes(notes)) != self.to_midi_index(
-                self.current
+            if (
+                self.to_midi_index(self.to_base_notes(notes_container.notes))
+                != self.to_midi_index(self.to_base_notes(self.current.notes))
             ):
                 return False
 

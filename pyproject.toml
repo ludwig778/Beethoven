@@ -27,7 +27,7 @@ prompt-toolkit = "3.0.18"
 pydantic = "1.10.2"
 pymongo = "3.12.3"
 pyparsing = "3.0.9"
-pyside6 = "^6.4.2"
+pyside6 = "6.4.2"
 python-rtmidi = "1.4.9"
 requests = "2.28.1"
 requests-futures = "1.0.0"
@@ -50,7 +50,7 @@ pytest-env = "0.6.2"
 pytest-mock = "3.10.0"
 
 [tool.poetry.scripts]
-beethoven = "beethoven:main"
+beethoven = "beethoven.ui.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

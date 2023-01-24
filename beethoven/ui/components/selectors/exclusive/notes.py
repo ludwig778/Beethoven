@@ -1,4 +1,4 @@
-from beethoven.ui.components.selectors.exclusive.base import ExclusiveSelector
+from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
 from beethoven.ui.constants import (
     NOTE_LABELS,
     NOTES_DATA,
@@ -7,9 +7,9 @@ from beethoven.ui.constants import (
 )
 
 
-class ExclusiveNoteSelector(ExclusiveSelector):
+class NoteExclusiveSelector(BaseExclusiveSelector):
     def __init__(self, *args, **kwargs):
-        super(ExclusiveNoteSelector, self).__init__(
+        super(NoteExclusiveSelector, self).__init__(
             *args,
             data=NOTES_DATA,
             labels=NOTE_LABELS,

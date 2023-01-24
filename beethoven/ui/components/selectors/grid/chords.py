@@ -1,4 +1,5 @@
 from functools import partial
+from typing import List
 
 from PySide6.QtCore import Signal
 
@@ -10,24 +11,19 @@ from beethoven.ui.utils import block_signal
 
 
 class ChordGridSelector(BaseGridSelector):
-    chord_name_changed = Signal(str)
+    value_changed = Signal(str)
 
     def __init__(self, *args, grid_width: int, **kwargs):
         super(ChordGridSelector, self).__init__(*args, **kwargs)
 
-        self.buttons = []
+        self.buttons: List[PushPullButton] = []
         self.chord_name_buttons = {}
 
         for chord_data in CHORDS_DATA_FLATTEN:
             chord_name = chord_data.short_name
 
-            button = PushPullButton(
-                pressed=chord_name,
-                released=chord_name,
-                state=False,
-                object_name="grid_item",
-            )
-            button.toggled.connect(partial(self.handle_chord_click, button))
+            button = PushPullButton(chord_name)
+            button.toggled.connect(partial(self.handle_chord_change, button))
 
             self.buttons.append(button)
             self.chord_name_buttons[chord_name] = button
@@ -36,14 +32,16 @@ class ChordGridSelector(BaseGridSelector):
 
         self.setLayout(layout)
 
-    def handle_chord_click(self, button, state):
-        self.handle_button_states(button, empty_allowed=True)
-
-        self.chord_name_changed.emit(button.text() if state else "")
-
-    def set_chord_name(self, name: str):
+    def set(self, chord_name: str):
         with block_signal(self.buttons):
-            if not name:
+            if not chord_name:
                 self.clear()
             else:
-                self.handle_button_states(self.chord_name_buttons[name])
+                self.handle_button_states(self.chord_name_buttons[chord_name])
+
+    def handle_chord_change(self, button, state):
+        self.handle_button_states(button, empty_allowed=True)
+
+        self.value = button.text() if state else ""
+
+        self.value_changed.emit(self.value)

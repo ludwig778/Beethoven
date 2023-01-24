@@ -2,12 +2,12 @@ from logging import getLogger
 from typing import Optional
 
 from PySide6.QtCore import QObject, Signal
-from PySide6.QtWidgets import QComboBox, QLabel, QVBoxLayout, QWidget, QDialog
+from PySide6.QtWidgets import QComboBox, QDialog, QLabel, QVBoxLayout, QWidget
 
 from beethoven.sequencer.players.registry import RegisteredPlayer
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
-from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.settings import PlayerSetting
 from beethoven.ui.utils import block_signal
@@ -32,64 +32,79 @@ class PlayerRow(QWidget):
         self.settings = settings
         self.system_player = system_player
 
-        self.instrument_combobox = QComboBox()
+        self.instrument_name_combobox = QComboBox()
+        self.instrument_name_combobox.setObjectName("instrument_name")
+
         self.instrument_style_combobox = QComboBox()
+        self.instrument_style_combobox.setObjectName("instrument_style")
+
         self.output_name_combobox = MidiOutputComboBox(
             value=self.settings.output_name, manager=self.manager
         )
-        self.channel_combobox = MidiChannelComboBox(value=self.settings.channel)
+        self.channel_combobox = MidiChannelComboBox(midi_channel=self.settings.channel)
 
-        self.instrument_combobox.setStyleSheet("width: 70px;")
+        # self.instrument_combobox.setStyleSheet("width: 70px;")
 
         self.set_instruments()
         self.set_instrument_styles()
 
-        self.instrument_combobox.currentTextChanged.connect(self.update_instrument_name)
+        self.instrument_name_combobox.currentTextChanged.connect(
+            self.handle_instrument_name_change
+        )
         self.instrument_style_combobox.currentTextChanged.connect(
-            self.update_instrument_style
+            self.handle_instrument_style_change
         )
         self.output_name_combobox.currentTextChanged.connect(self.setting_changed)
         self.channel_combobox.currentTextChanged.connect(self.setting_changed)
 
         widgets = [
-            self.instrument_combobox,
+            self.instrument_name_combobox,
+            Spacing(size=2),
             self.instrument_style_combobox,
+            Spacing(size=20),
             self.output_name_combobox,
+            Spacing(size=2),
             self.channel_combobox,
         ]
 
         if not self.system_player:
             self.enable_button = PushPullButton(
-                released="Enable",
-                pressed="Enabled",
-                state=self.settings.enabled,
+                "Enable",
+                pressed=self.settings.enabled,
+                pressed_text="Enabled",
             )
             self.delete_button = Button("X")
-            self.delete_button.setFixedWidth(23)
-            self.delete_button.setStyleSheet("background-color: red;")
+
+            self.enable_button.setObjectName("enable_button")
+            self.delete_button.setObjectName("delete_button")
 
             self.enable_button.toggled.connect(self.setting_changed)
             self.delete_button.clicked.connect(lambda: self.deleted.emit(self))
 
-            widgets += [self.enable_button, self.delete_button]
+            widgets += [
+                Stretch(),
+                self.enable_button,
+                Spacing(size=2),
+                self.delete_button,
+            ]
 
-        self.setLayout(horizontal_layout(widgets))
+        self.setLayout(horizontal_layout(widgets, margins=(0, 2, 0, 2)))  # type: ignore
 
     def set_instruments(self):
-        self.instrument_combobox.clear()
+        self.instrument_name_combobox.clear()
 
-        self.instrument_combobox.addItem("")
+        self.instrument_name_combobox.addItem("")
 
         instrument_names = RegisteredPlayer.get_instrument_names()
 
         for instrument in instrument_names:
-            self.instrument_combobox.addItem(instrument)
+            self.instrument_name_combobox.addItem(instrument)
 
         if (
             self.settings.instrument_name
             and self.settings.instrument_name in instrument_names
         ):
-            self.instrument_combobox.setCurrentText(self.settings.instrument_name)
+            self.instrument_name_combobox.setCurrentText(self.settings.instrument_name)
 
     def set_instrument_styles(self):
         self.instrument_style_combobox.clear()
@@ -113,7 +128,7 @@ class PlayerRow(QWidget):
                 self.settings.instrument_style
             )
 
-    def update_instrument_name(self, name: Optional[str]):
+    def handle_instrument_name_change(self, name: Optional[str]):
         logger.info(f"instrument name set to {name or 'none'}")
 
         self.settings.instrument_name = name or None
@@ -131,7 +146,7 @@ class PlayerRow(QWidget):
 
         self.manager.configuration_changed.emit()
 
-    def update_instrument_style(self, name: Optional[str]):
+    def handle_instrument_style_change(self, name: Optional[str]):
         logger.info(f"instrument style set to {name or 'none'}")
 
         self.settings.instrument_style = name or None
@@ -139,7 +154,9 @@ class PlayerRow(QWidget):
         self.manager.configuration_changed.emit()
 
     def setting_changed(self):
-        self.settings.instrument_name = self.instrument_combobox.currentText() or None
+        self.settings.instrument_name = (
+            self.instrument_name_combobox.currentText() or None
+        )
         self.settings.output_name = self.output_name_combobox.currentText() or None
         self.settings.channel = int(self.channel_combobox.currentText())
 
@@ -155,13 +172,22 @@ class PlayerDialog(QDialog):
     def __init__(self, *args, manager: AppManager, **kwargs):
         super(PlayerDialog, self).__init__(*args, **kwargs)
 
-        self.setFixedSize(740, 370)
         self.manager = manager
 
         self.player_list = QVBoxLayout()
 
         self.ok_button = Button("OK")
         self.add_button = Button("Add Player")
+
+        instrument_settings_label = QLabel("Instrument settings :")
+        instrument_settings_label.setObjectName("settings_label")
+        instrument_settings_label2 = QLabel("Instrument settings :")
+        instrument_settings_label2.setObjectName("settings_label")
+
+        midi_settings_label = QLabel("Midi settings :")
+        midi_settings_label.setObjectName("settings_label")
+        midi_settings_label2 = QLabel("Midi settings :")
+        midi_settings_label2.setObjectName("settings_label")
 
         self.ok_button.clicked.connect(self.close)
         self.add_button.clicked.connect(self.add_player)
@@ -170,6 +196,15 @@ class PlayerDialog(QDialog):
         self.setLayout(
             vertical_layout(
                 [
+                    horizontal_layout(
+                        [
+                            Spacing(size=188),
+                            instrument_settings_label,
+                            Spacing(size=181),
+                            midi_settings_label,
+                            Stretch(),
+                        ]
+                    ),
                     horizontal_layout(
                         [
                             QLabel("Preview"),
@@ -190,16 +225,32 @@ class PlayerDialog(QDialog):
                             ),
                         ]
                     ),
+                    Spacing(size=16),
                     QLabel("Players"),
+                    Spacing(size=12),
+                    horizontal_layout(
+                        [
+                            Spacing(size=10),
+                            instrument_settings_label2,
+                            Spacing(size=181),
+                            midi_settings_label2,
+                            Stretch(),
+                        ]
+                    ),
                     self.player_list,
                     Stretch(),
                     horizontal_layout(
                         [
+                            Stretch(),
                             self.ok_button,
+                            Spacing(size=5),
                             self.add_button,
-                        ]
+                            Stretch(),
+                        ],
+                        object_name="button_box",
                     ),
-                ]
+                ],
+                margins=(10, 10, 10, 10),
             )
         )
 

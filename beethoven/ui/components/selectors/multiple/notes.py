@@ -1,10 +1,10 @@
-from beethoven.ui.components.selectors.multiple.base import MultipleSelector
+from beethoven.ui.components.selectors.multiple.base import BaseMultipleSelector
 from beethoven.ui.constants import NOTE_LABELS, NOTES_DATA, SELECTED_NOTE_LABELS
 
 
-class MultipleNoteSelector(MultipleSelector):
+class NoteMultipleSelector(BaseMultipleSelector):
     def __init__(self, *args, **kwargs):
-        super(MultipleNoteSelector, self).__init__(
+        super(NoteMultipleSelector, self).__init__(
             *args,
             data=NOTES_DATA,
             labels=NOTE_LABELS,

@@ -2,8 +2,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
-from beethoven.controllers.note import parse_list as parse_notes_list
-from beethoven.models.note import Note
+from beethoven.models import Note
 
 
 class TuningSetting(BaseModel):
@@ -21,7 +20,7 @@ class TuningSetting(BaseModel):
 
     @classmethod
     def from_str(cls, notes):
-        return cls(notes=parse_notes_list(notes))
+        return cls(notes=Note.parse_list(notes))
 
 
 class TuningSettings(BaseModel):

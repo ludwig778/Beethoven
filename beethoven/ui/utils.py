@@ -1,19 +1,21 @@
 from contextlib import contextmanager
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QListWidget, QListWidgetItem, QWidget
+from PySide6.QtWidgets import QDialog, QListWidget, QListWidgetItem, QWidget
 
-from beethoven import controllers
 from beethoven.adapters.midi import MidiAdapter
+from beethoven.models import Degree, Scale
 from beethoven.sequencer.players.base import BasePlayer
 from beethoven.sequencer.players.registry import RegisteredPlayer
-from beethoven.ui.models import ChordItem, HarmonyItem, HarmonyItems
+from beethoven.ui.components.buttons import PushPullButton
+from beethoven.ui.constants import DEFAULT_BPM, DEFAULT_TIME_SIGNATURE
+from beethoven.ui.models import ChordItem, DurationItem, HarmonyItem
 from beethoven.ui.settings import PlayerSetting
 
 
 @contextmanager
-def block_signal(widgets: List[QWidget]):
+def block_signal(widgets: List):
     for widget in widgets:
         widget.blockSignals(True)
     try:
@@ -21,11 +23,6 @@ def block_signal(widgets: List[QWidget]):
     finally:
         for widget in widgets:
             widget.blockSignals(False)
-
-
-def set_object_name(widget: QWidget, object_name: Optional[str] = None, **kwargs):
-    if object_name:
-        widget.setObjectName(object_name)
 
 
 def get_checked_items(list_widget: QListWidget) -> List[QListWidgetItem]:
@@ -75,15 +72,58 @@ def run_method_on_widgets(
 
 
 def get_default_chord_item() -> ChordItem:
-    return ChordItem(root=controllers.degree.parse("I"), name="")
+    return ChordItem(
+        root=Degree.parse("I"), name="", duration_item=DurationItem()
+    )
 
 
 def get_default_harmony_item() -> HarmonyItem:
     return HarmonyItem(
-        scale=controllers.scale.parse("C4_major"),
-        chord_items=[get_default_chord_item()],
+        scale=Scale.parse("C4_major"),
+        chord_items=[
+            ChordItem(
+                root=Degree.parse("II"),
+                name="",
+                duration_item=DurationItem(),
+            ),
+            ChordItem(
+                root=Degree.parse("V"),
+                name="",
+                duration_item=DurationItem(),
+            ),
+            ChordItem(
+                root=Degree.parse("I"),
+                name="",
+                duration_item=DurationItem(),
+            ),
+        ],
+        # chord_items=[get_default_chord_item()],
+        bpm=DEFAULT_BPM,
+        time_signature=DEFAULT_TIME_SIGNATURE,
     )
 
 
-def get_default_harmony_items() -> HarmonyItems:
-    return HarmonyItems(items=[get_default_harmony_item()])
+def get_default_harmony_items() -> List[HarmonyItem]:
+    return [get_default_harmony_item(), get_default_harmony_item()]
+
+
+def get_harmony_items_from_list(data_items):
+    return [HarmonyItem.from_dict(item) for item in data_items]
+
+
+def get_harmony_items_to_dict(harmony_items):
+    return [item.dict() for item in harmony_items]
+
+
+def connect_push_pull_button_and_dialog(
+    push_pull_button: PushPullButton, dialog: QDialog
+):
+    def handle_push_pull_button_toggle(value):
+        if value:
+            dialog.show()
+        else:
+            with block_signal([dialog]):
+                dialog.close()
+
+    push_pull_button.toggled.connect(handle_push_pull_button_toggle)
+    dialog.finished.connect(push_pull_button.toggle)

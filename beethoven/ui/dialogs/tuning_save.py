@@ -1,15 +1,10 @@
 from logging import getLogger
 from typing import Tuple
 
-from PySide6.QtWidgets import (
-    QDialog,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QVBoxLayout,
-)
+from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
 
+from beethoven.ui.components.buttons import Button
+from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
 from beethoven.ui.settings import TuningSettings
 
 logger = getLogger("dialog.tuning_save")
@@ -21,53 +16,50 @@ class TuningSaveDialog(QDialog):
 
         self.tuning_settings = tuning_settings
 
-        self.setup()
-
-    def setup(self):
-        logger.debug("setup")
-
-        self.text_label = QLabel("Choose the tuning name:")
+        self.text_label = QLabel("Choose the tuning name: ")
         self.input_box = QLineEdit()
 
-        self.duplicate_error_label = QLabel(
-            "Choose another name, this one's already taken"
-        )
+        self.duplicate_error_label = QLabel()
+        self.duplicate_error_label.setObjectName("error_label")
 
-        self.ok_button = QPushButton("Ok")
-        self.cancel_button = QPushButton("Cancel")
+        self.ok_button = Button("Ok")
+        self.cancel_button = Button("Cancel")
 
-        self.duplicate_error_label.setVisible(False)
         self.ok_button.setEnabled(False)
 
         self.input_box.textChanged.connect(self.update)
         self.ok_button.clicked.connect(self.accept)
         self.cancel_button.clicked.connect(self.reject)
 
-        self.setLayout(self.get_layout())
+        self.setLayout(
+            vertical_layout(
+                [
+                    self.text_label,
+                    Spacing(size=10),
+                    self.input_box,
+                    Spacing(size=4),
+                    self.duplicate_error_label,
+                    Spacing(size=10),
+                    horizontal_layout(
+                        [
+                            self.ok_button,
+                            self.cancel_button,
+                        ]
+                    ),
+                ],
+                margins=(10, 10, 10, 10),
+            )
+        )
 
     def update(self, tuning_name):
         existing_tuning_names = self.tuning_settings.defaults.keys()
 
         if tuning_name in existing_tuning_names:
             self.ok_button.setEnabled(False)
-            self.duplicate_error_label.setVisible(True)
+            self.duplicate_error_label.setText("Name already taken")
         else:
             self.ok_button.setEnabled(tuning_name != "")
-            self.duplicate_error_label.setVisible(False)
+            self.duplicate_error_label.setText("")
 
     def getText(self) -> Tuple[bool, str]:
         return bool(self.exec()), self.input_box.text()
-
-    def get_layout(self):
-        main_layout = QVBoxLayout()
-
-        buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.ok_button)
-        buttons_layout.addWidget(self.cancel_button)
-
-        main_layout.addWidget(self.text_label)
-        main_layout.addWidget(self.input_box)
-        main_layout.addWidget(self.duplicate_error_label)
-        main_layout.addLayout(buttons_layout)
-
-        return main_layout

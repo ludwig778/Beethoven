@@ -1,20 +1,21 @@
 import atexit
 from logging import getLogger
-from pathlib import Path
 
 from PySide6.QtWidgets import QMainWindow
 from beethoven.adapters.factory import get_adapters
 
 from beethoven.ui.main_window import MainWindow
 from beethoven.ui.managers import AppManager
+from beethoven.ui.settings import get_settings
 
 logger = getLogger("ui.main")
 
 
 def setup_main_window() -> QMainWindow:
-    adapters = get_adapters()
-
-    manager = AppManager(setting_path=Path(".", "config.ui.json"), adapters=adapters)
+    manager = AppManager(
+        settings=get_settings(),
+        adapters=get_adapters()
+    )
 
     atexit.register(manager.midi.terminate_threads)
 

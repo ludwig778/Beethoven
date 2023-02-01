@@ -9,33 +9,27 @@
       "B Standard 7str": "B,E,A,D,G,B,E",
       "F# Standard 8str": "F#,B,E,A,D,G,B,E"
     },
-    "user_defined": {
-      "aaaa": "E,A,E,G,B,E"
-    }
+    "user_defined": {}
   },
   "midi": {
     "selected_input": null,
     "opened_outputs": [
-      "Guitar",
-      "Drums",
-      "Metronome",
-      "Piano",
-      "qsddd"
+      "Beethoven"
     ]
   },
   "player": {
     "max_players": 4,
     "metronome": {
-      "instrument_name": "Metronome",
-      "instrument_style": "Basic",
-      "output_name": "Metronome",
+      "instrument_name": "",
+      "instrument_style": null,
+      "output_name": "",
       "channel": 0,
       "enabled": true
     },
     "preview": {
-      "instrument_name": "Piano",
-      "instrument_style": "Basic",
-      "output_name": "Piano",
+      "instrument_name": "",
+      "instrument_style": null,
+      "output_name": "",
       "channel": 0,
       "enabled": true
     },

@@ -1,8 +1,8 @@
 
 from functools import partial
-from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
+from beethoven.ui.settings import get_settings
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
@@ -33,11 +33,10 @@ def qt_application():
 
 @fixture
 def manager():
-    setting_path = Path(".", "config.ui.json")
-
-    adapters = get_adapters()
-
-    yield AppManager(setting_path=setting_path, adapters=adapters)
+    yield AppManager(
+        settings=get_settings(),
+        adapters=get_adapters()
+    )
 
 
 @fixture

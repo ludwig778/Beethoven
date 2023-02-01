@@ -1,6 +1,9 @@
+import json
+from pathlib import Path
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, BaseSettings, Field, validator
+from hartware_lib.adapters.file import FileAdapter
 
 from beethoven.models import Note
 
@@ -24,8 +27,16 @@ class TuningSetting(BaseModel):
 
 
 class TuningSettings(BaseModel):
-    defaults: Dict[str, TuningSetting]
-    user_defined: Dict[str, TuningSetting]
+    defaults: Dict[str, TuningSetting] = {
+        "E Standard": TuningSetting.from_str("E,A,D,G,B,E"),
+        "E Standard 4str": TuningSetting.from_str("E,A,D,G"),
+        "E Standard 5str": TuningSetting.from_str("E,A,D,G,C"),
+        "D Dropped": TuningSetting.from_str("D,A,D,G,B,E"),
+        "B Standard": TuningSetting.from_str("B,E,A,D,F#,B"),
+        "B Standard 7str": TuningSetting.from_str("B,E,A,D,G,B,E"),
+        "F# Standard 8str": TuningSetting.from_str("F#,B,E,A,D,G,B,E"),
+    }
+    user_defined: Dict[str, TuningSetting] = {}
 
     @validator("defaults", "user_defined", pre=True)
     def setup_tuning_objects(cls, tunings):
@@ -62,35 +73,44 @@ class PlayerSettings(BaseModel):
     players: List[PlayerSetting]
 
 
+class SettingsConfigFile(BaseSettings):
+    path: Path = Path.home() / Path(".config", "beethoven", "config.ui.json")
+
+    class Config:
+        case_sensitive = False
+        env_prefix = "BEETHOVEN_CONFIG_"
+
+
 class AppSettings(BaseModel):
+    config_file: SettingsConfigFile = Field(default_factory=SettingsConfigFile)
+
     tuning: TuningSettings
     midi: MidiSettings
     player: PlayerSettings
 
 
+def get_local_settings() -> Optional[AppSettings]:
+    settings_config_file = SettingsConfigFile()
+
+    settings_file = FileAdapter(file_path=settings_config_file.path)
+
+    if settings_file.exists():
+        return AppSettings(
+            config_file=settings_config_file,
+            **settings_file.read_json()
+        )
+
+    return None
+
+
 def get_default_settings():
     app_settings = AppSettings(
-        tuning=TuningSettings(
-            defaults={
-                "E Standard": "E,A,D,G,B,E",
-                "E Standard 4str": "E,A,D,G",
-                "E Standard 5str": "E,A,D,G,C",
-                "D Dropped": "D,A,D,G,B,E",
-                "B Standard": "B,E,A,D,F#,B",
-                "B Standard 7str": "B,E,A,D,G,B,E",
-                "F# Standard 8str": "F#,B,E,A,D,G,B,E",
-            },
-            user_defined={},
-        ),
-        midi=MidiSettings(opened_outputs=[]),
+        tuning=TuningSettings(),
+        midi=MidiSettings(opened_outputs=["Beethoven"]),
         player=PlayerSettings(
             max_players=4,
-            metronome=PlayerSetting(
-                instrument_name="", output_name="", channel=0, enabled=True
-            ),
-            preview=PlayerSetting(
-                instrument_name="", output_name="", channel=0, enabled=True
-            ),
+            metronome=PlayerSetting(instrument_name="", output_name="", channel=0, enabled=True),
+            preview=PlayerSetting(instrument_name="", output_name="", channel=0, enabled=True),
             players=[],
         ),
     )
@@ -98,37 +118,31 @@ def get_default_settings():
     return app_settings
 
 
-def get_settings():
-    app_settings = AppSettings(
-        tuning=TuningSettings(
-            defaults={
-                "E Standard": "E,A,D,G,B,E",
-                "E Standard 4str": "E,A,D,G",
-                "E Standard 5str": "E,A,D,G,C",
-                "D Dropped": "D,A,D,G,B,E",
-                "B Standard": "B,E,A,D,F#,B",
-                "B Standard 7str": "B,E,A,D,G,B,E",
-                "F# Standard 8str": "F#,B,E,A,D,G,B,E",
-            },
-            user_defined={
-                "A Standard": "A,D,G,C,E,A",
-            },
-        ),
-        midi=MidiSettings(opened_outputs=["Drums", "Piano", "Guitar", "Bass"]),
-        player=PlayerSettings(
-            max_players=4,
-            metronome=PlayerSetting(
-                instrument_name="Drums", output_name="Drums", channel=2, enabled=True
-            ),
-            preview=PlayerSetting(
-                instrument_name="Guitar", output_name="Guitar", channel=2, enabled=True
-            ),
-            players=[
-                PlayerSetting(
-                    instrument_name="Guitar", output_name="e", channel=2, enabled=True
-                )
-            ],
-        ),
-    )
+def get_settings() -> AppSettings:
+    return get_local_settings() or get_default_settings()
 
-    return app_settings
+
+def setup_settings():
+    local_settings = get_local_settings()
+
+    if local_settings:
+        return local_settings
+
+    settings = get_default_settings()
+
+    save_settings(settings)
+
+    return settings
+
+
+def save_settings(settings: AppSettings):
+    settings_file = FileAdapter(file_path=settings.config_file.path)
+
+    if not settings_file.file_path.parent.exists():
+        settings_file.create_parent_dir()
+
+    settings_dict = settings.dict(exclude={"config_file"})
+
+    json.dumps(settings_dict)
+
+    settings_file.save_json(settings_dict)

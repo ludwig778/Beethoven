@@ -8,7 +8,7 @@ from beethoven.ui.stylesheet import get_stylesheet
 logger = getLogger("ui.main")
 
 
-def main():
+def run():
     app = QApplication([])
     app.setStyleSheet(get_stylesheet())
 
@@ -19,4 +19,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run()

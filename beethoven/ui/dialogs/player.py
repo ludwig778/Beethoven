@@ -161,7 +161,7 @@ class PlayerRow(QWidget):
         self.settings.channel = int(self.channel_combobox.currentText())
 
         if not self.system_player:
-            self.settings.enabled = self.enable_button.isChecked()
+            self.settings.enabled = self.enable_button.pressed
 
         self.manager.configuration_changed.emit()
 

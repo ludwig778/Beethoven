@@ -31,14 +31,14 @@ class PushPullButton(Button):
     ):
         super(PushPullButton, self).__init__(text, *args, **kwargs)
 
-        self.pressed = pressed
+        self.pressed = False
 
         self.released_text = text
         self.pressed_text = pressed_text
 
         self.clicked.connect(self.toggle)
 
-        if self.pressed:
+        if pressed:
             self.toggle()
 
     def toggle(self):

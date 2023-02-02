@@ -106,11 +106,21 @@ def get_local_settings() -> Optional[AppSettings]:
 def get_default_settings():
     app_settings = AppSettings(
         tuning=TuningSettings(),
-        midi=MidiSettings(opened_outputs=["Beethoven"]),
+        midi=MidiSettings(opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]),
         player=PlayerSettings(
             max_players=4,
-            metronome=PlayerSetting(instrument_name="", output_name="", channel=0, enabled=True),
-            preview=PlayerSetting(instrument_name="", output_name="", channel=0, enabled=True),
+            metronome=PlayerSetting(
+                instrument_name="Metronome",
+                output_name="Beethoven:metronome",
+                channel=0,
+                enabled=True
+            ),
+            preview=PlayerSetting(
+                instrument_name="Piano",
+                output_name="Beethoven:preview",
+                channel=0,
+                enabled=True
+            ),
             players=[],
         ),
     )
@@ -150,3 +160,11 @@ def save_settings(settings: AppSettings):
     serialized_settings = serialize_settings(settings)
 
     settings_file.save(serialized_settings)
+
+
+def delete_settings(settings: AppSettings):
+    if settings.config_file.path:
+        settings_file = FileAdapter(file_path=settings.config_file.path)
+
+        if settings_file.exists():
+            settings_file.delete()

@@ -6,14 +6,14 @@ from beethoven.adapters.factory import get_adapters
 
 from beethoven.ui.main_window import MainWindow
 from beethoven.ui.managers import AppManager
-from beethoven.ui.settings import get_settings
+from beethoven.ui.settings import setup_settings
 
 logger = getLogger("ui.main")
 
 
 def setup_main_window() -> QMainWindow:
     manager = AppManager(
-        settings=get_settings(),
+        settings=setup_settings(),
         adapters=get_adapters()
     )
 

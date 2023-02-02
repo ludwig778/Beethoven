@@ -2,7 +2,7 @@
 from functools import partial
 
 from PySide6.QtWidgets import QApplication
-from beethoven.ui.settings import get_settings
+from beethoven.ui.settings import save_settings, setup_settings, delete_settings
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
@@ -33,10 +33,16 @@ def qt_application():
 
 @fixture
 def manager():
+    settings = setup_settings()
+
+    save_settings(settings)
+
     yield AppManager(
-        settings=get_settings(),
+        settings=settings,
         adapters=get_adapters()
     )
+
+    delete_settings(settings)
 
 
 @fixture

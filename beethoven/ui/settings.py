@@ -135,14 +135,18 @@ def setup_settings():
     return settings
 
 
+def serialize_settings(settings: AppSettings) -> str:
+    settings_dict = settings.dict(exclude={"config_file"})
+
+    return json.dumps(settings_dict, indent=2)
+
+
 def save_settings(settings: AppSettings):
     settings_file = FileAdapter(file_path=settings.config_file.path)
 
     if not settings_file.file_path.parent.exists():
         settings_file.create_parent_dir()
 
-    settings_dict = settings.dict(exclude={"config_file"})
+    serialized_settings = serialize_settings(settings)
 
-    json.dumps(settings_dict)
-
-    settings_file.save_json(settings_dict)
+    settings_file.save(serialized_settings)

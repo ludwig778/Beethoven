@@ -1,4 +1,3 @@
-import json
 import logging
 from logging import getLogger
 from typing import Callable, Optional
@@ -9,7 +8,7 @@ from PySide6.QtCore import QObject, Signal
 from beethoven.adapters.factory import Adapters
 from beethoven.models import Grid
 from beethoven.ui.managers.midi import MidiManager
-from beethoven.ui.settings import AppSettings, save_settings
+from beethoven.ui.settings import AppSettings, save_settings, serialize_settings
 from beethoven.ui.threads import MidiOutputThread
 from beethoven.ui.utils import setup_players
 
@@ -34,7 +33,7 @@ class AppManager(QObject):
         logger.info("configuration changed")
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(json.dumps(self.settings.dict(), indent=2))
+            logger.debug(serialize_settings(self.settings))
 
         save_settings(self.settings)
 

@@ -22,9 +22,9 @@ from beethoven.utils.alterations import (
     get_degree_alteration_str_from_int,
     get_interval_alteration_int_from_str,
     get_interval_alteration_str_from_int,
+    get_note_alteration_int_from_str,
     get_note_alteration_str_from_int,
 )
-from beethoven.utils.note import note_alteration_to_int
 
 
 class Degree(BaseModel):
@@ -161,7 +161,7 @@ class Note(BaseModel):
     def build(**parsed: Dict) -> Note:
         return Note(
             name=parsed["name"],
-            alteration=note_alteration_to_int(str(parsed.get("alteration", ""))),
+            alteration=get_note_alteration_int_from_str(str(parsed.get("alteration", ""))),
             octave=parsed.get("octave"),
         )
 

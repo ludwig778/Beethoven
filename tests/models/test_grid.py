@@ -2,7 +2,7 @@ from fractions import Fraction
 
 from pytest import mark
 
-from beethoven.constants.duration import whole_value
+from beethoven.objects import whole_duration
 from beethoven.helpers.model import update_model
 from beethoven.models import Bpm, Degree, Duration, Grid, GridPart, TimeSignature
 from tests.fixtures.chords import a_min7, c4_maj, c_maj7, d_min7, e_min7, g_7
@@ -78,7 +78,7 @@ from tests.fixtures.scales import a_minor, c_major, d_lydian
                         time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
                         scale=c_major,
                         chord=update_model(c_maj7, degree=Degree(name="I")),
-                        duration=Duration(value=whole_value),
+                        duration=whole_duration,
                     ),
                 ],
             ),

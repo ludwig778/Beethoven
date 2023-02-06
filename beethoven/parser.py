@@ -16,7 +16,7 @@ from pyparsing import (
     oneOf,
 )
 
-from beethoven.constants import duration
+from beethoven.constants import duration as duration_constants
 
 ENGLISH_NOTE_NOTATION = ("A", "B", "C", "D", "E", "F", "G")
 SOLFEGE_NOTE_NOTATION = ("La", "Si", "Do", "Re", "Mi", "Fa", "Sol")
@@ -57,7 +57,7 @@ time_signature_pattern = Integer("beats_per_bar") + Suppress("/") + Integer("bea
 
 duration_pattern = Optional(
     Integer("numerator") + Optional(Suppress("/") + Integer("denominator"))
-) + Optional(oneOf(" ".join(duration.base_values))("base_duration"))
+) + Optional(oneOf(" ".join(duration_constants.base_values))("base_duration"))
 
 chord_pattern = (
     (Group(note_pattern)("root") | Group(degree_with_optional_octave_pattern)("degree"))

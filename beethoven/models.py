@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import copy, deepcopy
+from dataclasses import replace
 from fractions import Fraction
 from itertools import product
 from typing import Dict, Generator, List, Optional, Sequence, Tuple, Union
@@ -8,7 +9,7 @@ from typing import Dict, Generator, List, Optional, Sequence, Tuple, Union
 from pydantic import BaseModel, Field, validator
 
 from beethoven import parser
-from beethoven.constants import duration
+from beethoven.constants import duration as duration_constants
 from beethoven.indexes import (
     chord_index,
     degree_index,
@@ -325,9 +326,6 @@ class Chord(BaseModel):
     root: Note
     name: str
 
-    # notes: List[Note] = Field(default_factory=list)
-    # intervals: List[Interval] = Field(default_factory=list)
-
     inversion: Optional[int] = None
     base_note: Optional[Note] = None
     extensions: List[Interval] = Field(default_factory=list)
@@ -451,7 +449,7 @@ class Chord(BaseModel):
 
         if self.inversion:
             notes = notes[self.inversion:] + [
-                note.add_interval(octave) for note in notes[:self.inversion]
+                note.add_interval(Interval(name="8")) for note in notes[:self.inversion]
             ]
 
         if self.base_note:
@@ -489,49 +487,6 @@ class Chord(BaseModel):
 
         return notes
 
-    """
-    def get_notes(self):
-        intervals_string = chord_index.get_intervals(name or "maj")
-        intervals = Interval.parse_list(intervals_string)
-
-        notes = [self.root.add_interval(interval) for interval in intervals]
-
-        if inversion := parsed.get("inversion"):
-            notes = notes[inversion:] + [
-                note.add_interval(octave) for note in notes[:inversion]
-            ]
-
-        base_note = None
-        if base_note_parsed := parsed.get("base_note"):
-            base_note = Note.build(base_note_parsed)
-
-            if root.octave and not base_note.octave:
-                base_note = Note.build(base_note_parsed)
-
-                if notes[0].octave:
-                    base_note.octave = notes[0].octave
-
-                    if base_note > notes[0]:
-                        base_note.octave -= 1
-
-            notes.insert(0, base_note)
-
-        extensions = []
-        if extensions_parsed := parsed.get("extensions"):
-            extensions = [
-                Interval.build(extension_parsed)
-                for extension_parsed in extensions_parsed
-            ]
-            notes += [root.add_interval(interval) for interval in extensions]
-
-        # Only sort notes when chord root have an octave set
-        if extensions and root.octave:
-            first_note = notes[0]
-            notes = sorted(notes)  # type: ignore
-            first_note_index = notes.index(first_note)
-            notes = notes[first_note_index:] + notes[:first_note_index]
-    """
-
     @staticmethod
     def chord_product(roots: List[Note], chord_names: List[str]):
         return [
@@ -539,16 +494,13 @@ class Chord(BaseModel):
             for root, chord_name in product(roots, chord_names)
         ]
 
-
-octave = Interval(name="8")
+    def set_root_octave(self, octave: int) -> Chord:
+        return replace(self, root=replace(self.root, octave=octave))
 
 
 class Scale(BaseModel):
     tonic: Note
     name: str
-
-    # notes: List[Note] = Field(default_factory=list)
-    # intervals: List[Interval] = Field(default_factory=list)
 
     def __hash__(self):
         return hash(f"{self.tonic}_{self.name}")
@@ -608,7 +560,7 @@ class Scale(BaseModel):
         chords = []
 
         two_octave_notes = self.notes + [
-            note.add_interval(octave) for note in self.notes
+            note.add_interval(Interval(name="8")) for note in self.notes
         ]
 
         for degree_num in range(7):
@@ -776,7 +728,7 @@ class Duration(BaseModel):
         denominator: Optional[int] = None,
     ) -> Duration:
         if base_duration:
-            value = duration.base_values[base_duration]
+            value = duration_constants.base_values[base_duration]
         else:
             value = Fraction(1)
 

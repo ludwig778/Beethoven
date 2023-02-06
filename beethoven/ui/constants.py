@@ -1,6 +1,12 @@
 from beethoven.indexes import chord_index, scale_index
-from beethoven.constants import duration
-from beethoven.models import Bpm, Duration, Note, Degree, Scale, TimeSignature
+from beethoven.models import Bpm, Note, Degree, Scale, TimeSignature
+from beethoven.objects import (
+    whole_duration,
+    half_duration,
+    quarter_duration,
+    eighth_duration,
+    sixteenth_duration,
+)
 
 DEFAULT_MIDI_INPUT = ""
 DEFAULT_MIDI_OUTPUT = ""
@@ -51,10 +57,10 @@ DEFAULT_BPM = Bpm.parse("90")
 DEFAULT_TIME_SIGNATURE = TimeSignature.parse("4/4")
 
 BASE_DURATIONS = {
-    "Whole": Duration(value=duration.whole_value),
-    "Half": Duration(value=duration.half_value),
-    "Quarter": Duration(value=duration.quarter_value),
-    "Eighth": Duration(value=duration.eighth_value),
-    "Sixteenth": Duration(value=duration.sixteenth_value),
+    "Whole": whole_duration,
+    "Half": half_duration,
+    "Quarter": quarter_duration,
+    "Eighth": eighth_duration,
+    "Sixteenth": sixteenth_duration,
 }
 REVERSED_BASE_DURATIONS = {v: k for k, v in BASE_DURATIONS.items()}

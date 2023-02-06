@@ -5,7 +5,7 @@ from typing import Dict
 from prompt_toolkit import PromptSession, print_formatted_text
 from prompt_toolkit.history import FileHistory
 
-from beethoven.objects import Grid
+from beethoven.models import Grid
 
 
 class PromptStatus(Enum):

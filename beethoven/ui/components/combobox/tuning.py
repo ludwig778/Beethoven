@@ -3,7 +3,7 @@ from logging import getLogger
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
 
-from beethoven.ui.settings import TuningSettings
+from beethoven.settings import TuningSettings
 from beethoven.ui.utils import block_signal
 
 logger = getLogger("combobox.tuning")

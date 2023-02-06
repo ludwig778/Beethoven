@@ -4,7 +4,7 @@ from typing import List, Optional
 from PySide6.QtCore import QObject, Signal
 
 from beethoven.adapters.midi import MidiAdapter
-from beethoven.ui.settings import AppSettings
+from beethoven.settings import AppSettings
 from beethoven.ui.threads import MidiInputThread, MidiOutputThread
 
 logger = getLogger("manager.midi")

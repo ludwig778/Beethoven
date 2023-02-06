@@ -2,11 +2,11 @@
 from functools import partial
 
 from PySide6.QtWidgets import QApplication
-from beethoven.ui.settings import save_settings, setup_settings, delete_settings
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
 import beethoven.instruments  # noqa # pylint: disable=unused-import
+from beethoven.settings import save_settings, setup_settings, delete_settings
 from beethoven.ui.apps.harmony_trainer import HarmonyTrainerWidget
 from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
 from beethoven.ui.components.control import PlayerControl

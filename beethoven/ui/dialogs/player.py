@@ -5,11 +5,11 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QComboBox, QDialog, QLabel, QVBoxLayout, QWidget
 
 from beethoven.sequencer.players.registry import RegisteredPlayer
+from beethoven.settings import PlayerSetting
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
-from beethoven.ui.settings import PlayerSetting
 from beethoven.ui.utils import block_signal
 
 logger = getLogger("dialog.players")

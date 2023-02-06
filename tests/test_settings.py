@@ -1,153 +1,91 @@
 from pathlib import Path
+from pytest import fixture
 
 from hartware_lib.adapters.file import FileAdapter
 
-from beethoven.settings import get_settings
-from beethoven.utils.settings import create_config_file
+from beethoven.settings import delete_settings, get_settings, get_default_settings, get_local_settings, save_settings
 
 
-def test_settings_with_default_docker_env_variables():
-    assert get_settings().dict() == {
-        "test": True,
-        "debug": False,
-        "config": {"path": Path(".testing/beethoven/config.json")},
-        "midi": {"default_output": "Beethoven Default Output"},
-        "mongo_settings": {
-            "database": "beethoven",
-            "host": "mongodb",
-            "password": "password123",
-            "port": 27017,
-            "srv_mode": False,
-            "timeout_ms": 2000,
-            "username": "user",
-        },
-        "local_store": {"path": Path(".testing/beethoven/store.json")},
-    }
+@fixture
+def clean_default_settings_file():
+    settings = get_default_settings()
+
+    delete_settings(settings)
+
+    yield
+
+    delete_settings(settings)
 
 
-def test_settings_without_docker_env_variables(monkeypatch):
+def test_settings_default_factory():
+    settings = get_default_settings()
+
+    assert settings.test is True
+    assert settings.debug is False
+
+    assert settings.config_file.path == Path("tests", "fixtures", "config.json")
+
+    assert settings.midi.opened_outputs == [
+        "Beethoven", "Beethoven:preview", "Beethoven:metronome"
+    ]
+
+
+def test_settings_default_factory_without_env_variables(monkeypatch):
     monkeypatch.delenv("BEETHOVEN_TEST")
-    monkeypatch.delenv("BEETHOVEN_MONGODB_USERNAME")
-    monkeypatch.delenv("BEETHOVEN_MONGODB_PASSWORD")
-    monkeypatch.delenv("BEETHOVEN_MONGODB_HOST")
-    monkeypatch.delenv("BEETHOVEN_MONGODB_DATABASE")
     monkeypatch.delenv("BEETHOVEN_CONFIG_PATH")
-    monkeypatch.delenv("BEETHOVEN_LOCAL_STORE_PATH")
 
-    assert get_settings().dict() == {
-        "test": False,
-        "debug": False,
-        "config": {"path": Path("/root/.config/beethoven/config.json")},
-        "midi": {"default_output": "Beethoven Default Output"},
-        "mongo_settings": {
-            "database": "",
-            "host": "",
-            "password": "",
-            "port": 27017,
-            "srv_mode": False,
-            "timeout_ms": 2000,
-            "username": "",
-        },
-        "local_store": {"path": Path("/root/.config/beethoven/store.json")},
-    }
+    settings = get_default_settings()
+
+    assert settings.test is False
+    assert settings.debug is False
+
+    assert settings.config_file.path == Path.home() / Path(".config", "beethoven", "config.json")
 
 
-def test_settings_with_only_env_variables(monkeypatch):
+def test_settings_save_read_and_delete_cycle(clean_default_settings_file):
+    assert not get_local_settings()
+
+    settings = get_default_settings()
+    config_file = FileAdapter(file_path=settings.config_file.path)
+
+    save_settings(settings)
+
+    assert config_file.exists()
+
+    local_settings = get_local_settings()
+
+    assert local_settings
+    assert local_settings == settings
+
+    delete_settings(settings)
+
+    assert not config_file.exists()
+
+
+def test_settings_save_and_read_with_env_variables_override(clean_default_settings_file, monkeypatch):
+    settings = get_default_settings()
+
+    save_settings(settings)
+
     monkeypatch.setenv("BEETHOVEN_TEST", "true")
-    monkeypatch.setenv("BEETHOVEN_DEBUG", "false")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_USERNAME", "username")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_PASSWORD", "password")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_HOST", "host")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_DATABASE", "database")
-
-    assert get_settings().dict() == {
-        "test": True,
-        "debug": False,
-        "config": {"path": Path(".testing/beethoven/config.json")},
-        "midi": {"default_output": "Beethoven Default Output"},
-        "mongo_settings": {
-            "database": "database",
-            "host": "host",
-            "password": "password",
-            "port": 27017,
-            "srv_mode": False,
-            "timeout_ms": 2000,
-            "username": "username",
-        },
-        "local_store": {"path": Path(".testing/beethoven/store.json")},
-    }
-
-
-def test_settings_create_config_file(monkeypatch):
-    monkeypatch.setenv("BEETHOVEN_TEST", "true")
-    monkeypatch.setenv("BEETHOVEN_DEBUG", "false")
-    monkeypatch.setenv("BEETHOVEN_CONFIG_PATH", ".testing/beethoven/config.json")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_USERNAME", "username")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_PASSWORD", "password")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_HOST", "host")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_DATABASE", "database")
-    monkeypatch.setenv("BEETHOVEN_LOCAL_STORE_PATH", ".testing/beethoven/store.json")
+    monkeypatch.setenv("BEETHOVEN_DEBUG", "true")
 
     settings = get_settings()
 
-    create_config_file(settings)
-
-    config_file = FileAdapter(file_path=Path(".testing/beethoven/config.json"))
-
-    assert config_file.read_json() == {
-        "local_store": {"path": ".testing/beethoven/store.json"},
-        "midi": {"default_output": "Beethoven Default Output"},
-        "mongo_settings": {
-            "database": "database",
-            "host": "host",
-            "password": "password",
-            "port": 27017,
-            "srv_mode": False,
-            "timeout_ms": 2000,
-            "username": "username",
-        },
-    }
+    assert settings.test is True
+    assert settings.debug is True
 
 
-def test_settings_with_mixed_source(monkeypatch):
-    config_file = FileAdapter(file_path=Path(".testing/beethoven/config.json"))
-    config_file.create_parent_dir()
+def test_settings_factory(clean_default_settings_file):
+    settings = get_default_settings()
 
-    config_file.save_json(
-        {
-            "local_store": {"path": ".testing/beethoven/store.json"},
-            "midi": {"default_output": "Beethoven Default Output"},
-            "mongo_settings": {
-                "database": "beethoven",
-                "host": "mongodb",
-                "password": "password123",
-                "port": 27017,
-                "srv_mode": False,
-                "timeout_ms": 2000,
-                "username": "user",
-            },
-        }
-    )
+    assert settings.debug is False
+    assert settings == get_settings()
 
-    monkeypatch.setenv("BEETHOVEN_TEST", "false")
-    monkeypatch.setenv("BEETHOVEN_DEBUG", "true")
-    monkeypatch.setenv("BEETHOVEN_CONFIG_PATH", ".testing/beethoven/config.json")
-    monkeypatch.setenv("BEETHOVEN_MONGODB_USERNAME", "overrided")
-    monkeypatch.setenv("BEETHOVEN_LOCAL_STORE_PATH", ".testing/beethoven/store2.json")
+    settings.debug = True
 
-    assert get_settings().dict() == {
-        "test": False,
-        "debug": True,
-        "config": {"path": Path(".testing/beethoven/config.json")},
-        "midi": {"default_output": "Beethoven Default Output"},
-        "mongo_settings": {
-            "database": "beethoven",
-            "host": "mongodb",
-            "password": "password123",
-            "port": 27017,
-            "srv_mode": False,
-            "timeout_ms": 2000,
-            "username": "overrided",
-        },
-        "local_store": {"path": Path(".testing/beethoven/store2.json")},
-    }
+    save_settings(settings)
+
+    settings = get_settings()
+
+    assert settings.debug is True

@@ -9,7 +9,7 @@ from beethoven.adapters.midi import Input, MidiAdapter
 from beethoven.models import Grid, Note
 from beethoven.sequencer.players.base import BasePlayer
 from beethoven.sequencer.playroom import play_grid
-from beethoven.ui.settings import AppSettings
+from beethoven.settings import AppSettings
 
 
 class TestThread(QThread):

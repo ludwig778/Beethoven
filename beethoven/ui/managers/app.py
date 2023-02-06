@@ -7,8 +7,8 @@ from PySide6.QtCore import QObject, Signal
 
 from beethoven.adapters.factory import Adapters
 from beethoven.models import Grid
+from beethoven.settings import AppSettings, save_settings, serialize_settings
 from beethoven.ui.managers.midi import MidiManager
-from beethoven.ui.settings import AppSettings, save_settings, serialize_settings
 from beethoven.ui.threads import MidiOutputThread
 from beethoven.ui.utils import setup_players
 

@@ -8,10 +8,10 @@ from beethoven.adapters.midi import MidiAdapter
 from beethoven.models import Degree, Scale
 from beethoven.sequencer.players.base import BasePlayer
 from beethoven.sequencer.players.registry import RegisteredPlayer
+from beethoven.settings import PlayerSetting
 from beethoven.ui.components.buttons import PushPullButton
 from beethoven.ui.constants import DEFAULT_BPM, DEFAULT_TIME_SIGNATURE
 from beethoven.ui.models import ChordItem, DurationItem, HarmonyItem
-from beethoven.ui.settings import PlayerSetting
 
 
 @contextmanager

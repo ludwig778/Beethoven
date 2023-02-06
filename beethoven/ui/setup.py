@@ -4,9 +4,9 @@ from logging import getLogger
 from PySide6.QtWidgets import QMainWindow
 from beethoven.adapters.factory import get_adapters
 
+from beethoven.settings import setup_settings
 from beethoven.ui.main_window import MainWindow
 from beethoven.ui.managers import AppManager
-from beethoven.ui.settings import setup_settings
 
 logger = getLogger("ui.main")
 

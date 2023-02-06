@@ -3,6 +3,8 @@ __pycache__/
 
 coverage_html*
 
+tests/fixtures/config.json
+
 .coverage
 .poetry
 .pytest_cache

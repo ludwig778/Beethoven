@@ -1,35 +1,16 @@
 from logging import getLogger
-from pprint import pprint
-from time import sleep
-from typing import Callable, Dict, List, Optional
+from typing import Dict
 
 from PySide6.QtCore import QThread, SignalInstance
 
 from beethoven.adapters.midi import Input, MidiAdapter
-from beethoven.models import Grid, Note
-from beethoven.sequencer.players.base import BasePlayer
-from beethoven.sequencer.playroom import play_grid
-from beethoven.settings import AppSettings
-
-
-class TestThread(QThread):
-    def __init__(self, *args, settings: AppSettings, **kwargs):
-        super(TestThread, self).__init__(*args, **kwargs)
-        self.settings = settings
-
-    def run(self, *args, **kwargs):
-        while 1:
-            # os.system('clear')
-            print("THREAD RUNNING", args, kwargs)
-            pprint(self.settings.dict())
-            sleep(4)
+from beethoven.models import Note
+from beethoven.sequencer.runner import Sequencer
 
 
 class MidiInputThread(QThread):
-    def __init__(
-        self, *args, midi_input: Input, on_note_change: SignalInstance, **kwargs
-    ):
-        super(MidiInputThread, self).__init__(*args, **kwargs)
+    def __init__(self, midi_input: Input, on_note_change: SignalInstance):
+        super(MidiInputThread, self).__init__()
 
         self.logger = getLogger("threads.midi_input")
 
@@ -58,28 +39,20 @@ class MidiInputThread(QThread):
 class MidiOutputThread(QThread):
     def __init__(
         self,
-        *args,
         midi_adapter: MidiAdapter,
-        players: List[BasePlayer],
-        grid: Grid,
-        on_grid_part_change: Optional[Callable] = None,
-        on_grid_part_end: Optional[Callable] = None,
-        **kwargs
+        sequencer: Sequencer,
     ):
-        super(MidiOutputThread, self).__init__()  # *args, **kwargs)
+        super(MidiOutputThread, self).__init__()
 
         self.logger = getLogger("threads.midi_output")
 
         self.midi_adapter = midi_adapter
-        self.players = players
-        self.grid = grid
-        self.on_grid_part_change = on_grid_part_change
-
-        self.finished.connect(on_grid_part_end)
+        self.sequencer = sequencer
 
     def run(self):
         self.logger.info("run start")
-        play_grid(self.midi_adapter, self.players, self.grid, self.on_grid_part_change)
+
+        self.sequencer.run()
 
     def clean(self):
         self.logger.info("clean midi output")

@@ -110,11 +110,6 @@ class ChordPicker(QWidget):
     def handle_root_change(self, root: Union[Note, Degree]):
         logger.debug(f"updated chord root to {str(root)}")
 
-        print("ROOT")
-        print([root])
-        print([root.name])
-        print()
-
         if isinstance(root, Note):
             self.degree_grid_selector.clear()
 

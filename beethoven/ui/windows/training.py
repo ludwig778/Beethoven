@@ -1,3 +1,4 @@
+from logging import getLogger
 from random import shuffle
 from typing import Callable, List, Optional, Protocol, cast
 
@@ -7,7 +8,7 @@ from beethoven.models import Chord, NotesList, Scale
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiInputComboBox
-from beethoven.ui.components.frame import FramedChord, FramedNotes, FramedScale
+from beethoven.ui.components.frame import FramedChord, FramedScale
 from beethoven.ui.components.selectors import (
     ChordMultipleSelector,
     NoteMultipleSelector,
@@ -15,6 +16,8 @@ from beethoven.ui.components.selectors import (
 )
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
+
+logger = getLogger("app.trainers")
 
 
 class CannotSetupChecker(Exception):
@@ -37,11 +40,8 @@ class BaseTrainingWidget(QWidget):
         self.stop_button.clicked.connect(self.stop)
 
     def notes_changed(self, notes):
-        print("CHANGED LMAO")
-        print(notes)
-
-        if self.notes_checker and (current := self.notes_checker.current):
-            print(current.notes)
+        # if self.notes_checker and (current := self.notes_checker.current):
+        #     logger.info(current.notes)
         # self.playing_notes_frame.set_notes(notes.values())
 
         if not self.notes_checker or self.notes_checker.done:
@@ -55,14 +55,15 @@ class BaseTrainingWidget(QWidget):
                 self.update_frames()
 
     def get_buttons(self):
-        return horizontal_layout([
-            Stretch(),
-            self.start_button,
-            self.stop_button,
-        ])
+        return horizontal_layout(
+            [
+                Stretch(),
+                self.start_button,
+                self.stop_button,
+            ]
+        )
 
     def start(self):
-        print("START ARGS")
         if not self.start_button.isChecked():
             self.stop()
 
@@ -86,19 +87,23 @@ class ChordTrainingWidget(BaseTrainingWidget):
         self.note_selector = NoteMultipleSelector()
         self.chord_selector = ChordMultipleSelector()
 
-        self.target_notes_frame = FramedNotes()
+        # self.target_notes_frame = FramedNotes()
         self.target_chord_frame = FramedChord()
 
         self.setLayout(
-            vertical_layout([
-                horizontal_layout([self.note_selector, self.chord_selector]),
-                horizontal_layout([
-                    self.target_notes_frame,
-                    self.target_chord_frame,
-                ]),
-                Stretch(),
-                self.get_buttons(),
-            ])
+            vertical_layout(
+                [
+                    horizontal_layout([self.note_selector, self.chord_selector]),
+                    horizontal_layout(
+                        [
+                            self.target_notes_frame,
+                            self.target_chord_frame,
+                        ]
+                    ),
+                    Stretch(),
+                    self.get_buttons(),
+                ]
+            )
         )
 
     def setup_note_checker(self):
@@ -120,9 +125,9 @@ class ChordTrainingWidget(BaseTrainingWidget):
 
     def update_frames(self):
         if (
-            self.notes_checker and
-            (current := self.notes_checker.current) and
-            isinstance(current, Chord)
+            self.notes_checker
+            and (current := self.notes_checker.current)
+            and isinstance(current, Chord)
         ):
             self.target_notes_frame.set_notes(current.notes)
             self.target_chord_frame.set_chord(current.object)
@@ -141,15 +146,19 @@ class ScaleTrainingWidget(BaseTrainingWidget):
         self.note_selector = NoteMultipleSelector()
         self.scale_selector = ScaleExclusiveSelector()
 
-        self.target_notes_frame = FramedNotes()
+        # self.target_notes_frame = FramedNotes()
         self.target_scale_frame = FramedScale()
 
         self.setLayout(
-            vertical_layout([
-                horizontal_layout([self.note_selector, self.scale_selector]),
-                horizontal_layout([self.target_notes_frame, self.target_scale_frame]),
-                self.get_buttons(),
-            ])
+            vertical_layout(
+                [
+                    horizontal_layout([self.note_selector, self.scale_selector]),
+                    horizontal_layout(
+                        [self.target_notes_frame, self.target_scale_frame]
+                    ),
+                    self.get_buttons(),
+                ]
+            )
         )
 
     def setup_note_checker(self):
@@ -161,15 +170,10 @@ class ScaleTrainingWidget(BaseTrainingWidget):
 
             return
 
-        print(notes, scale_names)
-
         scale_list = Scale.scale_product(notes, scale_names)
         shuffle(scale_list)
 
-        note_containers = [
-            scale
-            for scale in scale_list
-        ]
+        note_containers = [scale for scale in scale_list]
 
         self.notes_checker = NotesContainerChecker(
             notes_containers=note_containers, type_check=NoteCheckerType.BY_BASE_NOTE
@@ -178,16 +182,14 @@ class ScaleTrainingWidget(BaseTrainingWidget):
 
     def update_frames(self):
         if (
-            self.notes_checker and
-            (current := self.notes_checker.current) and
-            isinstance(current, Scale)
+            self.notes_checker
+            and (current := self.notes_checker.current)
+            and isinstance(current, Scale)
         ):
             self.target_notes_frame.set_notes(current.notes)
             self.target_scale_frame.set_scale(current)
 
     def clear_frames(self):
-        # self.target_notes_frame.set_notes(self.notes_checker.current.notes)
-        # self.target_scale_frame.set_scale(self.notes_checker.current)
         self.target_notes_frame.clear()
         self.target_scale_frame.clear()
 
@@ -201,15 +203,19 @@ class ArppegioTrainingWidget(BaseTrainingWidget):
         self.note_selector = NoteMultipleSelector()
         self.chord_selector = ChordMultipleSelector()
 
-        self.target_notes_frame = FramedNotes()
+        # self.target_notes_frame = FramedNotes()
         self.target_chords_frame = FramedChord()
 
         self.setLayout(
-            vertical_layout([
-                horizontal_layout([self.note_selector, self.chord_selector]),
-                horizontal_layout([self.target_notes_frame, self.target_chords_frame]),
-                self.get_buttons(),
-            ])
+            vertical_layout(
+                [
+                    horizontal_layout([self.note_selector, self.chord_selector]),
+                    horizontal_layout(
+                        [self.target_notes_frame, self.target_chords_frame]
+                    ),
+                    self.get_buttons(),
+                ]
+            )
         )
 
     def setup_note_checker(self):
@@ -221,15 +227,10 @@ class ArppegioTrainingWidget(BaseTrainingWidget):
 
             return
 
-        print(notes, chord_names)
-
         chord_list = Chord.chord_product(notes, chord_names)
         shuffle(chord_list)
 
-        note_containers = [
-            chord
-            for chord in chord_list
-        ]
+        note_containers = [chord for chord in chord_list]
 
         self.notes_checker = NotesContainerChecker(
             notes_containers=note_containers, type_check=NoteCheckerType.BY_BASE_NOTE
@@ -238,9 +239,9 @@ class ArppegioTrainingWidget(BaseTrainingWidget):
 
     def update_frames(self):
         if (
-            self.notes_checker and
-            (current := self.notes_checker.current) and
-            isinstance(current, Chord)
+            self.notes_checker
+            and (current := self.notes_checker.current)
+            and isinstance(current, Chord)
         ):
             self.target_notes_frame.set_notes(current.notes)
             self.target_chords_frame.set_chord(current.object)
@@ -270,11 +271,9 @@ class TrainingWindow(QWidget):
         manager: AppManager,
         training_widgets: List[TrainingWidget],
         initial_widget: TrainingWidget,
-        **kwargs
+        **kwargs,
     ):
         super(TrainingWindow, self).__init__(*args, **kwargs)
-
-        # self.setFixedSize(400, 400)
 
         self.manager = manager
         self.training_widgets = {widget.title: widget for widget in training_widgets}
@@ -303,13 +302,11 @@ class TrainingWindow(QWidget):
                     self.input_combobox,
                     self.combobox,
                     self.training_layout,
-                    # Stretch()
                 ]
             )
         )
 
     def notes_changed(self, notes):
-        print("CHANGED")
         return self.training_widget.notes_changed(notes)
 
     def changed_midi_input(self, text):
@@ -320,7 +317,9 @@ class TrainingWindow(QWidget):
             self.training_layout.removeWidget(self.training_widget)
 
         training_widget_class = self.training_widgets.get(string)
-        training_widget = cast(Callable, training_widget_class)(manager=self.manager, parent=self)
+        training_widget = cast(Callable, training_widget_class)(
+            manager=self.manager, parent=self
+        )
         training_widget.style().unpolish(training_widget)
         training_widget.style().polish(training_widget)
 

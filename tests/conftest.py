@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pytest import fixture
 from hartware_lib.adapters.directory import DirectoryAdapter
+from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
 from beethoven.adapters.local_file import LocalFileAdapter

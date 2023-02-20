@@ -3,7 +3,9 @@ from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QPushButton
+from PySide6.QtWidgets import QDialog, QPushButton
+
+from beethoven.ui.utils import block_signal
 
 
 class Button(QPushButton):
@@ -59,6 +61,17 @@ class PushPullButton(Button):
     def release(self):
         if self.pressed:
             self.toggle()
+
+    def connect_to_dialog(self, dialog: QDialog):
+        def handle_push_pull_button_toggle(value):
+            if value:
+                dialog.show()
+            else:
+                with block_signal([dialog]):
+                    dialog.close()
+
+        self.toggled.connect(handle_push_pull_button_toggle)
+        dialog.finished.connect(self.toggle)
 
 
 class IconPushPullButton(PushPullButton):

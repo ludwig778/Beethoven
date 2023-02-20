@@ -1,11 +1,11 @@
 from beethoven.indexes import chord_index, scale_index
-from beethoven.models import Bpm, Note, Degree, Scale, TimeSignature
+from beethoven.models import Bpm, Degree, Note, Scale, TimeSignature
 from beethoven.objects import (
-    whole_duration,
+    eighth_duration,
     half_duration,
     quarter_duration,
-    eighth_duration,
     sixteenth_duration,
+    whole_duration,
 )
 
 DEFAULT_MIDI_INPUT = ""

@@ -1,8 +1,7 @@
-from enum import Enum, auto
+from functools import partial
 from logging import getLogger
-from typing import Optional
+from typing import Optional, Set
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QPushButton, QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
@@ -12,19 +11,11 @@ from beethoven.ui.utils import block_signal
 logger = getLogger("control")
 
 
-class PlayingType(Enum):
-    none = auto()
-    step = auto()
+class SequencerWidget(QWidget):
+    def __init__(self, *args, manager, **kwargs):
+        super(SequencerWidget, self).__init__(*args, **kwargs)
 
-
-class PlayerControl(QWidget):
-    play_grid = Signal()
-    play_grid_harmony_step = Signal()
-    play_grid_chord_step = Signal()
-    stop_grid = Signal()
-
-    def __init__(self, *args, **kwargs):
-        super(PlayerControl, self).__init__(*args, **kwargs)
+        self.manager = manager
 
         self.key_step_button = PushPullButton("Key Step Mode")
         self.chord_step_button = PushPullButton("Chord Step Mode")
@@ -34,7 +25,7 @@ class PlayerControl(QWidget):
         self.key_step_button.toggled.connect(self.handle_key_step)
         self.chord_step_button.toggled.connect(self.handle_chord_step)
 
-        self.play_button.toggled.connect(self.play)
+        self.play_button.toggled.connect(self.handle_play)
         self.stop_button.clicked.connect(self.stop)
 
         self.setLayout(
@@ -54,6 +45,22 @@ class PlayerControl(QWidget):
             )
         )
 
+    def setup(self):
+        self._set_pressed_play_button_func = partial(self.set_play_button_state, True)
+        self._set_release_play_button_func = partial(self.set_play_button_state, False)
+
+        self.manager.sequencer.grid_play.connect(self._set_pressed_play_button_func)
+        self.manager.sequencer.grid_stop.connect(self._set_release_play_button_func)
+
+    def teardown(self):
+        self.manager.sequencer.grid_play.disconnect(self._set_pressed_play_button_func)
+        self.manager.sequencer.grid_stop.disconnect(self._set_release_play_button_func)
+
+        if not self.manager.sequencer.is_stopped():
+            self.manager.sequencer.grid_stop.emit()
+
+        self.release_all()
+
     def is_key_step_button_pressed(self):
         return self.key_step_button.pressed
 
@@ -66,73 +73,46 @@ class PlayerControl(QWidget):
     def handle_key_step(self, state):
         logger.info(f"harmony step play: {'pressed' if state else 'released'}")
 
-        if self.is_play_button_pressed() or self.is_key_step_button_pressed():
-            self.stop_grid.emit()
-
-            logger.debug("emit stop")
-
-        self.release_all(ignore=self.key_step_button)
-
-        if state:
-            self.play_grid_harmony_step.emit()
-
-            logger.debug("emit play harmony step")
-        else:
-            self.stop_grid.emit()
-
-            logger.debug("emit stop")
+        if self.is_chord_step_button_pressed():
+            self.release_all(ignore={self.play_button, self.key_step_button})
 
     def handle_chord_step(self, state):
         logger.info(f"chord step play: {'pressed' if state else 'released'}")
 
-        if self.is_play_button_pressed() or self.is_key_step_button_pressed():
-            self.stop_grid.emit()
+        if self.is_key_step_button_pressed():
+            self.release_all(ignore={self.play_button, self.chord_step_button})
 
-            logger.debug("emit stop")
-
-        self.release_all(ignore=self.chord_step_button)
-
-        if state:
-            self.play_grid_chord_step.emit()
-
-            logger.debug("emit play chord step")
-        else:
-            self.stop_grid.emit()
-
-            logger.debug("emit stop")
-
-    def play(self, state):
+    def handle_play(self, state):
         logger.info(f"play: {'pressed' if state else 'released'}")
 
-        self.release_all(ignore=self.play_button)
-
-        if self.is_chord_step_button_pressed() or self.is_play_button_pressed():
-            self.stop_grid.emit()
+        if not state and not self.manager.sequencer.is_stopped():
+            self.manager.sequencer.grid_stop.emit()
 
             logger.debug("emit stop")
 
-        if state:
-            self.play_grid.emit()
+    def set_play_button_state(self, state, *args):
+        if (
+            state
+            and not self.is_play_button_pressed()
+            or not state
+            and self.is_play_button_pressed()
+        ):
+            with block_signal([self.play_button]):
+                self.play_button.toggle()
 
-            logger.debug("emit play")
-        else:
-            self.stop_grid.emit()
-
-            logger.debug("emit stop")
-
-    def release_all(self, ignore: Optional[QPushButton] = None):
+    def release_all(self, ignore: Optional[Set[QPushButton]] = None):
         for test_button in [
             self.key_step_button,
             self.chord_step_button,
             self.play_button,
         ]:
-            if test_button != ignore and test_button.pressed:
+            if not ignore or test_button not in ignore and test_button.pressed:
                 with block_signal([test_button]):
                     test_button.release()
 
     def stop(self):
         logger.info("stop")
 
-        self.release_all()
+        self.release_all(ignore={self.key_step_button, self.chord_step_button})
 
-        self.stop_grid.emit()
+        self.manager.sequencer.grid_stop.emit()

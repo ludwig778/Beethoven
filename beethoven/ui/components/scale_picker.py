@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
@@ -16,7 +18,9 @@ class ScalePicker(QWidget):
 
         self.tonic_combobox = NoteComboBox(note=scale.tonic.remove_octave())
         self.name_combobox = ScaleComboBox(scale_name=scale.name)
-        self.octave_spinbox = OctaveSpinBox(octave=scale.tonic.octave or 4, maximum=8)
+        self.octave_spinbox = OctaveSpinBox(
+            minimum=2, octave=scale.tonic.octave or 4, maximum=8
+        )
 
         self.set(scale)
 
@@ -44,7 +48,7 @@ class ScalePicker(QWidget):
                 self.octave_spinbox,
             ]
         ):
-            self.tonic_combobox.set(scale.tonic)
+            self.tonic_combobox.set(scale.tonic.remove_octave())
             self.name_combobox.set(scale.name)
 
             if scale.tonic.octave:
@@ -60,10 +64,9 @@ class ScalePicker(QWidget):
         self.update_scale(octave=octave)
 
     def update_scale(self, tonic=None, scale_name=None, octave=None):
-        tonic = tonic or self.value.tonic.remove_octave()
-        scale_name = scale_name or self.value.name
-        octave = octave or self.value.tonic.octave
+        tonic = deepcopy(tonic or self.value.tonic)
+        tonic.octave = octave or self.value.tonic.octave
 
-        self.value = Scale.construct(tonic=tonic, name=scale_name)
+        self.value = Scale.construct(tonic=tonic, name=scale_name or self.value.name)
 
         self.value_changed.emit(self.value)

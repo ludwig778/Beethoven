@@ -2,9 +2,9 @@ from fractions import Fraction
 
 from pytest import mark
 
-from beethoven.objects import whole_duration
 from beethoven.helpers.model import update_model
 from beethoven.models import Bpm, Degree, Duration, Grid, GridPart, TimeSignature
+from beethoven.objects import whole_duration
 from tests.fixtures.chords import a_min7, c4_maj, c_maj7, d_min7, e_min7, g_7
 from tests.fixtures.scales import a_minor, c_major, d_lydian
 

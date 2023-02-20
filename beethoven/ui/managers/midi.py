@@ -46,12 +46,12 @@ class MidiManager(QObject):
         midi_input = self.midi_adapter.open_input(input_name)
 
         if midi_input:
+            self.current_input = input_name
+
             self.input_thread = MidiInputThread(
                 midi_input=midi_input, on_note_change=self.notes_changed
             )
             self.input_thread.start()
-
-            self.current_input = input_name
 
     def update_outputs(self, output_names: List[str]):
         logger.info(f"outputs set to: {', '.join(output_names) or 'none'}")
@@ -75,6 +75,7 @@ class MidiManager(QObject):
         self.clean()
 
         if self.output_thread:
+            self.output_thread.finished.disconnect()
             self.output_thread.terminate()
             self.output_thread.wait()
             self.output_thread = None

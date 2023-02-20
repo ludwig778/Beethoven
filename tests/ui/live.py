@@ -1,4 +1,3 @@
-
 def test_live_ui(qt_application, widget_partials, adapters):
     check_list = [
         "main_window",

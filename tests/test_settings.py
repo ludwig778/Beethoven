@@ -1,9 +1,15 @@
 from pathlib import Path
-from pytest import fixture
 
 from hartware_lib.adapters.file import FileAdapter
+from pytest import fixture
 
-from beethoven.settings import delete_settings, get_settings, get_default_settings, get_local_settings, save_settings
+from beethoven.settings import (
+    delete_settings,
+    get_default_settings,
+    get_local_settings,
+    get_settings,
+    save_settings,
+)
 
 
 @fixture
@@ -26,7 +32,9 @@ def test_settings_default_factory():
     assert settings.config_file.path == Path("tests", "fixtures", "config.json")
 
     assert settings.midi.opened_outputs == [
-        "Beethoven", "Beethoven:preview", "Beethoven:metronome"
+        "Beethoven",
+        "Beethoven:preview",
+        "Beethoven:metronome",
     ]
 
 
@@ -39,7 +47,9 @@ def test_settings_default_factory_without_env_variables(monkeypatch):
     assert settings.test is False
     assert settings.debug is False
 
-    assert settings.config_file.path == Path.home() / Path(".config", "beethoven", "config.json")
+    assert settings.config_file.path == Path.home() / Path(
+        ".config", "beethoven", "config.json"
+    )
 
 
 def test_settings_save_read_and_delete_cycle(clean_default_settings_file):
@@ -62,7 +72,9 @@ def test_settings_save_read_and_delete_cycle(clean_default_settings_file):
     assert not config_file.exists()
 
 
-def test_settings_save_and_read_with_env_variables_override(clean_default_settings_file, monkeypatch):
+def test_settings_save_and_read_with_env_variables_override(
+    clean_default_settings_file, monkeypatch
+):
     settings = get_default_settings()
 
     save_settings(settings)

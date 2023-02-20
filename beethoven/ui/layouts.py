@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type, Union, TypeVar
+from typing import List, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel
 from PySide6.QtWidgets import QHBoxLayout, QStackedLayout, QVBoxLayout, QWidget

@@ -6,8 +6,8 @@ from typing import Dict, List, Optional
 logger = getLogger("players.registry")
 
 
-class RegisteredPlayer(type):
-    instances: Dict[str, Dict[str, RegisteredPlayer]] = {}
+class RegisteredPlayerMeta(type):
+    instances: Dict[str, Dict[str, RegisteredPlayerMeta]] = {}
 
     def __new__(cls, clsname, superclasses, attributedict):
         newclass = type.__new__(cls, clsname, superclasses, attributedict)
@@ -27,11 +27,15 @@ class RegisteredPlayer(type):
         return list(cls.instances.keys())
 
     @classmethod
-    def get_instrument_styles(cls, instrument_name) -> Dict[str, RegisteredPlayer]:
+    def get_instrument_styles(cls, instrument_name) -> Dict[str, RegisteredPlayerMeta]:
         return cls.instances.get(instrument_name, {})
 
     @classmethod
     def get_instrument_style(
         cls, instrument_name, style_name
-    ) -> Optional[RegisteredPlayer]:
+    ) -> Optional[RegisteredPlayerMeta]:
         return cls.instances.get(instrument_name, {}).get(style_name)
+
+
+class RegisteredPlayer(metaclass=RegisteredPlayerMeta):
+    pass

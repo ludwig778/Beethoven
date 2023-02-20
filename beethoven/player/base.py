@@ -29,7 +29,9 @@ class Player(ABC):
         return False
 
     def play(self):
-        for section, duration in self.time_signature.generate_time_sections(self.duration):
+        for section, duration in self.time_signature.generate_time_sections(
+            self.duration
+        ):
             if self.check():
                 continue
 

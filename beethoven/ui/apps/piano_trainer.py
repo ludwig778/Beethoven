@@ -1,18 +1,21 @@
+from logging import getLogger
 from random import shuffle
 from typing import Optional
 
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QWidget
 
 from beethoven.models import Chord
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
-from beethoven.ui.components.frame import FramedChord, FramedNotes
+from beethoven.ui.components.frame import FramedChord, FramedNote
 from beethoven.ui.components.selectors import (
     ChordMultipleSelector,
     NoteMultipleSelector,
 )
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
+
+logger = getLogger("app.compose")
 
 
 class PianoTrainerWidget(QWidget):
@@ -23,10 +26,7 @@ class PianoTrainerWidget(QWidget):
 
         self.notes_checker: Optional[NotesContainerChecker] = None
 
-        self.setup()
-
-    def setup(self):
-        self.playing_notes_frame = FramedNotes()
+        self.playing_notes_frame = FramedNote()
         self.target_chord_frame = FramedChord()
 
         self.chord_selector = ChordMultipleSelector()
@@ -69,30 +69,11 @@ class PianoTrainerWidget(QWidget):
             )
         )
 
-    def get_layout(self):
-        if True:
-            main_layout = QVBoxLayout()
+    def setup(self):
+        logger.info("setup")
 
-            control_buttons = QHBoxLayout()
-            control_buttons.addStretch()
-            control_buttons.addWidget(self.start_button)
-            control_buttons.addWidget(self.stop_button)
-
-            note_frames = QHBoxLayout()
-            note_frames.addWidget(self.playing_notes_frame)
-            note_frames.addWidget(self.target_chord_frame)
-
-            selectors = QHBoxLayout()
-            selectors.addWidget(self.chord_selector)
-            selectors.addWidget(self.note_selector)
-
-        main_layout.addWidget(QLabel("Training"))
-        main_layout.addLayout(selectors)
-        main_layout.addLayout(note_frames)
-        main_layout.addStretch()
-        main_layout.addLayout(control_buttons)
-
-        return main_layout
+    def teardown(self):
+        logger.info("teardown")
 
     def notes_changed(self, notes):
         self.playing_notes_frame.set_notes(notes.values())
@@ -108,7 +89,6 @@ class PianoTrainerWidget(QWidget):
                 self.target_chord_frame.set_chord(self.notes_checker.current)
 
     def start(self, *args):
-        print("START ARGS", args)
         if not self.start_button.isChecked():
             self.stop()
 
@@ -116,7 +96,6 @@ class PianoTrainerWidget(QWidget):
 
         notes = self.note_selector.get_checked_notes()
         chord_names = self.chord_selector.get_checked_texts()
-        print(notes, chord_names)
 
         if not (notes and chord_names):
             self.stop()

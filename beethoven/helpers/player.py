@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from beethoven.sequencer.players.base import BasePlayer
+from beethoven.sequencer.players import BasePlayer
 
 
 def split_player_by_types(

@@ -1,7 +1,11 @@
-from typing import Any, Dict, Generator, Optional, Tuple
+import logging
+from logging import Logger
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from beethoven.helpers.midi import get_on_off_messages
-from beethoven.models import Duration
+from beethoven.models import Chord, Duration, Note, Scale, TimeSection, TimeSignature
+from beethoven.sequencer.players import BasePlayer, SystemPlayer
+from beethoven.ui.exceptions import PlayerStopPlaying
+from beethoven.ui.models import ChordItem, HarmonyItem
 
 NoteGenerator = Generator[Tuple[str, Any], None, None]
 NoteGenerators = Dict[Any, NoteGenerator]
@@ -50,27 +54,126 @@ def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:
             del values[key]
 
 
-def update_timeline_for_player(timeline_events, player, limit, offset) -> None:
-    for note_timeline, note_data in player.play():
-        duration = note_data.pop("duration")
+class BaseSorter:
+    def __init__(
+        self, generators: Optional[NoteGenerators] = None, refeed_enabled: bool = False
+    ):
+        self.generators = generators or {}
 
-        note_on, note_off = get_on_off_messages(
-            note_index=note_data["note"],
-            output=player.output,
-            channel=player.channel,
-            velocity=note_data["velocity"],
+        self.refeed_enabled = refeed_enabled
+
+        self.start_cursor: Duration
+        self.end_cursor: Duration
+
+    def clear(self):
+        self.values = {}
+
+    def refeed(self, key, item):
+        self.values[key + "_refeed"] = item
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.values:
+            raise StopIteration()
+
+        key, [cursor, data] = sorted(self.values.items(), key=lambda x: x[1][0])[0]
+
+        try:
+            self.values[key] = next(self.generators[key])
+        except (StopIteration, KeyError, PlayerStopPlaying):
+            del self.values[key]
+
+        if self.refeed_enabled and cursor >= self.end_cursor:
+            self.refeed(key, [cursor, data])
+
+            raise StopIteration()
+
+        return [cursor, data]
+
+
+class NoteSorter(BaseSorter):
+    def __init__(self, **kwargs):
+        super(NoteSorter, self).__init__(**kwargs)
+
+        self.values: Dict[str, Any] = {}
+
+        for name, generator in self.generators.items():
+            try:
+                self.values[name] = next(generator)
+            except StopIteration:
+                pass
+
+
+class SequencerSorter(BaseSorter):
+    def __init__(self, players: List[BasePlayer]):
+        super(SequencerSorter, self).__init__(refeed_enabled=True)
+
+        self.players = players
+        self.values: Dict[str, Any] = {}
+
+    def setup(
+        self,
+        scale: Scale,
+        chord: Chord,
+        time_signature: TimeSignature,
+        start_cursor: Duration,
+        end_cursor: Duration,
+        start_time_section: TimeSection,
+    ):
+        self.start_cursor = start_cursor
+        self.end_cursor = end_cursor
+
+        self.generators = {}
+
+        for player in self.players:
+            player_name = player.__class__.__name__
+
+            time_signature_changed = (
+                getattr(player, "time_signature", None) != time_signature
+            )
+            player.setup(
+                scale,
+                chord,
+                time_signature,
+                start_cursor,
+                end_cursor,
+                start_time_section,
+            )
+            generator = player.play_wrapper()
+
+            if isinstance(player, SystemPlayer) and time_signature_changed:
+                for gen_name in list(self.values.keys()):
+                    if player_name in gen_name:
+                        del self.values[gen_name]
+
+            self.generators[player_name] = generator
+
+            if player_name not in self.values:
+                self.values[player_name] = next(generator)
+
+
+def system_tick_logger(logger: Logger, level: int = logging.INFO):
+    def wrapper(cursor: Duration, time_section: TimeSection, player: BasePlayer):
+        logger.log(
+            level,
+            f"{float(cursor.value):<5}  "
+            f"{player.time_signature.beats_per_bar}/{player.time_signature.beat_unit}  "
+            f"{str(time_section):38s}   end: {float(player.end_cursor.value)}",
         )
 
-        if note_timeline >= limit:
-            break
+    return wrapper
 
-        timeline_events[note_timeline + offset].append(note_on)
 
-        note_timeline += duration
+def get_chord_from_items(
+    harmony_item: HarmonyItem, chord_item: ChordItem
+) -> Tuple[Chord, Optional[Duration]]:
+    chord_data: Dict = {
+        "root" if isinstance(chord_item.root, Note) else "degree": chord_item.root
+    }
 
-        if note_timeline > limit:
-            remove = note_timeline - limit
-
-            note_timeline -= remove
-
-        timeline_events[note_timeline + offset].append(note_off)
+    return (
+        Chord.build(name=chord_item.name, scale=harmony_item.scale, **chord_data),
+        chord_item.duration_item.value,
+    )

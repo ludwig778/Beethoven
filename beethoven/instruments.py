@@ -1,5 +1,7 @@
-from beethoven.models import Duration
-from beethoven.sequencer.players.base import BasePlayer, PercussionPlayer
+from fractions import Fraction
+
+from beethoven.models import Duration, Note
+from beethoven.sequencer.players import BasePlayer, PercussionPlayer
 
 
 class Metronome(PercussionPlayer):
@@ -24,15 +26,11 @@ class BasicPiano(BasePlayer):
     style = "Basic"
 
     def play(self):
-        timeline = Duration(value=0)
+        cursor = self.start_cursor
+        duration = self.end_cursor
 
-        duration = Duration(value=4)
-
-        while True:
-            for note in self.grid_part.chord.notes:
-                yield timeline, self.play_note(note.midi_index, duration=duration)
-
-            timeline += duration
+        for note in self.chord.notes:
+            yield cursor, self.play_note(cursor, note.midi_index, duration=duration)
 
     def get_default_style(self):
         return ...
@@ -49,7 +47,39 @@ class BasicDrum(PercussionPlayer):
     style = "Basic"
 
     def play(self):
-        pass
+        """
+        yield from NoteSorter({
+            "kick": note_sequencer(Duration(value=Fraction(1)), ["KICK"], "+..."),
+            "snare": note_sequencer(Duration(value=Fraction(1)), ["SNARE"], "..+."),
+            "hh": note_sequencer(Duration(value=Fraction(1, 2)), ["HH"], "+"),
+        })
+
+        return
+        """
+
+        cursor = self.start_cursor
+
+        duration = Duration(value=Fraction(1, 2))
+
+        KICK = Note.parse("C3").midi_index
+        SNARE = Note.parse("C#3").midi_index
+        HH = Note.parse("F#3").midi_index
+
+        while True:
+            yield cursor, self.play_percussion(KICK)
+            yield cursor, self.play_percussion(HH)
+            cursor += duration
+
+            yield cursor, self.play_percussion(HH)
+
+            cursor += duration
+
+            yield cursor, self.play_percussion(SNARE)
+            yield cursor, self.play_percussion(HH)
+            cursor += duration
+            yield cursor, self.play_percussion(HH)
+
+            cursor += duration
 
     def get_default_style(self):
         return ...

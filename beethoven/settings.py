@@ -6,8 +6,8 @@ from hartware_lib.adapters.file import FileAdapter
 from hartware_lib.pydantic.field_types import BooleanFromString
 from pydantic import BaseModel, BaseSettings, Field, validator
 
-from beethoven.utils.pydantic import use_env_variables_over_config_file
 from beethoven.models import Note
+from beethoven.utils.pydantic import use_env_variables_over_config_file
 
 
 class TuningSetting(BaseModel):
@@ -106,8 +106,7 @@ def get_local_settings() -> Optional[AppSettings]:
 
     if settings_file.exists():
         return AppSettings(
-            config_file=settings_config_file,
-            **settings_file.read_json()
+            config_file=settings_config_file, **settings_file.read_json()
         )
 
     return None
@@ -116,20 +115,22 @@ def get_local_settings() -> Optional[AppSettings]:
 def get_default_settings():
     app_settings = AppSettings(
         tuning=TuningSettings(),
-        midi=MidiSettings(opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]),
+        midi=MidiSettings(
+            opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]
+        ),
         player=PlayerSettings(
             max_players=4,
             metronome=PlayerSetting(
                 instrument_name="Metronome",
                 output_name="Beethoven:metronome",
                 channel=0,
-                enabled=True
+                enabled=True,
             ),
             preview=PlayerSetting(
                 instrument_name="Piano",
                 output_name="Beethoven:preview",
                 channel=0,
-                enabled=True
+                enabled=True,
             ),
             players=[],
         ),

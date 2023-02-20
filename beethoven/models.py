@@ -161,7 +161,9 @@ class Note(BaseModel):
     def build(**parsed: Dict) -> Note:
         return Note(
             name=parsed["name"],
-            alteration=get_note_alteration_int_from_str(str(parsed.get("alteration", ""))),
+            alteration=get_note_alteration_int_from_str(
+                str(parsed.get("alteration", ""))
+            ),
             octave=parsed.get("octave"),
         )
 
@@ -374,19 +376,26 @@ class Chord(BaseModel):
         root = degree = base_degree = None
 
         if parsed_root := parsed.get("root"):
-            root = (
-                parsed_root
-                if isinstance(parsed_root, Note)
-                else Note.build(**parsed_root)
-            )
+            if isinstance(parsed_root, Note):
+                root = parsed_root
+            else:
+                root = (
+                    parsed_root
+                    if isinstance(parsed_root, Note)
+                    else Note.build(**parsed_root)
+                )
 
         elif parsed_degree := parsed.get("degree"):
             if not scale:
                 raise Exception("Scale must be set")
 
-            parsed_degree.pop("octave", None)
+            if isinstance(parsed_degree, Degree):
+                degree = parsed_degree
+            else:
+                parsed_degree.pop("octave", None)
 
-            degree = Degree.build(**parsed_degree)
+                degree = Degree.build(**parsed_degree)
+
             root = scale.get_note_from_degree(degree)
 
             if not name:
@@ -449,7 +458,8 @@ class Chord(BaseModel):
 
         if self.inversion:
             notes = notes[self.inversion:] + [
-                note.add_interval(Interval(name="8")) for note in notes[:self.inversion]
+                note.add_interval(Interval(name="8"))
+                for note in notes[: self.inversion]
             ]
 
         if self.base_note:
@@ -477,13 +487,8 @@ class Chord(BaseModel):
         if self.extensions:
             notes += [self.root.add_interval(interval) for interval in self.extensions]
 
-        # TODO CHECK THAT
         if self.extensions and self.root.octave:
-            # print("OK" * 123)
-            # first_note = notes[0]
             notes = sorted(notes)  # type: ignore
-            # first_note_index = notes.index(first_note)
-            # notes = notes[first_note_index:] + notes[:first_note_index]
 
         return notes
 
@@ -529,7 +534,7 @@ class Scale(BaseModel):
     def build(tonic: Union[Dict, Note], name: str) -> Scale:
         return Scale(
             tonic=Note.build(**tonic) if isinstance(tonic, dict) else tonic,
-            name=name.replace("_", " ")
+            name=name.replace("_", " "),
         )
 
     @property
@@ -608,57 +613,8 @@ class Bpm(BaseModel):
         return Bpm(value=value)
 
 
-class TimeSignature(BaseModel):
-    beats_per_bar: int
-    beat_unit: int
-
-    @validator("beat_unit")
-    def beat_unit_must_be_within_range(cls, beat_unit):
-        if 1 <= beat_unit <= 32:
-            return beat_unit
-
-        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be in range 1-32")
-
-    @validator("beat_unit")
-    def beat_unit_must_be_a_multiple_of_2(cls, beat_unit):
-        if beat_unit in (1, 2, 4, 8, 16, 32):
-            return beat_unit
-
-        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be a multiple of 2")
-
-    @classmethod
-    def parse(cls, string: str) -> TimeSignature:
-        parsed = parser.parse(parser.time_signature_pattern, string)
-
-        return cls.build(**parsed)
-
-    @staticmethod
-    def build(beats_per_bar: int, beat_unit: int) -> TimeSignature:
-        return TimeSignature(beats_per_bar=beats_per_bar, beat_unit=beat_unit)
-
-    def get_duration(self) -> Duration:
-        return Duration(value=Fraction(self.beats_per_bar * 4, self.beat_unit))
-
-    def generate_time_sections(
-        self, step: Duration
-    ) -> Generator[Tuple[TimeSection, Duration], None, None]:
-        cursor = Duration(value=Fraction(0))
-        reduction = Fraction(self.beat_unit, 4)
-
-        bar = measure = 0
-        rest = Fraction(0)
-
-        while True:
-            yield TimeSection(bar=bar + 1, measure=measure + 1, rest=rest), cursor
-
-            cursor += step
-
-            bar, measure_rest = divmod(cursor.value * reduction, self.beats_per_bar)
-            measure, rest = divmod(measure_rest * reduction, 1)
-
-
 class Duration(BaseModel):
-    value: Fraction
+    value: Fraction = Fraction(0)
 
     @validator("value", pre=True)
     def cast_int_to_fraction(cls, value):
@@ -741,10 +697,69 @@ class Duration(BaseModel):
         return Duration(value=value)
 
 
+class TimeSignature(BaseModel):
+    beats_per_bar: int
+    beat_unit: int
+
+    @validator("beat_unit")
+    def beat_unit_must_be_within_range(cls, beat_unit):
+        if 1 <= beat_unit <= 32:
+            return beat_unit
+
+        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be in range 1-32")
+
+    @validator("beat_unit")
+    def beat_unit_must_be_a_multiple_of_2(cls, beat_unit):
+        if beat_unit in (1, 2, 4, 8, 16, 32):
+            return beat_unit
+
+        raise ValueError(f"Invalid beat_unit: {beat_unit}, must be a multiple of 2")
+
+    @classmethod
+    def parse(cls, string: str) -> TimeSignature:
+        parsed = parser.parse(parser.time_signature_pattern, string)
+
+        return cls.build(**parsed)
+
+    @staticmethod
+    def build(beats_per_bar: int, beat_unit: int) -> TimeSignature:
+        return TimeSignature(beats_per_bar=beats_per_bar, beat_unit=beat_unit)
+
+    def get_duration(self) -> Duration:
+        return Duration(value=Fraction(self.beats_per_bar * 4, self.beat_unit))
+
+    def get_time_section(self, cursor: Duration, bar_offset: int = 0):
+        reduction = Fraction(self.beat_unit, 4)
+
+        bar, measure_rest = divmod(cursor.value * reduction, self.beats_per_bar)
+        measure, rest = divmod(measure_rest * reduction, 1)
+
+        return TimeSection(bar=bar_offset + bar + 1, measure=measure + 1, rest=rest)
+
+    def generate_time_sections(
+        self,
+        step: Duration,
+        cursor_offset: Duration = Duration(),
+        base_time_section: Optional[TimeSection] = None,
+    ) -> Generator[Tuple[TimeSection, Duration], None, None]:
+        cursor = Duration()
+
+        bar_offset = 0
+        if base_time_section:
+            bar_offset = base_time_section.bar - 1
+
+        while True:
+            ts = self.get_time_section(cursor, bar_offset=bar_offset)
+
+            yield ts, cursor + cursor_offset
+
+            cursor += step
+
+
 class TimeSection(BaseModel):
-    bar: int
-    measure: int
-    rest: Fraction
+    bar: int = 1
+    measure: int = 1
+    rest: Fraction = Fraction()
 
     @validator("rest", pre=True)
     def cast_int_to_fraction(cls, rest):
@@ -755,6 +770,12 @@ class TimeSection(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+    def to_next_bar(self):
+        if self.measure > 1 or self.rest != Fraction():
+            self.bar += 1
+            self.measure = 1
+            self.rest = Fraction()
 
 
 class GridPart(BaseModel):

@@ -4,7 +4,7 @@ from typing import Optional
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QComboBox, QDialog, QLabel, QVBoxLayout, QWidget
 
-from beethoven.sequencer.players.registry import RegisteredPlayer
+from beethoven.sequencer.registry import RegisteredPlayerMeta
 from beethoven.settings import PlayerSetting
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
@@ -95,7 +95,7 @@ class PlayerRow(QWidget):
 
         self.instrument_name_combobox.addItem("")
 
-        instrument_names = RegisteredPlayer.get_instrument_names()
+        instrument_names = RegisteredPlayerMeta.get_instrument_names()
 
         for instrument in instrument_names:
             self.instrument_name_combobox.addItem(instrument)
@@ -115,7 +115,9 @@ class PlayerRow(QWidget):
             return
 
         player_style_names = list(
-            RegisteredPlayer.get_instrument_styles(self.settings.instrument_name).keys()
+            RegisteredPlayerMeta.get_instrument_styles(
+                self.settings.instrument_name
+            ).keys()
         )
 
         self.instrument_style_combobox.addItems(player_style_names)

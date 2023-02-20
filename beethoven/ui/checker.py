@@ -36,10 +36,9 @@ class NotesContainerChecker:
             return False
 
         if self.type_check == NoteCheckerType.BY_BASE_NOTE:
-            if (
-                self.to_midi_index(self.to_base_notes(notes_container.notes))
-                != self.to_midi_index(self.to_base_notes(self.current.notes))
-            ):
+            if self.to_midi_index(
+                self.to_base_notes(notes_container.notes)
+            ) != self.to_midi_index(self.to_base_notes(self.current.notes)):
                 return False
 
         elif self.type_check == NoteCheckerType.BY_MIDI_INDEX:

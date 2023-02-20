@@ -24,8 +24,6 @@ class PromptContext:
 session: PromptSession = PromptSession(
     history=FileHistory(".beethoven_history"), enable_suspend=True
 )
-print("!!!!" * 33)
-print(type(session))
 
 
 class BasePrompt:

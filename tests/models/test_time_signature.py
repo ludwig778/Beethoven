@@ -2,6 +2,7 @@ from fractions import Fraction
 
 from pytest import mark, raises
 
+from beethoven.models import Duration, TimeSection, TimeSignature
 from beethoven.objects import (
     eighth_duration,
     half_duration,
@@ -9,7 +10,6 @@ from beethoven.objects import (
     sixteenth_duration,
     whole_duration,
 )
-from beethoven.models import Duration, TimeSection, TimeSignature
 
 
 @mark.parametrize(
@@ -42,7 +42,9 @@ def test_time_signature_model_raise_invalid_beat_unit(beat_unit):
 
 
 def test_time_section_helper_time_section_generator_first_values():
-    generator = TimeSignature(beats_per_bar=4, beat_unit=4).generate_time_sections(whole_duration)
+    generator = TimeSignature(beats_per_bar=4, beat_unit=4).generate_time_sections(
+        whole_duration
+    )
 
     assert next(generator) == (TimeSection(bar=1, measure=1, rest=0), Duration(value=0))
 

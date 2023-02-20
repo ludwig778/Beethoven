@@ -1,9 +1,12 @@
+from logging import getLogger
 from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from beethoven.ui.layouts import stacked_layout
+
+logger = getLogger("stacked_widget")
 
 
 class StackedWidget(QWidget):
@@ -16,9 +19,28 @@ class StackedWidget(QWidget):
 
         self.setLayout(self.stacked_layout)
 
+    def setup(self):
+        logger.info("setup")
+
+        self.current_widget.setup()
+
+    def teardown(self):
+        logger.info("teardown")
+
+        self.current_widget.teardown()
+
     @property
     def index(self):
         return self.stacked_layout.currentIndex()
 
+    @property
+    def current_widget(self):
+        return self.stacked_layout.currentWidget()
+
     def set_index(self, index: int):
-        return self.stacked_layout.setCurrentIndex(index)
+        if index != self.index:
+            self.current_widget.teardown()
+
+            self.stacked_layout.setCurrentIndex(index)
+
+            self.current_widget.setup()

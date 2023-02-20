@@ -46,7 +46,9 @@ class StringSelector(QWidget):
     def __init__(self, *args, initial_tuning=None, **kwargs):
         super(StringSelector, self).__init__(*args, **kwargs)
 
-        self.string_rows: Sequence = [StringSelectorRow(note=self.DEFAULT_NOTE) for _ in range(8)]
+        self.string_rows: Sequence = [
+            StringSelectorRow(note=self.DEFAULT_NOTE) for _ in range(8)
+        ]
         layout_items = self.string_rows + [Stretch()]
 
         self.set(initial_tuning)

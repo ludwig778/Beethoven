@@ -1,11 +1,23 @@
+from __future__ import annotations
+
 from fractions import Fraction
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Union
+from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from beethoven.models import (
+    Bpm,
+    Chord,
+    Degree,
+    Duration,
+    Grid,
+    Note,
+    Scale,
+    TimeSignature,
+)
 from beethoven.ui.constants import REVERSED_BASE_DURATIONS
 from beethoven.utils.degree_or_note import parse_root_note_or_degree
-from beethoven.models import Bpm, Chord, Degree, Duration, Note, Scale, TimeSignature
 
 
 class DurationItem(BaseModel):
@@ -34,9 +46,28 @@ class DurationItem(BaseModel):
 
 
 class ChordItem(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+
     root: Union[Note, Degree]
     name: str
     duration_item: DurationItem
+
+    def __hash__(self):
+        return int(self.id)
+
+    def get_index_from(self, chord_items: List[ChordItem]):
+        for i, chord_item in enumerate(chord_items):
+            if chord_item.id == self.id:
+                return i
+
+        raise KeyError(f"ChordItem {self.id} is not in list")
+
+    def is_in(self, chord_items: List[ChordItem]):
+        for chord_item in chord_items:
+            if chord_item.id == self.id:
+                return True
+
+        return False
 
     def __str__(self):
         chord_name = str(self.root)
@@ -66,15 +97,34 @@ class ChordItem(BaseModel):
         return {
             "name": self.name,
             "root": str(self.root),
-            "duration_item": self.duration_item,
+            "duration_item": self.duration_item.dict(),
         }
 
 
 class HarmonyItem(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+
     scale: Scale
     chord_items: List[ChordItem]
     bpm: Bpm
     time_signature: TimeSignature
+
+    def __hash__(self):
+        return int(self.id)
+
+    def get_index_from(self, harmony_items: List[HarmonyItem]):
+        for i, harmony_item in enumerate(harmony_items):
+            if harmony_item.id == self.id:
+                return i
+
+        raise KeyError(f"HarmonyItem {harmony_item.id} is not in list")
+
+    def is_in(self, harmony_items: List[HarmonyItem]):
+        for harmony_item in harmony_items:
+            if harmony_item.id == self.id:
+                return True
+
+        return False
 
     @classmethod
     def from_dict(cls, data):
@@ -86,17 +136,16 @@ class HarmonyItem(BaseModel):
         )
 
     def dict(self, *args, **kwargs):
-        # print(2, self, args, kwargs)
-        # pp({
-        #    "scale": str(self.scale),
-        #    "chord_items": [
-        #        chord_item.dict()
-        #        for chord_item in self.chord_items
-        #    ]
-        # })
         return {
             "scale": str(self.scale).replace(" ", "_"),
             "chord_items": [chord_item.dict() for chord_item in self.chord_items],
             "bpm": self.bpm,
             "time_signature": self.time_signature,
         }
+
+
+class SequencerItem(BaseModel):
+    grid: Grid
+    is_preview: bool = False
+    on_grid_part_change: Optional[Callable] = None
+    on_grid_part_end: Optional[Callable] = None

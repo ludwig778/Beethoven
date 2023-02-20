@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QAbstractItemView, QListView, QStyledItemDelegate, QWidget
@@ -17,9 +17,10 @@ from beethoven.ui.utils import (
 
 
 class BaseGrid(QWidget):
-    item_added = Signal()
+    item_added = Signal(object)
     item_changed = Signal(object)
-    item_deleted = Signal()
+    item_clicked = Signal(object)
+    item_deleted = Signal(object)
 
     default_item_callable: Callable
     delegate: QStyledItemDelegate
@@ -38,16 +39,19 @@ class BaseGrid(QWidget):
         self.list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.list.selectionModel().selectionChanged.connect(self.handle_item_change)
+        self.list.clicked.connect(self.handle_item_click)
 
     def add_item(self):
         row = self.current_index.row()
 
-        self.model.insert_item(self.get_default_item(), row + 1)
+        item = self.get_default_item()
+
+        self.model.insert_item(item, row + 1)
 
         self.current_index = self.model.index(row + 1)
         self.list.setCurrentIndex(self.current_index)
 
-        self.item_added.emit()
+        self.item_added.emit(item)
 
     @property
     def current_item(self):
@@ -61,6 +65,8 @@ class BaseGrid(QWidget):
             with block_signal([self.list]):
                 row = self.current_index.row()
 
+                item = self.current_item
+
                 self.model.remove(self.current_index)
 
                 if row == len(self.model):
@@ -69,7 +75,10 @@ class BaseGrid(QWidget):
                 self.current_index = self.model.index(row)
                 self.list.setCurrentIndex(self.current_index)
 
-                self.item_deleted.emit()
+                self.item_deleted.emit(item)
+
+    def handle_item_click(self, item):
+        self.item_clicked.emit(self.current_index.data())
 
     def handle_item_change(self, selected, *args):
         if selected_index := selected.indexes():
@@ -82,8 +91,14 @@ class BaseGrid(QWidget):
     def get_items(self):
         return self.model.items
 
-    def next(self) -> int:
-        next_row = self.current_index.row() + 1
+    def set_current_item(self, item):
+        index = self.model.index(item.get_index_from(self.get_items()))
+
+        self.list.setCurrentIndex(index)
+
+    def next(self) -> Tuple[int, int]:
+        current_row = self.current_index.row()
+        next_row = current_row + 1
 
         if next_row >= len(self.model):
             next_row = 0
@@ -91,11 +106,40 @@ class BaseGrid(QWidget):
         self.current_index = self.model.index(next_row)
         self.list.setCurrentIndex(self.current_index)
 
-        return next_row
+        return current_row, next_row
+
+    def previous(self) -> Tuple[int, int]:
+        current_row = self.current_index.row()
+        previous_row = current_row - 1
+
+        if previous_row < 0:
+            previous_row = len(self.model) - 1
+
+        self.current_index = self.model.index(previous_row)
+        self.list.setCurrentIndex(self.current_index)
+
+        return current_row, previous_row
+
+    def set_first_item_as_current_item(self) -> int:
+        row = 0
+
+        self.current_index = self.model.index(row)
+        self.list.setCurrentIndex(self.current_index)
+
+        return row
+
+    def set_last_item_as_current_item(self) -> int:
+        row = len(self.model) - 1
+
+        self.current_index = self.model.index(row)
+        self.list.setCurrentIndex(self.current_index)
+
+        return row
 
 
 class HarmonyGrid(BaseGrid):
     item_changed = Signal(HarmonyItem)
+    item_clicked = Signal(HarmonyItem)
 
     delegate = HarmonyDelegate()
 
@@ -152,6 +196,7 @@ class HarmonyGrid(BaseGrid):
 
 class ChordGrid(BaseGrid):
     item_changed = Signal(ChordItem)
+    item_clicked = Signal(ChordItem)
 
     delegate = ChordDelegate()
 
@@ -206,19 +251,22 @@ class ChordGrid(BaseGrid):
 class ComposerGrid(QWidget):
     harmony_item_changed = Signal(HarmonyItem, ChordItem)
     chord_item_changed = Signal(ChordItem)
+    item_clicked = Signal(HarmonyItem, ChordItem)
 
     def __init__(self, *args, harmony_items: List[HarmonyItem], **kwargs):
         super(ComposerGrid, self).__init__(*args, **kwargs)
 
         self.harmony_items = harmony_items
 
-        self.harmony_grid = HarmonyGrid(harmony_items=harmony_items)
-        self.chord_grid = ChordGrid(chord_items=harmony_items[0].chord_items)
+        self.harmony_grid = HarmonyGrid(harmony_items=self.harmony_items)
+        self.chord_grid = ChordGrid(chord_items=self.harmony_items[0].chord_items)
 
         self.harmony_grid.item_changed.connect(self.handle_harmony_item_change)
+        self.harmony_grid.item_clicked.connect(self.handle_harmony_item_click)
 
         self.chord_grid.item_added.connect(self.harmony_grid.refresh_current_index)
         self.chord_grid.item_changed.connect(self.handle_chord_item_change)
+        self.chord_grid.item_clicked.connect(self.handle_chord_item_click)
         self.chord_grid.item_deleted.connect(self.harmony_grid.refresh_current_index)
 
         self.setLayout(
@@ -226,11 +274,21 @@ class ComposerGrid(QWidget):
         )
 
     def next(self):
-        if not self.chord_grid.next():
+        _, chord_index = self.chord_grid.next()
+
+        if not chord_index:
             self.harmony_grid.next()
 
-    def get_current_item(self):
-        return (self.harmony_grid.current_item, self.chord_grid.current_item)
+    def previous(self):
+        previous_chord_index, chord_index = self.chord_grid.previous()
+
+        if chord_index > previous_chord_index:
+            self.harmony_grid.previous()
+
+            self.chord_grid.set_last_item_as_current_item()
+
+    def get_current_items(self) -> Tuple[HarmonyItem, ChordItem]:
+        return self.harmony_grid.current_item, self.chord_grid.current_item
 
     def handle_harmony_item_change(self, *args):
         self.refresh_chords_list()
@@ -238,14 +296,33 @@ class ComposerGrid(QWidget):
     def handle_chord_item_change(self, chord_item: ChordItem):
         self.chord_item_changed.emit(chord_item)
 
+    def handle_harmony_item_click(self, harmony_item):
+        self.item_clicked.emit(harmony_item, harmony_item.chord_items[0])
+
+    def handle_chord_item_click(self, chord_item):
+        self.item_clicked.emit(self.harmony_grid.current_item, chord_item)
+
     def refresh_chords_list(self):
         harmony_item = self.harmony_grid.current_item
 
         self.chord_grid.set(harmony_item.chord_items, setup=True)
 
-        self.harmony_item_changed.emit(*self.get_current_item())
+        self.harmony_item_changed.emit(*self.get_current_items())
 
     def update_chord_item(self, chord_item: ChordItem):
         self.chord_grid.update_chord_item(chord_item)
 
         self.harmony_grid.refresh_current_index()
+
+    def set_current_items(self, harmony_item: HarmonyItem, chord_item: ChordItem):
+        if self.harmony_grid.current_item.id != harmony_item.id:
+            self.harmony_grid.set_current_item(harmony_item)
+
+            if 0:
+                self.refresh_chords_list()
+            else:
+                harmony_item = self.harmony_grid.current_item
+
+                self.chord_grid.set(harmony_item.chord_items, setup=True)
+        else:
+            self.chord_grid.set_current_item(chord_item)

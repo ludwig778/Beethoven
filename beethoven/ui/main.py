@@ -1,4 +1,5 @@
 from logging import getLogger
+import traceback
 
 from PySide6.QtWidgets import QApplication
 
@@ -9,13 +10,16 @@ logger = getLogger("ui.main")
 
 
 def run():
-    app = QApplication([])
-    app.setStyleSheet(get_stylesheet())
+    try:
+        app = QApplication([])
+        app.setStyleSheet(get_stylesheet())
 
-    main_window = setup_main_window()
-    main_window.show()
+        main_window = setup_main_window()
+        main_window.show()
 
-    app.exec()
+        app.exec()
+    except Exception:
+        logger.critical(traceback.format_exc())
 
 
 if __name__ == "__main__":

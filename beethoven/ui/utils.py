@@ -1,4 +1,6 @@
 from contextlib import contextmanager
+from pathlib import Path
+import sys
 from typing import Callable, List
 
 from PySide6.QtCore import Qt
@@ -93,3 +95,12 @@ def get_harmony_items_from_list(data_items):
 
 def get_harmony_items_to_dict(harmony_items):
     return [item.dict() for item in harmony_items]
+
+
+def resource_path(relative_path: str) -> Path:
+    try:
+        base_path = Path(sys._MEIPASS)
+    except Exception:
+        base_path = Path(".") / "beethoven/ui/resources"
+
+    return base_path / relative_path

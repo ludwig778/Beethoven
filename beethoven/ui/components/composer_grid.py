@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Callable, List, Tuple
 
 from PySide6.QtCore import Qt, Signal
@@ -13,6 +12,7 @@ from beethoven.ui.utils import (
     block_signal,
     get_default_chord_item,
     get_default_harmony_item,
+    resource_path,
 )
 
 
@@ -148,12 +148,10 @@ class HarmonyGrid(BaseGrid):
 
         self.setAttribute(Qt.WA_StyledBackground)
 
-        self.add_button = IconButton(icon_path=Path("beethoven/ui/img/plus-32.png"))
+        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"))
         self.add_button.setObjectName("add_button")
 
-        self.delete_button = IconButton(
-            icon_path=Path("beethoven/ui/img/minus-7-32.png")
-        )
+        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"))
         self.delete_button.setObjectName("delete_button")
 
         self.setup_list_view(ItemsModel(harmony_items))
@@ -205,13 +203,9 @@ class ChordGrid(BaseGrid):
 
         self.setAttribute(Qt.WA_StyledBackground)
 
-        self.add_button = IconButton(icon_path=Path("beethoven/ui/img/plus-32.png"))
-        self.modify_button = IconPushPullButton(
-            icon_path=Path("beethoven/ui/img/gear-32.png")
-        )
-        self.delete_button = IconButton(
-            icon_path=Path("beethoven/ui/img/minus-7-32.png")
-        )
+        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"))
+        self.modify_button = IconPushPullButton(icon_path=resource_path("img/gear-32.png"))
+        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"))
 
         self.setup_list_view(ItemsModel(chord_items))
 

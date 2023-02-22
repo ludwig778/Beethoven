@@ -15,17 +15,23 @@ logging.config.dictConfig(
             },
         },
         "handlers": {
-            "default": {
-                "level": logging.DEBUG,
+            "console": {
                 "formatter": "standard",
                 "class": "logging.StreamHandler",
                 "stream": "ext://sys.stdout",
             },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "formatter": "standard",
+                "filename": settings.config_file.path.parent / "beethoven.log",
+                "maxBytes": 1000000,
+                "backupCount": 3,
+            },
         },
         "loggers": {
             "": {
-                "handlers": ["default"],
-                "level": logging.CRITICAL if settings.test else logging.DEBUG,
+                "handlers": ["console", "file"],
+                "level": logging.DEBUG if settings.debug else logging.INFO,
             },
         },
     }

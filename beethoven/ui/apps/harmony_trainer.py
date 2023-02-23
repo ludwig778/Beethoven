@@ -1,5 +1,5 @@
 from copy import deepcopy
-from logging import getLogger
+from logging import DEBUG, getLogger
 from random import shuffle
 from typing import Iterator, List, Tuple
 
@@ -281,7 +281,7 @@ class HarmonyTrainerWidget(QWidget):
             harmony_items=[self.harmony_item],
             players=self.manager.sequencer.get_players(),
             on_chord_item_change=on_item_change,
-            on_tick=system_tick_logger(logger),
+            on_tick=system_tick_logger(logger, level=DEBUG),
         )
 
     def set_params(self, harmony_items, chord_item, preview: bool = False):

@@ -1,4 +1,4 @@
-from logging import getLogger
+from logging import DEBUG, getLogger
 from typing import List, Tuple
 
 from PySide6.QtGui import QKeySequence, QShortcut
@@ -149,7 +149,7 @@ class ComposeWidget(QWidget):
         params = SequencerParams(
             players=self.manager.sequencer.get_players(),
             on_chord_item_change=on_item_change,
-            on_tick=system_tick_logger(logger),
+            on_tick=system_tick_logger(logger, level=DEBUG),
             on_grid_end=self.manager.sequencer.grid_ended.emit,
         )
 

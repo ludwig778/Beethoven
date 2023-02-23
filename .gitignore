@@ -8,4 +8,8 @@ coverage_html*
 .pytest_cache
 .mypy_cache
 
+Beethoven.spec
+build
+dist
+
 tests/fixtures/beethoven.log*

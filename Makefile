@@ -49,8 +49,31 @@ cov:
 cov_html:
 	pytest ${TEST_ARGS} --cov=beethoven --cov-report html:coverage_html
 
-clean:
+clean: build_clean
 	rm -rf coverage_html .coverage .mypy_cache .pytest_cache
 	find . -name "*.pyc" -o -name "__pycache__"|xargs rm -rf
 
-.PHONY: tests
+build_clean:
+	rm -rf build dist Beethoven.spec
+
+convert_png_to_icns:
+	poetry run icnsutil c ${ARGS}
+
+build: build_clean
+	poetry run pyinstaller \
+		--name Beethoven \
+		--icon "beethoven/ui/resources/icon/beethoven.icns" \
+		--add-data "beethoven/ui/resources/img:img" \
+		--windowed beethoven/ui/main.py
+
+# Only on Mac, needs brew install create-dmg
+build_mac: build
+	create-dmg \
+		--volname "Beethoven" \
+		--window-pos 390 160 \
+		--app-drop-link 0 0 \
+		--hdiutil-quiet \
+		"dist/Beethoven.dmg" \
+		"dist/Beethoven.app"
+
+.PHONY: build tests

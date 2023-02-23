@@ -88,6 +88,8 @@ class SequencerParams(BaseModel):
 
 
 class Sequencer:
+    continuous_duration_ratio = 2
+
     def __init__(self, midi_adapter: MidiAdapter):
         self.midi_adapter = midi_adapter
 
@@ -194,10 +196,12 @@ class Sequencer:
 
             if self.params.continuous:
                 harmony_time_signature = DEFAULT_TIME_SIGNATURE
+                harmony_time_signature_duration = (
+                    harmony_time_signature.get_duration() * self.continuous_duration_ratio
+                )
             else:
                 harmony_time_signature = harmony_item.time_signature
-
-            harmony_time_signature_duration = harmony_time_signature.get_duration()
+                harmony_time_signature_duration = harmony_time_signature.get_duration()
 
             chord_sum = Duration()
             bar_offset = previous_harmony_end_time_section.bar - 1

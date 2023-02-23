@@ -49,7 +49,7 @@ class ComposeWidget(QWidget):
         self.time_signature_selector = TimeSignatureSelector()
         self.bpm_spinbox = BpmSpinBox()
         self.sequencer_widget = SequencerWidget(manager=self.manager)
-        self.chord_picker = ChordPickerDialog(chord_item=chord_item)
+        self.chord_picker = ChordPickerDialog(chord_item=chord_item, parent=self)
 
         self.update_frame_display()
 

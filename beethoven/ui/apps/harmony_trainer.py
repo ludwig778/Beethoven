@@ -109,7 +109,8 @@ class HarmonyTrainerWidget(QWidget):
 
         self.chord_grid = ChordGrid(chord_items=self.harmony_item.chord_items)
         self.chord_picker = ChordPickerDialog(
-            chord_item=self.harmony_item.chord_items[0]
+            chord_item=self.harmony_item.chord_items[0],
+            parent=self
         )
         self.sequencer_widget = SequencerWidget(manager=self.manager)
 

@@ -8,16 +8,14 @@ from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QComboBox, QLabel, QWidget
 
 from beethoven.helpers.sequencer import system_tick_logger
-from beethoven.models import ChordItem, HarmonyItem, Note, Scale
+from beethoven.models import Bpm, ChordItem, HarmonyItem, Note, Scale, TimeSignature
 from beethoven.sequencer.runner import SequencerItemIterator, SequencerParams
 from beethoven.types import SequencerItems
 from beethoven.ui.components.composer_grid import ChordGrid
 from beethoven.ui.components.frame import HarmonyChordItemFrames
-from beethoven.ui.components.scale_picker import ScalePicker
-from beethoven.ui.components.selectors.time_signature import TimeSignatureSelector
+from beethoven.ui.components.harmony_picker import HarmonyPicker
 from beethoven.ui.components.sequencer import SequencerWidget
-from beethoven.ui.components.spinbox import BpmSpinBox
-from beethoven.ui.constants import C_MAJOR4, ROOTS_WITH_SHARPS
+from beethoven.ui.constants import ROOTS_WITH_SHARPS
 from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
@@ -78,15 +76,29 @@ class HarmonyItemGenerator:
     }
 
     def __init__(self, harmony_item, generator_name: str = "5"):
+        self.original_item = harmony_item
         self.current_item = harmony_item
 
         self.setup(harmony_item.scale, generator_name)
+
+    def set_bpm(self, bpm: Bpm):
+        self.current_item.bpm = bpm
+        self.next_item.bpm = bpm
+
+        self.original_item = replace(self.original_item, bpm=bpm)
+
+    def set_time_signature(self, time_signature: TimeSignature):
+        self.current_item.time_signature = time_signature
+        self.next_item.time_signature = time_signature
+
+        self.original_item = replace(self.original_item, time_signature=time_signature)
 
     def setup(
         self, scale: Optional[Scale] = None, generator_name: Optional[str] = None
     ):
         if scale:
-            self.current_item = replace(self.current_item, scale=scale)
+            self.original_item = replace(self.original_item, scale=scale)
+            self.current_item = self.original_item
         if generator_name:
             self.generator_name = generator_name
 
@@ -98,7 +110,7 @@ class HarmonyItemGenerator:
 
         next_tonic = next(self.generator)
         self.next_item = replace(
-            self.current_item, scale=replace(self.current_item.scale, tonic=next_tonic)
+            self.current_item, scale=replace(self.original_item.scale, tonic=next_tonic)
         )
 
         self._index = 0
@@ -110,12 +122,12 @@ class HarmonyItemGenerator:
             self._tonics.append(next(self.generator))
 
         self.current_item = replace(
-            self.current_item,
-            scale=replace(self.current_item.scale, tonic=self._tonics[self._index]),
+            self.original_item,
+            scale=replace(self.original_item.scale, tonic=self._tonics[self._index]),
         )
         self.next_item = replace(
-            self.current_item,
-            scale=replace(self.current_item.scale, tonic=self._tonics[self._index + 1]),
+            self.original_item,
+            scale=replace(self.original_item.scale, tonic=self._tonics[self._index + 1]),
         )
 
         return self.current_item, self.next_item
@@ -125,12 +137,12 @@ class HarmonyItemGenerator:
             self._index -= 1
 
         self.current_item = replace(
-            self.current_item,
-            scale=replace(self.current_item.scale, tonic=self._tonics[self._index]),
+            self.original_item,
+            scale=replace(self.original_item.scale, tonic=self._tonics[self._index]),
         )
         self.next_item = replace(
-            self.current_item,
-            scale=replace(self.current_item.scale, tonic=self._tonics[self._index + 1]),
+            self.original_item,
+            scale=replace(self.original_item.scale, tonic=self._tonics[self._index + 1]),
         )
 
         return self.current_item, self.next_item
@@ -147,10 +159,6 @@ class HarmonyTrainerWidget(QWidget):
         self.mode_combobox = QComboBox()
         self.mode_combobox.addItems(list(HarmonyItemGenerator.generators.keys()))
 
-        self.scale_picker = ScalePicker(scale=C_MAJOR4)
-        self.time_signature_selector = TimeSignatureSelector()
-        self.bpm_spinbox = BpmSpinBox()
-
         self.harmony_item_generator = HarmonyItemGenerator(get_default_harmony_item())
 
         self.chord_grid = ChordGrid(
@@ -160,6 +168,8 @@ class HarmonyTrainerWidget(QWidget):
             chord_item=self.harmony_item_generator.current_item.chord_items[0],
             parent=self,
         )
+        self.harmony_picker = HarmonyPicker()
+
         self.sequencer_widget = SequencerWidget(manager=self.manager)
 
         self.mode_combobox.currentTextChanged.connect(self.handle_mode_change)  # type: ignore
@@ -170,11 +180,7 @@ class HarmonyTrainerWidget(QWidget):
         self.chord_grid.item_deleted.connect(self.handle_deleted_chord_item)
 
         self.chord_picker.value_changed.connect(self.handle_change_from_chord_picker)
-        self.scale_picker.value_changed.connect(self.handle_scale_change)
-        self.time_signature_selector.value_changed.connect(
-            self.handle_time_signature_change
-        )
-        self.bpm_spinbox.value_changed.connect(self.handle_bpm_change)
+        self.harmony_picker.value_changed.connect(self.handle_harmony_change)
 
         self.sequencer_widget.key_step_button.toggled.connect(
             self.handle_sequencer_stepper_change
@@ -210,24 +216,7 @@ class HarmonyTrainerWidget(QWidget):
                     Spacing(size=5),
                     horizontal_layout(
                         [
-                            vertical_layout(
-                                [
-                                    QLabel("Scale :"),
-                                    QLabel("Time Signature :"),
-                                    QLabel("Bpm :"),
-                                ],
-                                object_name="label_section",
-                            ),
-                            Stretch(),
-                            vertical_layout(
-                                [
-                                    self.scale_picker,
-                                    horizontal_layout(
-                                        [self.time_signature_selector, Stretch()]
-                                    ),
-                                    horizontal_layout([self.bpm_spinbox, Stretch()]),
-                                ]
-                            ),
+                            self.harmony_picker,
                             Spacing(size=5),
                             self.sequencer_widget,
                         ]
@@ -280,7 +269,7 @@ class HarmonyTrainerWidget(QWidget):
 
         self.params.set_options(preview=False)
 
-        self.harmony_item_generator.setup(scale=self.scale_picker.value)
+        self.harmony_item_generator.setup(scale=self.harmony_picker.scale)
 
         harmony_item = self.harmony_item_generator.current_item
 
@@ -500,28 +489,36 @@ class HarmonyTrainerWidget(QWidget):
 
         self.reset()
 
-    def handle_scale_change(self, scale):
+    def handle_harmony_change(
+        self,
+        scale: Optional[Scale],
+        time_signature: Optional[TimeSignature],
+        bpm: Optional[Bpm],
+    ):
         logger.info(
-            f"hid={self.harmony_item_generator.current_item.id} setting scale={scale.to_log_string()}"
+            f"scale={scale.to_log_string() if scale else 'None'} "
+            f"time_signature={str(time_signature)} bpm={str(bpm)}"
         )
 
-        self.harmony_item_generator.setup(scale)
+        if time_signature:
+            self.harmony_item_generator.set_time_signature(time_signature)
 
-        self.update_frame_display()
+        if bpm:
+            self.harmony_item_generator.set_bpm(bpm)
 
-    def handle_time_signature_change(self, time_signature):
-        logger.info(
-            f"hid={self.harmony_item_generator.current_item.id} setting time_signature={time_signature}"
-        )
+        if scale:
+            self.harmony_item_generator.setup(scale)
 
-        self.harmony_item_generator.current_item.time_signature = time_signature
+            self.sequencer_iterator.reset((
+                self.harmony_item_generator.current_item,
+                self.harmony_item_generator.current_item.chord_items[0]
+            ))
 
-    def handle_bpm_change(self, bpm):
-        logger.info(
-            f"hid={self.harmony_item_generator.current_item.id} setting bpm={bpm}"
-        )
-
-        self.harmony_item_generator.current_item.bpm = bpm
+        if scale or time_signature:
+            if self.manager.sequencer.is_playing():
+                self.manager.sequencer.grid_play.emit()
+            else:
+                self.update_frame_display()
 
     def update_frame_display(self):
         if self.sequencer_widget.is_chord_step_button_pressed():

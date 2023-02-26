@@ -109,9 +109,4 @@ class SystemPlayer(PercussionPlayer):
             cursor_offset=self.start_cursor,
             base_time_section=self.start_time_section,
         ):
-            yield (
-                cursor,
-                partial(
-                    self.callable, cursor=cursor, time_section=time_section, player=self
-                ),
-            )
+            yield cursor, partial(self.callable, cursor, time_section, self)

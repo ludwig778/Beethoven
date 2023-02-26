@@ -296,7 +296,7 @@ class HarmonyTrainerWidget(QWidget):
         next_chord_item = chord_item
 
         if self.sequencer_widget.is_key_step_button_pressed():
-            next_harmony_item, _ = self.harmony_item_generator.next()
+            next_harmony_item = self.harmony_item_generator.next_item
             next_chord_item = next_harmony_item.chord_items[0]
         elif self.sequencer_widget.is_chord_step_button_pressed():
             next_chord_item, _ = self._get_next_item(
@@ -308,10 +308,7 @@ class HarmonyTrainerWidget(QWidget):
             )
 
             if chord_reset:
-                next_harmony_item, _ = self.harmony_item_generator.next()
-                next_chord_item = next_harmony_item.chord_items[0]
-            else:
-                next_harmony_item = harmony_item
+                next_harmony_item = self.harmony_item_generator.current_item
 
         return next_harmony_item, next_chord_item
 
@@ -356,12 +353,7 @@ class HarmonyTrainerWidget(QWidget):
             )
 
             if chord_reset:
-                next_harmony_item = self.harmony_item_generator.next_item
-                next_chord_item = next_harmony_item.chord_items[0]
-            else:
-                next_harmony_item = harmony_item
-
-        logger.info(f"hid={next_harmony_item.id} cid={next_chord_item.id}")
+                next_harmony_item, _ = self.harmony_item_generator.next()
 
         return next_harmony_item, next_chord_item
 
@@ -482,12 +474,14 @@ class HarmonyTrainerWidget(QWidget):
     def handle_mode_change(self, mode: str):
         logger.info(f"setting mode={mode}")
 
-        self.harmony_item_generator.setup(generator_name=mode)
+        self.harmony_item_generator.setup(
+            scale=self.sequencer_iterator.current_items[0].scale,
+            generator_name=mode
+        )
 
-        if self.sequencer_widget.is_play_button_pressed():
-            self.manager.sequencer.grid_stop.emit()
+        self.sequencer_iterator.reset(self.sequencer_iterator.current_items)
 
-        self.reset()
+        self.update_frame_display()
 
     def handle_harmony_change(
         self,
@@ -511,7 +505,7 @@ class HarmonyTrainerWidget(QWidget):
 
             self.sequencer_iterator.reset((
                 self.harmony_item_generator.current_item,
-                self.harmony_item_generator.current_item.chord_items[0]
+                self.sequencer_iterator.current_items[1]
             ))
 
         if scale or time_signature:

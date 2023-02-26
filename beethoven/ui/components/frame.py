@@ -5,25 +5,32 @@ from PySide6.QtWidgets import QFrame, QLabel, QWidget
 
 from beethoven.helpers.sequencer import get_chord_from_items
 from beethoven.models import Chord, ChordItem, Degree, HarmonyItem, Note, Scale
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import LayoutItem, Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.utils.alterations import get_degree_alteration_str_from_int
 
 
 class FramedText(QFrame):
-    def __init__(self, *args, upper_text: str, **kwargs):
+    def __init__(self, *args, upper_text: Optional[str] = None, **kwargs):
         super(FramedText, self).__init__(*args, **kwargs)
 
         self.setAttribute(Qt.WA_StyledBackground)
 
-        upper_label = QLabel(upper_text)
-        upper_label.setAlignment(Qt.AlignCenter)  # type: ignore
-        upper_label.setObjectName("upper_text")
+        layout_items: List[LayoutItem] = []
 
         self.lower_label = QLabel()
         self.lower_label.setAlignment(Qt.AlignCenter)  # type: ignore
         self.lower_label.setObjectName("lower_text")
 
-        self.setLayout(vertical_layout([upper_label, self.lower_label, Stretch()]))
+        if upper_text:
+            upper_label = QLabel(upper_text)
+            upper_label.setAlignment(Qt.AlignCenter)  # type: ignore
+            upper_label.setObjectName("upper_text")
+
+            layout_items = [upper_label, self.lower_label, Stretch()]
+        else:
+            layout_items = [self.lower_label]
+
+        self.setLayout(vertical_layout(layout_items))
 
     def set_text(self, text: str):
         self.lower_label.setText(text)

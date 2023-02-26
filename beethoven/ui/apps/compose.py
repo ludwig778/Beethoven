@@ -358,11 +358,9 @@ class ComposeWidget(QWidget):
         self.handle_items_change(*self.sequencer_iterator.current_items)
 
     def _set_current_harmony_item(self, harmony_item: HarmonyItem):
-        harmony_item, _ = self.sequencer_iterator.current_items
-
         self.sequencer_iterator.reset((harmony_item, harmony_item.chord_items[0]))
 
-        self.composer_grid.harmony_grid.refresh_current_index()
+        self.handle_items_change(harmony_item, harmony_item.chord_items[0])
 
         if self.sequencer_widget.is_play_button_pressed():
             self.manager.sequencer.grid_play.emit()

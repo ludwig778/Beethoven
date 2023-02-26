@@ -147,7 +147,7 @@ class HarmonyTrainerWidget(QWidget):
         self.mode_combobox = QComboBox()
         self.mode_combobox.addItems(list(HarmonyItemGenerator.generators.keys()))
 
-        self.scale_selector = ScalePicker(scale=C_MAJOR4)
+        self.scale_picker = ScalePicker(scale=C_MAJOR4)
         self.time_signature_selector = TimeSignatureSelector()
         self.bpm_spinbox = BpmSpinBox()
 
@@ -170,7 +170,7 @@ class HarmonyTrainerWidget(QWidget):
         self.chord_grid.item_deleted.connect(self.handle_deleted_chord_item)
 
         self.chord_picker.value_changed.connect(self.handle_change_from_chord_picker)
-        self.scale_selector.value_changed.connect(self.handle_scale_change)
+        self.scale_picker.value_changed.connect(self.handle_scale_change)
         self.time_signature_selector.value_changed.connect(
             self.handle_time_signature_change
         )
@@ -221,7 +221,7 @@ class HarmonyTrainerWidget(QWidget):
                             Stretch(),
                             vertical_layout(
                                 [
-                                    self.scale_selector,
+                                    self.scale_picker,
                                     horizontal_layout(
                                         [self.time_signature_selector, Stretch()]
                                     ),
@@ -280,7 +280,7 @@ class HarmonyTrainerWidget(QWidget):
 
         self.params.set_options(preview=False)
 
-        self.harmony_item_generator.setup(scale=self.scale_selector.value)
+        self.harmony_item_generator.setup(scale=self.scale_picker.value)
 
         harmony_item = self.harmony_item_generator.current_item
 

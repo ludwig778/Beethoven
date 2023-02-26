@@ -42,7 +42,7 @@ class ComposeWidget(QWidget):
         self.composer_grid = ComposerGrid(harmony_items=harmony_items)
         self.composer_grid.items_clicked.connect(self.handle_click_from_grid)
 
-        self.scale_selector = ScalePicker(scale=harmony_items[0].scale)
+        self.scale_picker = ScalePicker(scale=harmony_items[0].scale)
         self.time_signature_selector = TimeSignatureSelector()
         self.bpm_spinbox = BpmSpinBox()
         self.sequencer_widget = SequencerWidget(manager=self.manager)
@@ -64,10 +64,10 @@ class ComposeWidget(QWidget):
             self.handle_deleted_harmony_item
         )
 
-        self.scale_selector.octave_spinbox.clearFocus()
+        self.scale_picker.octave_spinbox.clearFocus()
         self.composer_grid.chord_grid.setFocus()
 
-        self.scale_selector.value_changed.connect(self.handle_scale_change)
+        self.scale_picker.value_changed.connect(self.handle_scale_change)
         self.time_signature_selector.value_changed.connect(
             self.handle_time_signature_change
         )
@@ -109,7 +109,7 @@ class ComposeWidget(QWidget):
                             Stretch(),
                             vertical_layout(
                                 [
-                                    self.scale_selector,
+                                    self.scale_picker,
                                     horizontal_layout(
                                         [self.time_signature_selector, Stretch()]
                                     ),
@@ -264,7 +264,7 @@ class ComposeWidget(QWidget):
     def handle_items_change(self, harmony_item: HarmonyItem, chord_item: ChordItem):
         self.composer_grid.set_current_items(harmony_item, chord_item)
 
-        self.scale_selector.set(harmony_item.scale)
+        self.scale_picker.set(harmony_item.scale)
         self.chord_picker.set(chord_item)
 
         self.time_signature_selector.set(harmony_item.time_signature)

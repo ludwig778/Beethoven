@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Sequence
 
 from PySide6.QtCore import Signal
@@ -9,7 +9,7 @@ from beethoven.settings import TuningSetting
 from beethoven.ui.components.combobox import NoteComboBox
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 
-logger = getLogger("selectors.string")
+logger = logging.getLogger("selectors.string")
 
 
 class StringSelectorRow(QWidget):

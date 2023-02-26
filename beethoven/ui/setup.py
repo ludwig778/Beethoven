@@ -1,5 +1,5 @@
 import atexit
-from logging import getLogger
+import logging
 
 from PySide6.QtWidgets import QMainWindow
 
@@ -8,7 +8,7 @@ from beethoven.settings import setup_settings
 from beethoven.ui.main_window import MainWindow
 from beethoven.ui.managers import AppManager
 
-logger = getLogger("ui.main")
+logger = logging.getLogger("ui.main")
 
 
 def setup_main_window() -> QMainWindow:

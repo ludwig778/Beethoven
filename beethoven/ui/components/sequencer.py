@@ -1,5 +1,5 @@
+import logging
 from functools import partial
-from logging import getLogger
 from typing import Optional, Set
 
 from PySide6.QtWidgets import QPushButton, QWidget
@@ -8,7 +8,7 @@ from beethoven.ui.components.buttons import PushPullButton
 from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("control")
+logger = logging.getLogger("control")
 
 
 class SequencerWidget(QWidget):
@@ -27,6 +27,8 @@ class SequencerWidget(QWidget):
 
         self.play_button.toggled.connect(self.handle_play)
         self.stop_button.clicked.connect(self.stop)
+
+        self.manager.sequencer.grid_ended.connect(self.release_play)
 
         self.setLayout(
             vertical_layout(
@@ -88,7 +90,11 @@ class SequencerWidget(QWidget):
         if not state and not self.manager.sequencer.is_stopped():
             self.manager.sequencer.grid_stop.emit()
 
-            logger.debug("emit stop")
+            logger.info("stop")
+        elif state:
+            self.manager.sequencer.grid_play.emit()
+
+            logger.info("play")
 
     def set_play_button_state(self, state, *args):
         if (
@@ -116,3 +122,8 @@ class SequencerWidget(QWidget):
         self.release_all(ignore={self.key_step_button, self.chord_step_button})
 
         self.manager.sequencer.grid_stop.emit()
+
+    def release_play(self):
+        logger.info("stop")
+
+        self.release_all(ignore={self.key_step_button, self.chord_step_button})

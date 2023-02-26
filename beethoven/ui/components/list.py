@@ -2,6 +2,8 @@ from PySide6.QtCore import QAbstractListModel, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QFont, QFontMetrics
 from PySide6.QtWidgets import QStyle, QStyledItemDelegate
 
+from beethoven.models import ChordItem
+
 
 class BaseDelegate(QStyledItemDelegate):
     extra_width = 24
@@ -21,7 +23,7 @@ class HarmonyDelegate(BaseDelegate):
 
     @staticmethod
     def _format_chords(obj):
-        return " \u2794 ".join(map(str, obj.chord_items))
+        return " \u2794 ".join(map(ChordItem.to_simple_string, obj.chord_items))
 
     def _get_max_width(self, obj):
         return (
@@ -91,7 +93,10 @@ class HarmonyDelegate(BaseDelegate):
 class ChordDelegate(BaseDelegate):
     def _get_max_width(self, obj):
         return (
-            max(QFontMetrics(self.bold_font).horizontalAdvance(str(obj)), 1)
+            max(
+                QFontMetrics(self.bold_font).horizontalAdvance(obj.to_simple_string()),
+                1,
+            )
             + self.extra_width
         )
 
@@ -126,13 +131,13 @@ class ChordDelegate(BaseDelegate):
         )
 
         painter.setFont(self.bold_font)
-        painter.drawText(chord_rect, Qt.AlignCenter, str(obj))
+        painter.drawText(chord_rect, Qt.AlignCenter, obj.to_simple_string())
         if obj.duration_item.to_string():
             painter.setFont(self.normal_font)
             painter.drawText(
                 QRect(left, 35 - (height / 2), width, height),
                 Qt.AlignCenter,
-                (str(obj.duration_item.to_string())),
+                (obj.duration_item.to_string()),
             )
 
         painter.restore()
@@ -144,13 +149,12 @@ class ItemsModel(QAbstractListModel):
 
         self.items = items
 
+    def setData(self, index, item, role=Qt.EditRole):
+        if role == Qt.EditRole:
+            self.items[index.row()] = item
+
     def insert_item(self, item, row):
         self.items.insert(row, item)
-
-        self.endResetModel()
-
-    def set_items(self, items):
-        self.items = items
 
         self.endResetModel()
 
@@ -159,15 +163,16 @@ class ItemsModel(QAbstractListModel):
 
         self.endResetModel()
 
+    def set_items(self, items):
+        self.items = items
+
+        self.endResetModel()
+
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             obj = self.items[index.row()]
 
             return obj
-
-    def setData(self, index, item, role=Qt.EditRole):
-        if role == Qt.EditRole:
-            self.items[index.row()] = item
 
     def __len__(self):
         return len(self.items)

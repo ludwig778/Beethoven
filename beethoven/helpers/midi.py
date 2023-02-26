@@ -26,7 +26,7 @@ def play_note(
     output: Output,
     channel: int,
     velocity: int = 127,
-    duration: Duration = Duration(value=1),
+    duration: Duration = Duration.parse("1"),
 ) -> None:
     note_on, note_off = get_on_off_messages(
         note_index, output, channel, velocity=velocity
@@ -44,7 +44,7 @@ def play_notes(
     output: Output,
     channel: int,
     velocity: int = 127,
-    duration: Duration = Duration(value=1),
+    duration: Duration = Duration.parse("1"),
 ) -> None:
     notes_on = []
     notes_off = []

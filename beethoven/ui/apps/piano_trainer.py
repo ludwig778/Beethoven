@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from random import shuffle
 from typing import Optional
 
@@ -15,7 +15,7 @@ from beethoven.ui.components.selectors import (
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
-logger = getLogger("app.compose")
+logger = logging.getLogger("app.compose")
 
 
 class PianoTrainerWidget(QWidget):

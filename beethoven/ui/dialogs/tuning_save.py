@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Tuple
 
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
@@ -7,7 +7,7 @@ from beethoven.settings import TuningSettings
 from beethoven.ui.components.buttons import Button
 from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
 
-logger = getLogger("dialog.tuning_save")
+logger = logging.getLogger("dialog.tuning_save")
 
 
 class TuningSaveDialog(QDialog):

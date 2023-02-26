@@ -1,8 +1,6 @@
-from typing import List, Protocol
+from typing import List, Protocol, Tuple
 
-from beethoven.models import GridPart, Note
-
-GridParts = List[GridPart]
+from beethoven.models import ChordItem, HarmonyItem, Note
 
 
 class NotesContainer(Protocol):
@@ -10,3 +8,6 @@ class NotesContainer(Protocol):
 
     def __hash__(self):
         ...
+
+
+SequencerItems = Tuple[HarmonyItem, ChordItem]

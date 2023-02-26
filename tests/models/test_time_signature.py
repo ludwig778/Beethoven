@@ -46,7 +46,7 @@ def test_time_section_helper_time_section_generator_first_values():
         whole_duration
     )
 
-    assert next(generator) == (TimeSection(bar=1, measure=1, rest=0), Duration(value=0))
+    assert next(generator) == (TimeSection(bar=1, measure=1), Duration.parse("0"))
 
 
 @mark.parametrize(
@@ -57,19 +57,19 @@ def test_time_section_helper_time_section_generator_first_values():
             TimeSignature(beats_per_bar=4, beat_unit=4),
             whole_duration,
             1,
-            (TimeSection(bar=2, measure=1, rest=0), Duration(value=4)),
+            (TimeSection(bar=2, measure=1), Duration.parse("4")),
         ],
         [
             TimeSignature(beats_per_bar=4, beat_unit=4),
             half_duration,
             1,
-            (TimeSection(bar=1, measure=3, rest=0), Duration(value=2)),
+            (TimeSection(bar=1, measure=3), Duration.parse("2")),
         ],
         [
             TimeSignature(beats_per_bar=4, beat_unit=4),
             quarter_duration,
             1,
-            (TimeSection(bar=1, measure=2, rest=0), Duration(value=1)),
+            (TimeSection(bar=1, measure=2), Duration.parse("1")),
         ],
         [
             TimeSignature(beats_per_bar=4, beat_unit=4),
@@ -77,7 +77,7 @@ def test_time_section_helper_time_section_generator_first_values():
             1,
             (
                 TimeSection(bar=1, measure=1, rest=Fraction(1, 2)),
-                Duration(value=Fraction(1, 2)),
+                Duration.parse("1/2"),
             ),
         ],
         [
@@ -86,7 +86,7 @@ def test_time_section_helper_time_section_generator_first_values():
             1,
             (
                 TimeSection(bar=1, measure=1, rest=Fraction(1, 4)),
-                Duration(value=Fraction(1, 4)),
+                Duration.parse("1/4"),
             ),
         ],
         # Time Signature Check
@@ -94,19 +94,19 @@ def test_time_section_helper_time_section_generator_first_values():
             TimeSignature(beats_per_bar=2, beat_unit=2),
             whole_duration,
             1,
-            (TimeSection(bar=2, measure=1, rest=0), Duration(value=4)),
+            (TimeSection(bar=2, measure=1), Duration.parse("4")),
         ],
         [
             TimeSignature(beats_per_bar=8, beat_unit=8),
             whole_duration,
             1,
-            (TimeSection(bar=2, measure=1, rest=0), Duration(value=4)),
+            (TimeSection(bar=2, measure=1), Duration.parse("4")),
         ],
         [
             TimeSignature(beats_per_bar=16, beat_unit=16),
             whole_duration,
             1,
-            (TimeSection(bar=2, measure=1, rest=0), Duration(value=4)),
+            (TimeSection(bar=2, measure=1), Duration.parse("4")),
         ],
         # Check Duration divided values
         [
@@ -115,7 +115,7 @@ def test_time_section_helper_time_section_generator_first_values():
             2,
             (
                 TimeSection(bar=1, measure=1, rest=Fraction(4, 5)),
-                Duration(value=Fraction(4, 5)),
+                Duration.parse("4/5"),
             ),
         ],
         [
@@ -124,7 +124,7 @@ def test_time_section_helper_time_section_generator_first_values():
             3,
             (
                 TimeSection(bar=1, measure=2, rest=Fraction(4, 5)),
-                Duration(value=Fraction(9, 5)),
+                Duration.parse("9/5"),
             ),
         ],
         # Check duration overlaps
@@ -132,13 +132,13 @@ def test_time_section_helper_time_section_generator_first_values():
             TimeSignature(beats_per_bar=5, beat_unit=4),
             whole_duration,
             1,
-            (TimeSection(bar=1, measure=5, rest=0), Duration(value=4)),
+            (TimeSection(bar=1, measure=5), Duration.parse("4")),
         ],
         [
             TimeSignature(beats_per_bar=3, beat_unit=4),
             whole_duration,
             1,
-            (TimeSection(bar=2, measure=2, rest=0), Duration(value=4)),
+            (TimeSection(bar=2, measure=2), Duration.parse("4")),
         ],
     ],
 )

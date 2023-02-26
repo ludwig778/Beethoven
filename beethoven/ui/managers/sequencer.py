@@ -1,18 +1,18 @@
+import logging
 from enum import Enum, auto
-from logging import getLogger
 from typing import Optional, Tuple
 
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, QThread, Signal
 
 from beethoven.adapters.factory import Adapters
+from beethoven.models import ChordItem, HarmonyItem
 from beethoven.sequencer.runner import Sequencer, SequencerParams
 from beethoven.settings import AppSettings
 from beethoven.ui.managers.midi import MidiManager
-from beethoven.ui.models import ChordItem, HarmonyItem
 from beethoven.ui.threads import MidiOutputThread
 from beethoven.ui.utils import setup_players
 
-logger = getLogger("manager.sequencer")
+logger = logging.getLogger("manager.sequencer")
 
 
 class SequencerState(Enum):
@@ -25,6 +25,8 @@ class SequencerManager(QObject):
     grid_play = Signal()
     grid_stop = Signal()
     grid_ended = Signal()
+
+    items_change = Signal(HarmonyItem, ChordItem)
 
     def __init__(
         self,
@@ -75,6 +77,7 @@ class SequencerManager(QObject):
         )
 
         self.midi_manager.output_thread.start()
+        self.midi_manager.output_thread.setPriority(QThread.TimeCriticalPriority)
         self.midi_manager.output_thread.finished.connect(self.finished)
 
     def get_players(self, preview: bool = False):

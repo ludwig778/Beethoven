@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QLabel, QSpinBox, QWidget
@@ -7,7 +7,7 @@ from beethoven.models import TimeSignature
 from beethoven.ui.layouts import Spacing, horizontal_layout
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("selectors.time_signature")
+logger = logging.getLogger("selectors.time_signature")
 
 
 class TimeSignatureSelector(QWidget):

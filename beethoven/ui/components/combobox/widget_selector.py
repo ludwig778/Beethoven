@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Dict
 
 from PySide6.QtCore import Signal
@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QComboBox, QWidget
 from beethoven.ui.components.widget_stack import StackedWidget
 from beethoven.ui.layouts import Spacing, vertical_layout
 
-logger = getLogger("widget_selector")
+logger = logging.getLogger("widget_selector")
 
 
 class WidgetSelectorComboBox(QWidget):

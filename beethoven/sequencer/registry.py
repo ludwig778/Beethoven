@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from logging import getLogger
+import logging
 from typing import Dict, List, Optional
 
-logger = getLogger("players.registry")
+logger = logging.getLogger("players.registry")
 
 
 class RegisteredPlayerMeta(type):

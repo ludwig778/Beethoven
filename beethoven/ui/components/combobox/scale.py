@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QComboBox
 from beethoven import indexes
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("combobox.scale")
+logger = logging.getLogger("combobox.scale")
 
 
 class ScaleComboBox(QComboBox):

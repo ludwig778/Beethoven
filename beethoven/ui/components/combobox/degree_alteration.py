@@ -1,11 +1,11 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
 
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("combobox.degree_alteration")
+logger = logging.getLogger("combobox.degree_alteration")
 
 
 class DegreeAlterationComboBox(QComboBox):

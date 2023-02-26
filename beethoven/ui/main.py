@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 import traceback
 
 from PySide6.QtWidgets import QApplication
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QApplication
 from beethoven.ui.setup import setup_main_window
 from beethoven.ui.stylesheet import get_stylesheet
 
-logger = getLogger("ui.main")
+logger = logging.getLogger("ui.main")
 
 
 def run():

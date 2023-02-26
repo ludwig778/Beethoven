@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Dict
 
 from PySide6.QtCore import QThread, SignalInstance
@@ -12,7 +12,7 @@ class MidiInputThread(QThread):
     def __init__(self, midi_input: Input, on_note_change: SignalInstance):
         super(MidiInputThread, self).__init__()
 
-        self.logger = getLogger("threads.midi_input")
+        self.logger = logging.getLogger("threads.midi_input")
 
         self.midi_input = midi_input
         self.on_note_change = on_note_change
@@ -44,7 +44,7 @@ class MidiOutputThread(QThread):
     ):
         super(MidiOutputThread, self).__init__()
 
-        self.logger = getLogger("threads.midi_output")
+        self.logger = logging.getLogger("threads.midi_output")
 
         self.midi_adapter = midi_adapter
         self.sequencer = sequencer

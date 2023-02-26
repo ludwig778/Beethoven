@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Optional
 
 from PySide6.QtCore import QObject, Signal
@@ -12,7 +12,7 @@ from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_l
 from beethoven.ui.managers import AppManager
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("dialog.players")
+logger = logging.getLogger("dialog.players")
 
 
 class PlayerRow(QWidget):

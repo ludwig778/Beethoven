@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QComboBox
 from beethoven.settings import TuningSettings
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("combobox.tuning")
+logger = logging.getLogger("combobox.tuning")
 
 
 class TuningComboBox(QComboBox):

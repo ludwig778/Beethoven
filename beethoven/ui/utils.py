@@ -1,18 +1,17 @@
+import sys
 from contextlib import contextmanager
 from pathlib import Path
-import sys
 from typing import Callable, List
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QWidget
 
 from beethoven.adapters.midi import MidiAdapter
-from beethoven.models import Degree, Scale
+from beethoven.models import ChordItem, Degree, DurationItem, HarmonyItem, Scale
 from beethoven.sequencer.players import BasePlayer
 from beethoven.sequencer.registry import RegisteredPlayer
 from beethoven.settings import PlayerSetting
 from beethoven.ui.constants import DEFAULT_BPM, DEFAULT_TIME_SIGNATURE
-from beethoven.ui.models import ChordItem, DurationItem, HarmonyItem
 
 
 @contextmanager

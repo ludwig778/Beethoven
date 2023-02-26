@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QDialog, QLabel, QPushButton
@@ -11,7 +11,7 @@ from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_l
 from beethoven.ui.managers.app import AppManager
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("dialog.tuning")
+logger = logging.getLogger("dialog.tuning")
 
 
 class TuningDialog(QDialog):

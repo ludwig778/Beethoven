@@ -4,9 +4,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QLabel, QWidget
 
 from beethoven.helpers.sequencer import get_chord_from_items
-from beethoven.models import Chord, Degree, Note, Scale
+from beethoven.models import Chord, ChordItem, Degree, HarmonyItem, Note, Scale
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
-from beethoven.ui.models import ChordItem, HarmonyItem
 from beethoven.utils.alterations import get_degree_alteration_str_from_int
 
 

@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QDialog, QLabel
@@ -11,7 +11,7 @@ from beethoven.ui.dialogs.midi_add import MidiAddDialog
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
-logger = getLogger("dialog.midi")
+logger = logging.getLogger("dialog.midi")
 
 
 class MidiDialog(QDialog):

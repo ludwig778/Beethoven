@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from typing import Dict
 
 from PySide6.QtCore import Signal
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget
 
 from beethoven.ui.layouts import stacked_layout
 
-logger = getLogger("stacked_widget")
+logger = logging.getLogger("stacked_widget")
 
 
 class StackedWidget(QWidget):

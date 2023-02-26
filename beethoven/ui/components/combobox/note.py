@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QComboBox
@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QComboBox
 from beethoven.models import Note
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("combobox.note")
+logger = logging.getLogger("combobox.note")
 
 
 class NoteComboBox(QComboBox):

@@ -1,5 +1,4 @@
 import logging
-from logging import getLogger
 
 from PySide6.QtCore import QObject, Signal
 
@@ -8,7 +7,7 @@ from beethoven.settings import AppSettings, save_settings, serialize_settings
 from beethoven.ui.managers.midi import MidiManager
 from beethoven.ui.managers.sequencer import SequencerManager
 
-logger = getLogger("manager.app")
+logger = logging.getLogger("manager.app")
 
 
 class AppManager(QObject):

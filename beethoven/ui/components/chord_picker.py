@@ -1,10 +1,10 @@
-from logging import getLogger
+import logging
 from typing import Union
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QWidget
 
-from beethoven.models import Degree, Note
+from beethoven.models import ChordItem, Degree, DurationItem, Note
 from beethoven.ui.components.combobox.degree_alteration import DegreeAlterationComboBox
 from beethoven.ui.components.selectors import (
     ChordGridSelector,
@@ -13,10 +13,9 @@ from beethoven.ui.components.selectors import (
 )
 from beethoven.ui.components.selectors.duration import DurationSelector
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
-from beethoven.ui.models import ChordItem, DurationItem
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("chord_picker")
+logger = logging.getLogger("chord_picker")
 
 
 class ChordPicker(QWidget):

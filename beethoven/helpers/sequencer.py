@@ -2,17 +2,25 @@ import logging
 from logging import Logger
 from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from beethoven.models import Chord, Duration, Note, Scale, TimeSection, TimeSignature
+from beethoven.models import (
+    Chord,
+    ChordItem,
+    Duration,
+    HarmonyItem,
+    Note,
+    Scale,
+    TimeSection,
+    TimeSignature,
+)
 from beethoven.sequencer.players import BasePlayer, SystemPlayer
 from beethoven.ui.exceptions import PlayerStopPlaying
-from beethoven.ui.models import ChordItem, HarmonyItem
 
 NoteGenerator = Generator[Tuple[str, Any], None, None]
 NoteGenerators = Dict[Any, NoteGenerator]
 
 
 def note_repeater(cycle: Duration, messages, offset: Optional[Duration] = None):
-    timeline = offset or Duration(value=0)
+    timeline = offset or Duration()
 
     while 1:
         for message in messages:
@@ -22,7 +30,7 @@ def note_repeater(cycle: Duration, messages, offset: Optional[Duration] = None):
 
 
 def note_sequencer(step: Duration, messages, round_robin: str):
-    timeline = Duration(value=0)
+    timeline = Duration()
     i = 0
 
     while 1:

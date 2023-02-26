@@ -1,15 +1,15 @@
+import logging
 from fractions import Fraction
-from logging import getLogger
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QLabel, QSpinBox, QWidget
 
+from beethoven.models import DurationItem
 from beethoven.ui.constants import BASE_DURATIONS
 from beethoven.ui.layouts import horizontal_layout
-from beethoven.ui.models import DurationItem
 from beethoven.ui.utils import block_signal
 
-logger = getLogger("selectors.duration")
+logger = logging.getLogger("selectors.duration")
 
 
 class DurationSelector(QWidget):

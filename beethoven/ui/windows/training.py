@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from random import shuffle
 from typing import Callable, List, Optional, Protocol, cast
 
@@ -17,7 +17,7 @@ from beethoven.ui.components.selectors import (
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
-logger = getLogger("app.trainers")
+logger = logging.getLogger("app.trainers")
 
 
 class CannotSetupChecker(Exception):

@@ -1,11 +1,13 @@
-from logging import DEBUG, getLogger
-from typing import List, Tuple
+import logging
+from typing import List, Tuple, TypeVar
 
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QLabel, QWidget
 
 from beethoven.helpers.sequencer import system_tick_logger
-from beethoven.sequencer.runner import SequencerParams
+from beethoven.models import ChordItem, HarmonyItem
+from beethoven.sequencer.runner import SequencerItemIterator, SequencerParams
+from beethoven.types import SequencerItems
 from beethoven.ui.components.composer_grid import ComposerGrid
 from beethoven.ui.components.frame import HarmonyChordItemFrames
 from beethoven.ui.components.scale_picker import ScalePicker
@@ -15,10 +17,11 @@ from beethoven.ui.components.spinbox import BpmSpinBox
 from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
-from beethoven.ui.models import ChordItem, HarmonyItem
 from beethoven.ui.utils import get_default_harmony_items
 
-logger = getLogger("app.compose")
+logger = logging.getLogger("app.compose")
+
+T = TypeVar("T", HarmonyItem, ChordItem)
 
 
 class ComposeWidget(QWidget):
@@ -27,35 +30,40 @@ class ComposeWidget(QWidget):
         *args,
         manager: AppManager,
         harmony_items: List[HarmonyItem] = get_default_harmony_items(),
-        **kwargs
+        **kwargs,
     ):
         super(ComposeWidget, self).__init__(*args, **kwargs)
 
         self.manager = manager
+        self.harmony_items = harmony_items
 
         self.harmony_chord_frames = HarmonyChordItemFrames()
 
         self.composer_grid = ComposerGrid(harmony_items=harmony_items)
-        self.composer_grid.harmony_item_changed.connect(
-            self.handle_harmony_item_change_from_grid
-        )
-        self.composer_grid.chord_item_changed.connect(
-            self.handle_chord_item_change_from_grid
-        )
+        self.composer_grid.items_clicked.connect(self.handle_click_from_grid)
 
-        harmony_item, chord_item = self.composer_grid.get_current_items()
-
-        self.scale_selector = ScalePicker(scale=harmony_item.scale)
+        self.scale_selector = ScalePicker(scale=harmony_items[0].scale)
         self.time_signature_selector = TimeSignatureSelector()
         self.bpm_spinbox = BpmSpinBox()
         self.sequencer_widget = SequencerWidget(manager=self.manager)
-        self.chord_picker = ChordPickerDialog(chord_item=chord_item, parent=self)
-
-        self.update_frame_display()
-
-        self.composer_grid.item_clicked.connect(self.handle_composer_grid_items_click)
+        self.chord_picker = ChordPickerDialog(
+            chord_item=harmony_items[0].chord_items[0], parent=self
+        )
 
         self.composer_grid.chord_grid.modify_button.connect_to_dialog(self.chord_picker)
+
+        self.composer_grid.chord_grid.item_added.connect(self.handle_added_chord_item)
+        self.composer_grid.chord_grid.item_deleted.connect(
+            self.handle_deleted_chord_item
+        )
+
+        self.composer_grid.harmony_grid.item_added.connect(
+            self.handle_added_harmony_item
+        )
+        self.composer_grid.harmony_grid.item_deleted.connect(
+            self.handle_deleted_harmony_item
+        )
+
         self.scale_selector.octave_spinbox.clearFocus()
         self.composer_grid.chord_grid.setFocus()
 
@@ -64,18 +72,13 @@ class ComposeWidget(QWidget):
             self.handle_time_signature_change
         )
         self.bpm_spinbox.value_changed.connect(self.handle_bpm_change)
-        self.chord_picker.value_changed.connect(
-            self.handle_chord_item_change_from_chord_picker
-        )
+        self.chord_picker.value_changed.connect(self.handle_change_from_chord_picker)
 
-        self.sequencer_widget.play_button.toggled.connect(
-            self.handle_sequencer_widget_play_button
-        )
         self.sequencer_widget.key_step_button.toggled.connect(
-            self.handle_sequencer_widget_stepper_change
+            self.handle_sequencer_stepper_change
         )
         self.sequencer_widget.chord_step_button.toggled.connect(
-            self.handle_sequencer_widget_stepper_change
+            self.handle_sequencer_stepper_change
         )
 
         self.action_binding = QShortcut(QKeySequence("Space"), self)
@@ -128,148 +131,139 @@ class ComposeWidget(QWidget):
         logger.info("setup")
 
         self.sequencer_widget.setup()
+        self.sequencer_iterator = SequencerItemIterator.setup(
+            current_items=(self.harmony_items[0], self.harmony_items[0].chord_items[0]),
+            next_items_updater=self.next_items_update,
+        )
+        self.params = SequencerParams(
+            item_iterator=self.sequencer_iterator,
+            players=self.manager.sequencer.get_players(),
+            on_chord_item_change=self.manager.sequencer.items_change.emit,
+            on_tick=system_tick_logger(logger, level=logging.DEBUG),
+        )
 
-        self.params = self.get_default_params()
+        self.manager.sequencer.items_change.connect(self.handle_items_change)
         self.manager.sequencer.setup(self.params)
+        self.manager.sequencer.grid_stop.connect(self.reset)
+
+        self.update_frame_display()
 
     def teardown(self):
         logger.info("teardown")
 
         self.sequencer_widget.teardown()
 
+        self.manager.sequencer.grid_stop.disconnect(self.reset)
+        self.manager.sequencer.items_change.disconnect(self.handle_items_change)
+
         if not self.manager.sequencer.is_stopped():
             self.manager.sequencer.grid_stop.emit()
 
-    def get_default_params(self) -> SequencerParams:
-        def on_item_change(chord_item: ChordItem, harmony_item: HarmonyItem):
-            self.composer_grid.set_current_items(
-                harmony_item=harmony_item, chord_item=chord_item
+    def reset(self):
+        logger.info("reset")
+
+        self.params.set_options(preview=False)
+
+    def _get_next_item(self, items: List[T], current_item: T) -> Tuple[T, bool]:
+        next_index = items.index(current_item) + 1
+        next_item = items[next_index % len(items)]
+
+        return next_item, next_index >= len(items)
+
+    def _get_previous_item(self, items: List[T], current_item: T) -> Tuple[T, bool]:
+        previous_index = items.index(current_item) - 1
+        previous_item = items[previous_index % len(items)]
+
+        return previous_item, previous_index < 0
+
+    def next_items_update(
+        self, harmony_item: HarmonyItem, chord_item: ChordItem
+    ) -> SequencerItems:
+        next_harmony_item = harmony_item
+        next_chord_item = chord_item
+
+        if self.sequencer_widget.is_key_step_button_pressed():
+            next_chord_item, _ = self._get_next_item(
+                harmony_item.chord_items, chord_item
+            )
+        elif not self.sequencer_widget.is_chord_step_button_pressed():
+            next_chord_item, chord_reset = self._get_next_item(
+                harmony_item.chord_items, chord_item
             )
 
-        params = SequencerParams(
-            players=self.manager.sequencer.get_players(),
-            on_chord_item_change=on_item_change,
-            on_tick=system_tick_logger(logger, level=DEBUG),
-            on_grid_end=self.manager.sequencer.grid_ended.emit,
-        )
-
-        # TODO: Check if changed, pydantic does not pass list reference
-        # using Config.copy_on_model_validation already tried
-        params.harmony_items = self.composer_grid.harmony_items
-
-        return params
-
-    def handle_composer_grid_items_click(self, harmony_item, chord_item):
-        self.set_params(harmony_item, chord_item)
-        self.params.set_first_items(harmony_item, chord_item)
-
-        if self.sequencer_widget.is_play_button_pressed():
-            self.manager.sequencer.grid_play.emit()
-
-    def handle_action_binding(self):
-        if self.sequencer_widget.is_play_button_pressed():
-            if self.sequencer_widget.is_key_step_button_pressed():
-                self.composer_grid.harmony_grid.next()
-            elif self.sequencer_widget.is_chord_step_button_pressed():
-                self.composer_grid.chord_grid.next()
+            if chord_reset:
+                next_harmony_item, _ = self._get_next_item(
+                    self.harmony_items, harmony_item
+                )
+                next_chord_item = next_harmony_item.chord_items[0]
             else:
-                self.manager.sequencer.grid_stop.emit()
+                next_harmony_item = harmony_item
 
-                return
+        logger.info(f"hid={next_harmony_item.id} cid={next_chord_item.id}")
 
-        harmony_item, chord_item = self.composer_grid.get_current_items()
+        return next_harmony_item, next_chord_item
 
-        self.set_params(harmony_item, chord_item)
-        self.params.set_first_items(harmony_item, chord_item)
-
-        self.manager.sequencer.grid_play.emit()
-
-    def handle_next_binding(self):
+    def get_next_items(
+        self, harmony_item: HarmonyItem, chord_item: ChordItem
+    ) -> SequencerItems:
         if self.sequencer_widget.is_key_step_button_pressed():
-            self.composer_grid.harmony_grid.next()
+            next_harmony_item, _ = self._get_next_item(self.harmony_items, harmony_item)
+
+            return next_harmony_item, next_harmony_item.chord_items[0]
         elif self.sequencer_widget.is_chord_step_button_pressed():
-            self.composer_grid.chord_grid.next()
-        else:
-            self.composer_grid.next()
-
-        harmony_item, chord_item = self.composer_grid.get_current_items()
-
-        self.set_params(harmony_item, chord_item)
-        self.params.set_first_items(harmony_item, chord_item)
-
-        self.manager.sequencer.grid_play.emit()
-
-    def handle_previous_binding(self):
-        if self.sequencer_widget.is_key_step_button_pressed():
-            self.composer_grid.harmony_grid.previous()
-        elif self.sequencer_widget.is_chord_step_button_pressed():
-            self.composer_grid.chord_grid.previous()
-        else:
-            self.composer_grid.previous()
-
-        harmony_item, chord_item = self.composer_grid.get_current_items()
-
-        self.set_params(harmony_item, chord_item)
-        self.params.set_first_items(harmony_item, chord_item)
-
-        self.manager.sequencer.grid_play.emit()
-
-    def set_params(self, harmony_item, chord_item, preview: bool = False):
-        if self.sequencer_widget.is_key_step_button_pressed():
-            self.params.set_ranges(selected_harmony_items=[harmony_item])
-            self.params.set_options(preview=preview)
-        elif self.sequencer_widget.is_chord_step_button_pressed():
-            self.params.set_ranges(
-                selected_harmony_items=[harmony_item],
-                selected_chord_items=[chord_item],
+            next_chord_item, _ = self._get_next_item(
+                harmony_item.chord_items, chord_item
             )
-            self.params.set_options(
-                continuous=True,
-                preview=preview,
-            )
+
+            return harmony_item, next_chord_item
         else:
-            self.params.clear_ranges()
-            self.params.set_options(preview=preview)
+            next_chord_item, chord_reset = self._get_next_item(
+                harmony_item.chord_items, chord_item
+            )
 
-    def handle_sequencer_widget_stepper_change(self, state):
-        harmony_item, chord_item = self.composer_grid.get_current_items()
+            if chord_reset:
+                next_harmony_item, _ = self._get_next_item(
+                    self.harmony_items, harmony_item
+                )
+                next_chord_item = next_harmony_item.chord_items[0]
+            else:
+                next_harmony_item = harmony_item
 
-        self.set_params(harmony_item, chord_item)
+            return next_harmony_item, next_chord_item
 
-        self.update_frame_display()
+    def get_previous_items(
+        self, harmony_item: HarmonyItem, chord_item: ChordItem
+    ) -> SequencerItems:
+        if self.sequencer_widget.is_key_step_button_pressed():
+            previous_harmony_item, _ = self._get_previous_item(
+                self.harmony_items, harmony_item
+            )
 
-    def handle_sequencer_widget_play_button(self, state):
-        self.manager.sequencer.grid_play.emit()
+            return previous_harmony_item, previous_harmony_item.chord_items[0]
+        elif self.sequencer_widget.is_chord_step_button_pressed():
+            previous_chord_item, _ = self._get_previous_item(
+                harmony_item.chord_items, chord_item
+            )
 
-    def handle_chord_item_change_from_chord_picker(self, chord_item):
-        self.composer_grid.update_chord_item(chord_item)
+            return harmony_item, previous_chord_item
+        else:
+            previous_chord_item, chord_reset = self._get_previous_item(
+                harmony_item.chord_items, chord_item
+            )
 
-        is_playing = self.manager.sequencer.is_playing()
-        is_playing_preview = self.manager.sequencer.is_playing_preview()
+            if chord_reset:
+                previous_harmony_item, _ = self._get_previous_item(
+                    self.harmony_items, harmony_item
+                )
+                previous_chord_item = previous_harmony_item.chord_items[-1]
+            else:
+                previous_harmony_item = harmony_item
 
-        harmony_item, chord_item = self.composer_grid.get_current_items()
+            return previous_harmony_item, previous_chord_item
 
-        self.set_params(
-            harmony_item, chord_item, preview=not is_playing or is_playing_preview
-        )
-        self.params.set_first_items(harmony_item, chord_item)
+    def handle_items_change(self, harmony_item: HarmonyItem, chord_item: ChordItem):
+        self.composer_grid.set_current_items(harmony_item, chord_item)
 
-        self.manager.sequencer.grid_play.emit()
-
-        self.update_frame_display()
-
-    def handle_scale_change(self, scale):
-        self.composer_grid.harmony_grid.update_item_scale(scale)
-
-        self.update_frame_display()
-
-    def handle_time_signature_change(self, time_signature):
-        self.composer_grid.harmony_grid.update_item_time_signature(time_signature)
-
-    def handle_bpm_change(self, bpm):
-        self.composer_grid.harmony_grid.update_item_bpm(bpm)
-
-    def handle_harmony_item_change_from_grid(self, harmony_item, chord_item):
         self.scale_selector.set(harmony_item.scale)
         self.chord_picker.set(chord_item)
 
@@ -278,38 +272,177 @@ class ComposeWidget(QWidget):
 
         self.update_frame_display()
 
-    def handle_chord_item_change_from_grid(self, chord_item: ChordItem):
-        self.chord_picker.set(chord_item)
+    def handle_action_binding(self):
+        if self.sequencer_widget.is_play_button_pressed():
+            if (
+                self.sequencer_widget.is_key_step_button_pressed()
+                or self.sequencer_widget.is_chord_step_button_pressed()
+            ):
+                next_items = self.get_next_items(*self.sequencer_iterator.current_items)
+
+                logger.info(f"hid={next_items[0].id} cid={next_items[1].id}")
+
+                self.sequencer_iterator.reset(next_items)
+                self.manager.sequencer.grid_play.emit()
+            else:
+                self.manager.sequencer.grid_stop.emit()
+
+                return
+        else:
+            current_items = self.sequencer_iterator.current_items
+
+            logger.info(f"hid={current_items[0].id} cid={current_items[1].id}")
+
+            self.manager.sequencer.grid_play.emit()
+
+    def handle_next_binding(self):
+        next_items = self.get_next_items(*self.sequencer_iterator.current_items)
+
+        self.sequencer_iterator.reset(next_items)
+
+        logger.info(f"hid={next_items[0].id} cid={next_items[1].id}")
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.handle_items_change(*next_items)
+
+    def handle_previous_binding(self):
+        previous_items = self.get_previous_items(*self.sequencer_iterator.current_items)
+
+        self.sequencer_iterator.reset(previous_items)
+
+        logger.info(f"hid={previous_items[0].id} cid={previous_items[1].id}")
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.handle_items_change(*previous_items)
+
+    def handle_click_from_grid(self, harmony_item: HarmonyItem, chord_item: ChordItem):
+        logger.info(f"hid={harmony_item.id} cid={chord_item.id}")
+
+        self.sequencer_iterator.reset((harmony_item, chord_item))
 
         self.update_frame_display()
 
-    def get_next_items(self) -> Tuple[HarmonyItem, ChordItem]:
-        harmony_item, chord_item = self.composer_grid.get_current_items()
-        chord_items = harmony_item.chord_items
+        if self.manager.sequencer.is_playing():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.handle_items_change(harmony_item, chord_item)
 
-        chord_index = chord_item.get_index_from(chord_items)
-        next_chord_index = chord_index + 1
+    def handle_change_from_chord_picker(self, chord_item):
+        logger.info(f"chord item={chord_item.to_log_string()}")
+
+        self.composer_grid.chord_grid.update_chord_item(chord_item)
+
+        self.composer_grid.harmony_grid.refresh_current_index()
 
         if (
-            self.sequencer_widget.is_chord_step_button_pressed()
-            or self.sequencer_widget.is_key_step_button_pressed()
+            self.manager.sequencer.is_playing_preview()
+            or self.manager.sequencer.is_stopped()
         ):
-            return harmony_item, chord_items[next_chord_index % len(chord_items)]
+            self.params.set_options(preview=True)
 
-        if next_chord_index >= len(chord_items):
-            harmony_items = self.composer_grid.harmony_grid.get_items()
+        self.manager.sequencer.grid_play.emit()
 
-            harmony_index = harmony_item.get_index_from(harmony_items)
-            next_harmony_index = harmony_index + 1
+    def handle_sequencer_stepper_change(self, _):
+        continuous = self.sequencer_widget.is_chord_step_button_pressed()
 
-            next_harmony_item = harmony_items[next_harmony_index % len(harmony_items)]
+        logger.info(f"set {continuous=}")
 
-            return next_harmony_item, next_harmony_item.chord_items[0]
+        self.sequencer_iterator.reset(self.sequencer_iterator.current_items)
 
-        return harmony_item, chord_items[next_chord_index]
+        self.params.set_options(continuous=continuous)
+
+        self.handle_items_change(*self.sequencer_iterator.current_items)
+
+    def _set_current_harmony_item(self, harmony_item: HarmonyItem):
+        harmony_item, _ = self.sequencer_iterator.current_items
+
+        self.sequencer_iterator.reset((harmony_item, harmony_item.chord_items[0]))
+
+        self.composer_grid.harmony_grid.refresh_current_index()
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.update_frame_display()
+
+    def handle_added_harmony_item(self, harmony_item: HarmonyItem):
+        logger.info(f"{harmony_item.to_log_string()}")
+
+        self._set_current_harmony_item(harmony_item)
+
+    def handle_deleted_harmony_item(self, _: HarmonyItem, harmony_item: HarmonyItem):
+        logger.info(f"setting as current item cid={harmony_item.id}")
+
+        self._set_current_harmony_item(harmony_item)
+
+    def _set_current_chord_item(self, chord_item: ChordItem):
+        harmony_item, _ = self.sequencer_iterator.current_items
+
+        self.sequencer_iterator.reset((harmony_item, chord_item))
+
+        self.composer_grid.harmony_grid.refresh_current_index()
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.update_frame_display()
+
+    def handle_added_chord_item(self, chord_item: ChordItem):
+        logger.info(f"{chord_item.to_log_string()}")
+
+        self._set_current_chord_item(chord_item)
+
+    def handle_deleted_chord_item(self, _: ChordItem, chord_item: ChordItem):
+        logger.info(f"setting as current item cid={chord_item.id}")
+
+        self._set_current_chord_item(chord_item)
+
+    def handle_scale_change(self, scale):
+        logger.info(
+            f"hid={self.sequencer_iterator.current_items[0].id} setting scale={scale.to_log_string()}"
+        )
+
+        self.sequencer_iterator.current_items[0].scale = scale
+        self.composer_grid.harmony_grid.refresh_current_index()
+
+        self.sequencer_iterator.reset(self.sequencer_iterator.current_items)
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+        else:
+            self.update_frame_display()
+
+    def handle_time_signature_change(self, time_signature):
+        logger.info(
+            f"hid={self.sequencer_iterator.current_items[0].id} setting time_signature={time_signature}"
+        )
+
+        self.sequencer_iterator.current_items[0].time_signature = time_signature
+        self.composer_grid.harmony_grid.refresh_current_index()
+
+        if self.sequencer_widget.is_play_button_pressed():
+            self.manager.sequencer.grid_play.emit()
+
+    def handle_bpm_change(self, bpm):
+        logger.info(
+            f"hid={self.sequencer_iterator.current_items[0].id} setting bpm={bpm}"
+        )
+
+        self.sequencer_iterator.current_items[0].bpm = bpm
+        self.composer_grid.harmony_grid.refresh_current_index()
 
     def update_frame_display(self):
-        self.harmony_chord_frames.update_frames(
-            current_items=self.composer_grid.get_current_items(),
-            next_items=self.get_next_items(),
-        )
+        if self.sequencer_widget.is_chord_step_button_pressed():
+            self.harmony_chord_frames.update_frames(
+                current_items=self.sequencer_iterator.current_items,
+                next_items=self.get_next_items(*self.sequencer_iterator.current_items),
+            )
+        else:
+            self.harmony_chord_frames.update_frames(
+                current_items=self.sequencer_iterator.current_items,
+                next_items=self.sequencer_iterator.next_items,
+            )

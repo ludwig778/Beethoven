@@ -1,9 +1,9 @@
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QDialog
 
+from beethoven.models import ChordItem
 from beethoven.ui.components.chord_picker import ChordPicker
 from beethoven.ui.layouts import vertical_layout
-from beethoven.ui.models import ChordItem
 
 
 class ChordPickerDialog(QDialog):

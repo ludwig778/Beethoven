@@ -60,8 +60,8 @@ class TimeSignatureSelector(QWidget):
 
     def handle_beats_per_bar_change(self, value):
         if (
-            value > self.beats_per_bar_spinbox.minimum()
-            and value < self.beats_per_bar_spinbox.maximum()
+            value >= self.beats_per_bar_spinbox.minimum()
+            and value <= self.beats_per_bar_spinbox.maximum()
         ):
             time_signature = TimeSignature(
                 beats_per_bar=value,

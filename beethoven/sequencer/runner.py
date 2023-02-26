@@ -68,37 +68,8 @@ class SequencerParams:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def clear_first_items(self):
-        return self.set_first_items()
-
-    def set_first_items(
-        self,
-        first_harmony_item: Optional[HarmonyItem] = None,
-        first_chord_item: Optional[ChordItem] = None,
-    ):
-        self.first_harmony_item = first_harmony_item
-        self.first_chord_item = first_chord_item
-
-        return self
-
     def set_players(self, players: Optional[List[BasePlayer]] = None):
         self.players = players or []
-
-        return self
-
-    def clear_ranges(self):
-        self.selected_harmony_items = []
-        self.selected_chord_items = []
-
-        return self
-
-    def set_ranges(
-        self,
-        selected_harmony_items: Optional[List[HarmonyItem]] = None,
-        selected_chord_items: Optional[List[ChordItem]] = None,
-    ):
-        self.selected_harmony_items = selected_harmony_items or []
-        self.selected_chord_items = selected_chord_items or []
 
         return self
 

@@ -106,6 +106,7 @@ class SequencerManager(QObject):
         logger.info("finished")
 
         self.state = SequencerState.stopped
+
         self.sequencer.reset()
 
         self.grid_ended.emit()

@@ -5,7 +5,7 @@ from typing import Optional, Set
 from PySide6.QtWidgets import QPushButton, QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
-from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.utils import block_signal
 
 logger = logging.getLogger("control")
@@ -17,8 +17,8 @@ class SequencerWidget(QWidget):
 
         self.manager = manager
 
-        self.key_step_button = PushPullButton("Key Step Mode")
-        self.chord_step_button = PushPullButton("Chord Step Mode")
+        self.key_step_button = PushPullButton("Key Step")
+        self.chord_step_button = PushPullButton("Chord Step")
         self.play_button = PushPullButton("Play")
         self.stop_button = QPushButton("Stop")
 
@@ -31,20 +31,11 @@ class SequencerWidget(QWidget):
         self.manager.sequencer.grid_ended.connect(self.release_play)
 
         self.setLayout(
-            vertical_layout(
-                [
-                    self.key_step_button,
-                    Spacing(size=1),
-                    self.chord_step_button,
-                    Spacing(size=1),
-                    horizontal_layout(
-                        [
-                            self.play_button,
-                            self.stop_button,
-                        ]
-                    ),
-                ]
-            )
+            vertical_layout([
+                self.key_step_button,
+                self.chord_step_button,
+                horizontal_layout([self.play_button, self.stop_button])
+            ])
         )
 
     def setup(self):

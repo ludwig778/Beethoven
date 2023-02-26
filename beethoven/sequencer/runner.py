@@ -107,9 +107,11 @@ class Sequencer:
         self.global_cursor = Duration()
         self.previous_time_signature = None
 
+        self.previous_harmony_end_time_section = TimeSection()
+        self.previous_harmony_item = None
+
     def run(self):  # noqa: C901
-        previous_harmony_end_time_section = TimeSection()
-        previous_harmony_item = None
+        self.previous_harmony_end_time_section.to_next_bar()
 
         sequencer_sorter = SequencerSorter(players=self.get_players())
 
@@ -130,9 +132,10 @@ class Sequencer:
                 harmony_time_signature_duration = harmony_time_signature.get_duration()
 
             chord_sum = Duration()
-            if harmony_item != previous_harmony_item:
+            if harmony_item != self.previous_harmony_item:
                 chord_sum = Duration()
-                bar_offset = previous_harmony_end_time_section.bar - 1
+
+            bar_offset = self.previous_harmony_end_time_section.bar - 1
 
             for player in self.get_players():
                 player.reset()
@@ -171,6 +174,9 @@ class Sequencer:
 
                 self.previous_time_signature = harmony_item.time_signature
 
+            self.previous_harmony_end_time_section = end_chord_time_section
+            self.previous_harmony_item = harmony_item
+
             sequencer_sorter.setup(
                 scale=harmony_item.scale,
                 chord=chord_item.as_chord(harmony_item.scale),
@@ -197,9 +203,6 @@ class Sequencer:
                 self.sleep_for_gap(last_cursor, end_cursor, bpm=harmony_item.bpm)
 
             self.global_cursor = end_cursor
-
-            previous_harmony_end_time_section = end_chord_time_section
-            previous_harmony_item = harmony_item
 
             if self.params.preview:
                 self.params.preview = False

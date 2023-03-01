@@ -64,7 +64,7 @@ class PlayerSetting(BaseModel):
     instrument_style: Optional[str] = None
     output_name: Optional[str] = None
     channel: int = 0
-    enabled: bool = True
+    enabled: bool = False
 
 
 class PlayerSettings(BaseModel):

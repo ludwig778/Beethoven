@@ -78,6 +78,7 @@ def get_stylesheet() -> str:
                 " QAbstractItemView": (f"selection-background-color: {LIGHT_BLUE};"),
             },
             "QSpinBox": f"background-color: {SOFT_GRAY};",
+            "QLineEdit": f"background-color: {SOFT_GRAY};",
             "QPushButton": {
                 "": (f"background-color: {SOFT_GRAY};" f"border: 1px solid {BORDER_COLOR};"),
                 ":hover": f"background-color: {LIGHT_GRAY};",

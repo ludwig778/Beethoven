@@ -12,7 +12,7 @@ logger = logging.getLogger("stacked_widget")
 class StackedWidget(QWidget):
     value_changed = Signal()
 
-    def __init__(self, *args, widgets: Dict[str, QWidget], parent=None, **kwargs):
+    def __init__(self, *args, widgets: Dict[str, QWidget], **kwargs):
         super(StackedWidget, self).__init__(*args, **kwargs)
 
         self.stacked_layout = stacked_layout(list(widgets.values()))

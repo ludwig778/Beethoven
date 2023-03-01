@@ -13,9 +13,7 @@ logger = logging.getLogger("manager.midi")
 class MidiManager(QObject):
     notes_changed = Signal(dict)
 
-    def __init__(
-        self, *args, settings: AppSettings, midi_adapter: MidiAdapter, **kwargs
-    ):
+    def __init__(self, *args, settings: AppSettings, midi_adapter: MidiAdapter, **kwargs):
         super(MidiManager, self).__init__(*args, **kwargs)
 
         self.settings = settings
@@ -33,9 +31,7 @@ class MidiManager(QObject):
     def update_input(self, input_name: str):
         logger.info(f"input set to: {input_name or 'none'}")
 
-        if self.input_thread and (
-            not input_name or input_name != self.input_thread.midi_input.name
-        ):
+        if self.input_thread and (not input_name or input_name != self.input_thread.midi_input.name):
             self.adapter.close_input(self.input_thread.midi_input)
 
             self.terminate_input_thread()
@@ -48,9 +44,7 @@ class MidiManager(QObject):
         if midi_input:
             self.current_input = input_name
 
-            self.input_thread = MidiInputThread(
-                midi_input=midi_input, on_note_change=self.notes_changed
-            )
+            self.input_thread = MidiInputThread(midi_input=midi_input, on_note_change=self.notes_changed)
             self.input_thread.start()
 
     def update_outputs(self, output_names: List[str]):

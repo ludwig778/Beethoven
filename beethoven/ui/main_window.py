@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
                 "Harmony Trainer": HarmonyTrainerWidget(manager=manager),
                 # "Piano": PianoTrainerWidget(manager=manager),
             },
-            parent=self,
         )
         self.stack.setup()
         self.stack.setContentsMargins(6, 6, 6, 6)
@@ -40,19 +39,13 @@ class MainWindow(QMainWindow):
         settings = menubar.addMenu("Settings")
 
         tuning_settings = QAction("Tunings", self)
-        tuning_settings.triggered.connect(
-            self.run_dialog(TuningDialog, manager=self.manager)
-        )
+        tuning_settings.triggered.connect(self.run_dialog(TuningDialog, manager=self.manager))
 
         midi_settings = QAction("Midi", self)
-        midi_settings.triggered.connect(
-            self.run_dialog(MidiDialog, manager=self.manager)
-        )
+        midi_settings.triggered.connect(self.run_dialog(MidiDialog, manager=self.manager))
 
         player_settings = QAction("Players", self)
-        player_settings.triggered.connect(
-            self.run_dialog(PlayerDialog, manager=self.manager)
-        )
+        player_settings.triggered.connect(self.run_dialog(PlayerDialog, manager=self.manager))
 
         quit = QAction("Quit", self)
         quit.setShortcut("Q")

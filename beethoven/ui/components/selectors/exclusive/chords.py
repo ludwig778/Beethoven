@@ -1,10 +1,5 @@
 from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
-from beethoven.ui.constants import (
-    CHORD_LABELS,
-    CHORDS_DATA,
-    SELECTED_CHORD,
-    SELECTED_CHORD_LABELS,
-)
+from beethoven.ui.constants import CHORD_LABELS, CHORDS_DATA, SELECTED_CHORD, SELECTED_CHORD_LABELS
 
 
 class ChordExclusiveSelector(BaseExclusiveSelector):

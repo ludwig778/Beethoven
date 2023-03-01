@@ -29,9 +29,7 @@ class BasePlayer(RegisteredPlayer):
 
         return self
 
-    def setup(
-        self, scale, chord, time_signature, start_cursor, end_cursor, start_time_section
-    ):
+    def setup(self, scale, chord, time_signature, start_cursor, end_cursor, start_time_section):
         self.scale = scale
         self.chord = chord
 

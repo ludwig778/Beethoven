@@ -29,9 +29,9 @@ IntegerAsString = Word(nums)
 octave_pattern = Integer(nums)("octave")
 alteration_pattern = Word("#b")("alteration")
 
-degree_pattern = Optional(alteration_pattern) + oneOf(
-    "I II III IV V VI VII i ii iii iv v vi vi vii"
-)("name")
+degree_pattern = Optional(alteration_pattern) + oneOf("I II III IV V VI VII i ii iii iv v vi vi vii")(
+    "name"
+)
 degree_with_optional_octave_pattern = (
     Optional(alteration_pattern)
     + oneOf("I II III IV V VI VII i ii iii iv v vi vi vii")("name")
@@ -44,9 +44,9 @@ note_pattern = (
     + Optional(octave_pattern)
 )
 
-interval_alteration_pattern = Combine(
-    Literal("M") | Literal("m") | Word("a") | Word("d") | Empty()
-)("alteration")
+interval_alteration_pattern = Combine(Literal("M") | Literal("m") | Word("a") | Word("d") | Empty())(
+    "alteration"
+)
 
 interval_pattern = IntegerAsString(nums)("name") + Optional(interval_alteration_pattern)
 
@@ -63,10 +63,7 @@ chord_pattern = (
     + Optional(Suppress("_") + Word(alphas + nums + CHORD_EXTRA_CHARS)("name"))
     + ZeroOrMore(
         (Suppress(":i=") + Integer("inversion"))
-        | (
-            Suppress(":e=")
-            + delimitedList(Group(interval_pattern), delim=",")("extensions")
-        )
+        | (Suppress(":e=") + delimitedList(Group(interval_pattern), delim=",")("extensions"))
         | (Suppress(":b=") + Group(note_pattern)("base_note"))
         | (Suppress(":s=") + Group(degree_pattern)("base_degree"))
         | (Suppress(":d=") + Group(duration_pattern)("duration"))

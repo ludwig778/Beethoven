@@ -63,9 +63,7 @@ def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:
 
 
 class BaseSorter:
-    def __init__(
-        self, generators: Optional[NoteGenerators] = None, refeed_enabled: bool = False
-    ):
+    def __init__(self, generators: Optional[NoteGenerators] = None, refeed_enabled: bool = False):
         self.generators = generators or {}
 
         self.refeed_enabled = refeed_enabled
@@ -138,9 +136,7 @@ class SequencerSorter(BaseSorter):
         for player in self.players:
             player_name = player.__class__.__name__
 
-            time_signature_changed = (
-                getattr(player, "time_signature", None) != time_signature
-            )
+            time_signature_changed = getattr(player, "time_signature", None) != time_signature
             player.setup(
                 scale,
                 chord,
@@ -177,9 +173,7 @@ def system_tick_logger(logger: Logger, level: int = logging.INFO):
 def get_chord_from_items(
     harmony_item: HarmonyItem, chord_item: ChordItem
 ) -> Tuple[Chord, Optional[Duration]]:
-    chord_data: Dict = {
-        "root" if isinstance(chord_item.root, Note) else "degree": chord_item.root
-    }
+    chord_data: Dict = {"root" if isinstance(chord_item.root, Note) else "degree": chord_item.root}
 
     return (
         Chord.build(name=chord_item.name, scale=harmony_item.scale, **chord_data),

@@ -36,9 +36,7 @@ def get_interval_alteration_int_from_str(alteration: str, interval: int) -> int:
 
         return alteration_count
 
-    raise ValueError(
-        f"Error on getting interval alteration int from str: {interval}{alteration}"
-    )
+    raise ValueError(f"Error on getting interval alteration int from str: {interval}{alteration}")
 
 
 def get_interval_alteration_str_from_int(alteration: int, interval: int) -> str:
@@ -57,9 +55,7 @@ def get_interval_alteration_str_from_int(alteration: int, interval: int) -> str:
         elif alteration < -1:
             return "d" * abs(alteration + 1)
 
-    raise ValueError(
-        f"Error on getting interval alteration str from int: {interval}{alteration}"
-    )
+    raise ValueError(f"Error on getting interval alteration str from int: {interval}{alteration}")
 
 
 def get_degree_alteration_int_from_str(alteration: str) -> int:

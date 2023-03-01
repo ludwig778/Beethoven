@@ -39,7 +39,5 @@ class ScaleComboBox(QComboBox):
     def _get_scale_names(self):
         return [
             scale_data.names[0]
-            for scale_data in indexes.scale_index.get_scales_by_label_data(
-                ["main_diatonic", "major"]
-            )
+            for scale_data in indexes.scale_index.get_scales_by_label_data(["main_diatonic", "major"])
         ]

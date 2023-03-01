@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QWidget
 from beethoven.models import Scale
 from beethoven.ui.components.combobox import NoteComboBox, ScaleComboBox
 from beethoven.ui.components.spinbox import OctaveSpinBox
-from beethoven.ui.layouts import horizontal_layout
+from beethoven.ui.layouts import Stretch, horizontal_layout
 from beethoven.ui.utils import block_signal
 
 
@@ -32,6 +32,7 @@ class ScalePicker(QWidget):
                     self.tonic_combobox,
                     self.name_combobox,
                     self.octave_spinbox,
+                    Stretch(),
                 ]
             )
         )

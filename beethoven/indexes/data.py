@@ -229,9 +229,7 @@ scales_index_data = [
         labels=["pentatonic", "main", "main_non_diatonic"],
         names=["pentatonic minor", "pentatonic"],
     ),
-    ScaleData(
-        intervals_string="1,2,3,5,6", labels=["pentatonic"], names=["pentatonic major"]
-    ),
+    ScaleData(intervals_string="1,2,3,5,6", labels=["pentatonic"], names=["pentatonic major"]),
     ScaleData(
         intervals_string="1,3m,4,5d,5,7m",
         labels=["pentatonic", "main", "main_non_diatonic"],
@@ -254,21 +252,15 @@ scales_index_data = [
     ),
     ScaleData(intervals_string="1,2,3,4,5,6,7", labels=["major"], names=["ionian"]),
     ScaleData(intervals_string="1,2,3m,4,5,6,7m", labels=["major"], names=["dorian"]),
-    ScaleData(
-        intervals_string="1,2m,3m,4,5,6m,7m", labels=["major"], names=["phrygian"]
-    ),
+    ScaleData(intervals_string="1,2m,3m,4,5,6m,7m", labels=["major"], names=["phrygian"]),
     ScaleData(intervals_string="1,2,3,4a,5,6,7", labels=["major"], names=["lydian"]),
-    ScaleData(
-        intervals_string="1,2,3,4,5,6,7m", labels=["major"], names=["mixolydian"]
-    ),
+    ScaleData(intervals_string="1,2,3,4,5,6,7m", labels=["major"], names=["mixolydian"]),
     ScaleData(
         intervals_string="1,2,3m,4,5,6m,7m",
         labels=["major"],
         names=["aeolian", "natural minor"],
     ),
-    ScaleData(
-        intervals_string="1,2m,3m,4,5d,6m,7m", labels=["major"], names=["locrian"]
-    ),
+    ScaleData(intervals_string="1,2m,3m,4,5d,6m,7m", labels=["major"], names=["locrian"]),
     ScaleData(
         intervals_string="1,2,3m,4,5,6,7",
         labels=["melodic minor", "main"],
@@ -374,16 +366,10 @@ scales_index_data = [
         labels=["double harmonic minor"],
         names=["locrian bb3 bb7"],
     ),
-    ScaleData(
-        intervals_string="1,2,3,4,5,6,7m,7", labels=["alternative"], names=["bebop"]
-    ),
-    ScaleData(
-        intervals_string="1,3m,4a,6", labels=["alternative"], names=["diminished"]
-    ),
+    ScaleData(intervals_string="1,2,3,4,5,6,7m,7", labels=["alternative"], names=["bebop"]),
+    ScaleData(intervals_string="1,3m,4a,6", labels=["alternative"], names=["diminished"]),
     ScaleData(intervals_string="1,3,6m", labels=["alternative"], names=["augmented"]),
-    ScaleData(
-        intervals_string="1,2,3,4a,6m,7m", labels=["alternative"], names=["whole tone"]
-    ),
+    ScaleData(intervals_string="1,2,3,4a,6m,7m", labels=["alternative"], names=["whole tone"]),
     ScaleData(
         intervals_string="1,2m,2,3m,3,4,5d,5,6m,6,7m,7",
         labels=["alternative"],

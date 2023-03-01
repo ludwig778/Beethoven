@@ -1,9 +1,10 @@
 import logging
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QComboBox, QLabel, QSpinBox, QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QWidget
 
 from beethoven.models import TimeSignature
+from beethoven.ui.components.spinbox import SpinBox
 from beethoven.ui.layouts import Spacing, horizontal_layout
 from beethoven.ui.utils import block_signal
 
@@ -13,23 +14,15 @@ logger = logging.getLogger("selectors.time_signature")
 class TimeSignatureSelector(QWidget):
     value_changed = Signal(TimeSignature)
 
-    def __init__(
-        self,
-        *args,
-        time_signature=TimeSignature(beats_per_bar=4, beat_unit=4),
-        **kwargs
-    ):
+    def __init__(self, *args, time_signature=TimeSignature(beats_per_bar=4, beat_unit=4), **kwargs):
         super(TimeSignatureSelector, self).__init__(*args, **kwargs)
 
-        self.beats_per_bar_spinbox = QSpinBox()
-        self.beats_per_bar_spinbox.setRange(1, 52)
+        self.beats_per_bar_spinbox = SpinBox(minimum=1, maximum=52)
 
         self.beat_unit_combobox = QComboBox()
         self.beat_unit_combobox.addItems("1,2,4,8,16,32".split(","))
 
-        self.beats_per_bar_spinbox.valueChanged.connect(
-            self.handle_beats_per_bar_change
-        )
+        self.beats_per_bar_spinbox.valueChanged.connect(self.handle_beats_per_bar_change)
         self.beat_unit_combobox.currentTextChanged.connect(self.handle_beat_unit_change)
 
         self.set(time_signature)

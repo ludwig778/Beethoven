@@ -9,7 +9,15 @@ class Metronome(PercussionPlayer):
     style = "Basic"
 
     def play(self):
-        return
+        cursor = self.start_cursor
+        duration = Duration.parse("1E")
+
+        note = Note.parse("C#4")
+
+        while 1:
+            yield cursor, self.play_percussion(note.midi_index)
+
+            cursor += duration
 
     def get_default_style(self):
         return ...

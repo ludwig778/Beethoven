@@ -1,3 +1,5 @@
+from typing import List
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QAbstractItemView, QListWidget
 
@@ -18,8 +20,8 @@ class MidiOutputSelector(QListWidget):
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
     @property
-    def values(self):
-        return [item.text() for item in self.selectedItems()]
+    def values(self) -> List[str]:
+        return list(sorted([item.text() for item in self.selectedItems()]))
 
     def add(self, output_name: str):
         if output_name not in self.manager.settings.midi.opened_outputs:

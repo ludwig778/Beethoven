@@ -126,16 +126,10 @@ class MongoRepository(AbstractRepository):
             return self.model(**data)
 
     def list(self, **kwargs):
-        return [
-            self.model(**data)
-            for data in self.collection.find(kwargs)
-            if data.pop("_id")
-        ]
+        return [self.model(**data) for data in self.collection.find(kwargs) if data.pop("_id")]
 
     def update(self, model):
-        result = self.collection.update_one(
-            {"name": model.name}, {"$set": asdict(model)}
-        )
+        result = self.collection.update_one({"name": model.name}, {"$set": asdict(model)})
 
         return bool(result.modified_count)
 

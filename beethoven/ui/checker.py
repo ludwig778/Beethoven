@@ -11,9 +11,7 @@ class NoteCheckerType(Enum):
 
 
 class NotesContainerChecker:
-    def __init__(
-        self, notes_containers: List[NotesContainer], type_check: NoteCheckerType
-    ):
+    def __init__(self, notes_containers: List[NotesContainer], type_check: NoteCheckerType):
         self.i = 0
         self.type_check = type_check
         self.notes_containers = notes_containers
@@ -36,9 +34,9 @@ class NotesContainerChecker:
             return False
 
         if self.type_check == NoteCheckerType.BY_BASE_NOTE:
-            if self.to_midi_index(
-                self.to_base_notes(notes_container.notes)
-            ) != self.to_midi_index(self.to_base_notes(self.current.notes)):
+            if self.to_midi_index(self.to_base_notes(notes_container.notes)) != self.to_midi_index(
+                self.to_base_notes(self.current.notes)
+            ):
                 return False
 
         elif self.type_check == NoteCheckerType.BY_MIDI_INDEX:

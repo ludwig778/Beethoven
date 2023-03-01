@@ -49,9 +49,7 @@ def test_midi_adapter_send_midi_message(adapters, mocker):
 
     output = adapters.midi.open_output("PIANO_CHANNEL")
 
-    message = MidiMessage(
-        note=64, output=output, velocity=127, channel=0, type="note_on"
-    )
+    message = MidiMessage(note=64, output=output, velocity=127, channel=0, type="note_on")
     adapters.midi.send_message(message)
 
     assert mocked_midi_send.call_count == 1

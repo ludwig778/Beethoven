@@ -42,9 +42,7 @@ class ParserNotFound(Exception):
 
 
 class CouldNotParse(Exception):
-    def __init__(
-        self, string, obj_name, message="Couldn't parse string='{string}' as {obj_name}"
-    ):
+    def __init__(self, string, obj_name, message="Couldn't parse string='{string}' as {obj_name}"):
         self.string = string
         self.obj_name = obj_name
         self.message = message.format(obj_name=to_pascal_case(obj_name), string=string)
@@ -63,9 +61,7 @@ class BeatUnitIsInvalid(Exception):
 
 
 class BeatsPerBarCantBeZero(Exception):
-    def __init__(
-        self, beats_per_bar, message="Beats per bar {beats_per_bar} can't be equal to 0"
-    ):
+    def __init__(self, beats_per_bar, message="Beats per bar {beats_per_bar} can't be equal to 0"):
         self.beats_per_bar = beats_per_bar
         self.message = message.format(beats_per_bar=beats_per_bar)
         super().__init__(self.message)

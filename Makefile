@@ -23,7 +23,7 @@ isort:
 	python3 -m isort .
 
 black:
-	poetry run black .
+	poetry run black --line-length 105 .
 
 mypy:
 	mypy .

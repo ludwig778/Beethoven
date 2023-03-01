@@ -9,13 +9,7 @@ from beethoven.ui.utils import block_signal
 
 class BaseExclusiveSelector(BaseSelector):
     def __init__(
-        self,
-        *args,
-        data,
-        labels: List[str],
-        expanded_labels: List[str],
-        checked: str,
-        **kwargs
+        self, *args, data, labels: List[str], expanded_labels: List[str], checked: str, **kwargs
     ):
         super(BaseExclusiveSelector, self).__init__(*args, **kwargs)
 

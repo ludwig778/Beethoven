@@ -9,8 +9,11 @@ from beethoven.ui.utils import block_signal
 
 
 class Button(QPushButton):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, object_name=None, **kwargs):
         super(Button, self).__init__(*args, **kwargs)
+
+        if object_name:
+            self.setObjectName(object_name)
 
         self.setAttribute(Qt.WA_StyledBackground)
 
@@ -24,12 +27,7 @@ class IconButton(Button):
 
 class PushPullButton(Button):
     def __init__(
-        self,
-        text: str,
-        *args,
-        pressed: bool = False,
-        pressed_text: Optional[str] = None,
-        **kwargs
+        self, text: str, *args, pressed: bool = False, pressed_text: Optional[str] = None, **kwargs
     ):
         super(PushPullButton, self).__init__(text, *args, **kwargs)
 

@@ -4,7 +4,7 @@ from typing import Optional, Set
 
 from PySide6.QtWidgets import QPushButton, QWidget
 
-from beethoven.ui.components.buttons import PushPullButton
+from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.layouts import horizontal_layout, vertical_layout
 from beethoven.ui.utils import block_signal
 
@@ -17,10 +17,10 @@ class SequencerWidget(QWidget):
 
         self.manager = manager
 
-        self.key_step_button = PushPullButton("Key Step")
-        self.chord_step_button = PushPullButton("Chord Step")
-        self.play_button = PushPullButton("Play")
-        self.stop_button = QPushButton("Stop")
+        self.key_step_button = PushPullButton("Key Step", object_name="key_step")
+        self.chord_step_button = PushPullButton("Chord Step", object_name="chord_step")
+        self.play_button = PushPullButton("Play", object_name="play")
+        self.stop_button = Button("Stop", object_name="stop")
 
         self.key_step_button.toggled.connect(self.handle_key_step)
         self.chord_step_button.toggled.connect(self.handle_chord_step)
@@ -31,11 +31,13 @@ class SequencerWidget(QWidget):
         self.manager.sequencer.grid_ended.connect(self.release_play)
 
         self.setLayout(
-            vertical_layout([
-                self.key_step_button,
-                self.chord_step_button,
-                horizontal_layout([self.play_button, self.stop_button])
-            ])
+            vertical_layout(
+                [
+                    self.key_step_button,
+                    self.chord_step_button,
+                    horizontal_layout([self.play_button, self.stop_button]),
+                ]
+            )
         )
 
     def setup(self):
@@ -88,12 +90,7 @@ class SequencerWidget(QWidget):
             logger.info("play")
 
     def set_play_button_state(self, state, *args):
-        if (
-            state
-            and not self.is_play_button_pressed()
-            or not state
-            and self.is_play_button_pressed()
-        ):
+        if state and not self.is_play_button_pressed() or not state and self.is_play_button_pressed():
             with block_signal([self.play_button]):
                 self.play_button.toggle()
 

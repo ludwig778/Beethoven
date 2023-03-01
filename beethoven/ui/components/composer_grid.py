@@ -31,7 +31,7 @@ class BaseGrid(QWidget):
         self.model = model
         self.current_index = self.model.index(0)
 
-        self.list = QListView()
+        self.list = QListView(self)
         self.list.setModel(self.model)
 
         self.list.setFlow(QListView.LeftToRight)
@@ -124,15 +124,14 @@ class HarmonyGrid(BaseGrid):
     def __init__(self, *args, harmony_items: List[HarmonyItem], **kwargs):
         super(HarmonyGrid, self).__init__(*args, **kwargs)
 
+        self.setFixedHeight(82)
         self.setAttribute(Qt.WA_StyledBackground)
 
-        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"))
-        self.add_button.setObjectName("add_button")
-
-        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"))
-        self.delete_button.setObjectName("delete_button")
+        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"), object_name="green")
+        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"), object_name="red")
 
         self.setup_list_view(ItemsModel(harmony_items))
+        self.list.setFixedHeight(82)
 
         self.add_button.clicked.connect(self.add_item)
         self.delete_button.clicked.connect(self.delete_current_item)
@@ -164,15 +163,17 @@ class ChordGrid(BaseGrid):
     def __init__(self, *args, chord_items: List[ChordItem], **kwargs):
         super(ChordGrid, self).__init__(*args, **kwargs)
 
+        self.setFixedHeight(50)
         self.setAttribute(Qt.WA_StyledBackground)
 
-        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"))
-        self.modify_button = IconPushPullButton(icon_path=resource_path("img/gear-32.png"))
-        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"))
+        self.add_button = IconButton(icon_path=resource_path("img/plus-32.png"), object_name="green")
+        self.delete_button = IconButton(icon_path=resource_path("img/minus-7-32.png"), object_name="red")
+        self.modify_button = IconPushPullButton(
+            icon_path=resource_path("img/gear-32.png"), object_name="blue"
+        )
 
         self.setup_list_view(ItemsModel(chord_items))
-
-        self.list.setObjectName("chord_list")
+        self.list.setFixedHeight(50)
 
         self.add_button.clicked.connect(self.add_item)
         self.delete_button.clicked.connect(self.delete_current_item)
@@ -213,9 +214,7 @@ class ComposerGrid(QWidget):
         self.chord_grid = ChordGrid(chord_items=self.harmony_items[0].chord_items)
         self.chord_grid.item_clicked.connect(self.handle_chord_item_click)
 
-        self.setLayout(
-            vertical_layout([self.harmony_grid, Spacing(size=4), self.chord_grid])
-        )
+        self.setLayout(vertical_layout([self.harmony_grid, Spacing(size=4), self.chord_grid]))
 
     def handle_harmony_item_click(self, harmony_item):
         self._current_harmony_item = harmony_item

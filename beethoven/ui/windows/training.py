@@ -31,9 +31,7 @@ class BaseTrainingWidget(QWidget):
         self.manager = manager
         self.notes_checker: Optional[NotesContainerChecker] = None
 
-        self.start_button = PushPullButton(
-            "Start", pressed=False, pressed_text="Playing"
-        )
+        self.start_button = PushPullButton("Start", pressed=False, pressed_text="Playing")
         self.stop_button = Button("Stop", object_name="stop_button")
 
         self.start_button.clicked.connect(self.start)
@@ -124,11 +122,7 @@ class ChordTrainingWidget(BaseTrainingWidget):
         self.update_frames()
 
     def update_frames(self):
-        if (
-            self.notes_checker
-            and (current := self.notes_checker.current)
-            and isinstance(current, Chord)
-        ):
+        if self.notes_checker and (current := self.notes_checker.current) and isinstance(current, Chord):
             self.target_notes_frame.set_notes(current.notes)
             self.target_chord_frame.set_chord(current.object)
 
@@ -153,9 +147,7 @@ class ScaleTrainingWidget(BaseTrainingWidget):
             vertical_layout(
                 [
                     horizontal_layout([self.note_selector, self.scale_selector]),
-                    horizontal_layout(
-                        [self.target_notes_frame, self.target_scale_frame]
-                    ),
+                    horizontal_layout([self.target_notes_frame, self.target_scale_frame]),
                     self.get_buttons(),
                 ]
             )
@@ -181,11 +173,7 @@ class ScaleTrainingWidget(BaseTrainingWidget):
         self.update_frames()
 
     def update_frames(self):
-        if (
-            self.notes_checker
-            and (current := self.notes_checker.current)
-            and isinstance(current, Scale)
-        ):
+        if self.notes_checker and (current := self.notes_checker.current) and isinstance(current, Scale):
             self.target_notes_frame.set_notes(current.notes)
             self.target_scale_frame.set_scale(current)
 
@@ -210,9 +198,7 @@ class ArppegioTrainingWidget(BaseTrainingWidget):
             vertical_layout(
                 [
                     horizontal_layout([self.note_selector, self.chord_selector]),
-                    horizontal_layout(
-                        [self.target_notes_frame, self.target_chords_frame]
-                    ),
+                    horizontal_layout([self.target_notes_frame, self.target_chords_frame]),
                     self.get_buttons(),
                 ]
             )
@@ -238,11 +224,7 @@ class ArppegioTrainingWidget(BaseTrainingWidget):
         self.update_frames()
 
     def update_frames(self):
-        if (
-            self.notes_checker
-            and (current := self.notes_checker.current)
-            and isinstance(current, Chord)
-        ):
+        if self.notes_checker and (current := self.notes_checker.current) and isinstance(current, Chord):
             self.target_notes_frame.set_notes(current.notes)
             self.target_chords_frame.set_chord(current.object)
 
@@ -317,9 +299,7 @@ class TrainingWindow(QWidget):
             self.training_layout.removeWidget(self.training_widget)
 
         training_widget_class = self.training_widgets.get(string)
-        training_widget = cast(Callable, training_widget_class)(
-            manager=self.manager, parent=self
-        )
+        training_widget = cast(Callable, training_widget_class)(manager=self.manager)
         training_widget.style().unpolish(training_widget)
         training_widget.style().polish(training_widget)
 

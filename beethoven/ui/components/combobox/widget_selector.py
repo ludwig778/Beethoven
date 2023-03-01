@@ -5,7 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QWidget
 
 from beethoven.ui.components.widget_stack import StackedWidget
-from beethoven.ui.layouts import Spacing, vertical_layout
+from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 
 logger = logging.getLogger("widget_selector")
 
@@ -13,7 +13,7 @@ logger = logging.getLogger("widget_selector")
 class WidgetSelectorComboBox(QWidget):
     value_changed = Signal()
 
-    def __init__(self, *args, widgets: Dict[str, QWidget], parent=None, **kwargs):
+    def __init__(self, *args, widgets: Dict[str, QWidget], **kwargs):
         super(WidgetSelectorComboBox, self).__init__(*args, **kwargs)
 
         self.combobox = QComboBox()
@@ -23,7 +23,22 @@ class WidgetSelectorComboBox(QWidget):
 
         self.combobox.currentIndexChanged.connect(self.handle_widget_change)
 
-        self.setLayout(vertical_layout([self.combobox, Spacing(size=10), self.stack]))
+        self.setLayout(
+            vertical_layout(
+                [
+                    Spacing(size=5),
+                    horizontal_layout(
+                        [
+                            Stretch(),
+                            self.combobox,
+                            Stretch(),
+                        ]
+                    ),
+                    Spacing(size=5),
+                    self.stack,
+                ]
+            )
+        )
 
     def setup(self):
         logger.info("setup")

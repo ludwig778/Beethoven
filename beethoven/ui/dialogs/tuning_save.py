@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
 
 from beethoven.settings import TuningSettings
 from beethoven.ui.components.buttons import Button
-from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 
 logger = logging.getLogger("dialog.tuning_save")
 
@@ -22,10 +22,11 @@ class TuningSaveDialog(QDialog):
         self.duplicate_error_label = QLabel()
         self.duplicate_error_label.setObjectName("error_label")
 
-        self.ok_button = Button("Ok")
-        self.cancel_button = Button("Cancel")
+        self.ok_button = Button("Ok", object_name="green")
+        self.cancel_button = Button("Cancel", object_name="red")
 
         self.ok_button.setEnabled(False)
+        self.input_box.setMaxLength(20)
 
         self.input_box.textChanged.connect(self.update)
         self.ok_button.clicked.connect(self.accept)
@@ -37,9 +38,15 @@ class TuningSaveDialog(QDialog):
                     self.text_label,
                     Spacing(size=10),
                     self.input_box,
-                    Spacing(size=4),
-                    self.duplicate_error_label,
-                    Spacing(size=10),
+                    Spacing(size=2),
+                    horizontal_layout(
+                        [
+                            Stretch(),
+                            self.duplicate_error_label,
+                            Stretch(),
+                        ]
+                    ),
+                    Stretch(),
                     horizontal_layout(
                         [
                             self.ok_button,

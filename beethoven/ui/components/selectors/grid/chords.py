@@ -1,47 +1,87 @@
 from functools import partial
-from typing import List
+from typing import Dict, Optional
 
 from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
-from beethoven.ui.components.selectors.grid.base import BaseGridSelector
 from beethoven.ui.constants import CHORDS_DATA_FLATTEN
-from beethoven.ui.layouts import vertical_layout
+from beethoven.ui.layouts import LayoutItems, horizontal_layout, vertical_layout
 from beethoven.ui.utils import block_signal
 
 
-class ChordGridSelector(BaseGridSelector):
+class ChordGridSelector(QWidget):
     value_changed = Signal(str)
 
-    def __init__(self, *args, grid_width: int, **kwargs):
+    def __init__(self, *args, chord_name: str = "", **kwargs):
         super(ChordGridSelector, self).__init__(*args, **kwargs)
 
-        self.buttons: List[PushPullButton] = []
-        self.chord_name_buttons = {}
+        self.chord_buttons: Dict[str, PushPullButton] = {}
+        self._current_button: Optional[PushPullButton] = None
 
-        for chord_data in CHORDS_DATA_FLATTEN:
-            chord_name = chord_data.short_name
+        chords_by_rows = [
+            ["maj", "min", "aug", "dim", "power", "dim power", "aug power"],
+            ["maj7", "min7", "7", "min7b5", "dim7", "6", "min6"],
+            [
+                "min maj7",
+                "maj7#5",
+                "min dim7",
+                "dim7 dim3",
+                "maj7b5",
+                "min maj7b5",
+                "7b5",
+            ],
+            ["sus2", "sus4", "7sus2", "7sus4", "majb5", "dim dim3"],
+        ]
+        chord_by_names = {chord_data.short_name: chord_data for chord_data in CHORDS_DATA_FLATTEN}
 
-            button = PushPullButton(chord_name)
-            button.toggled.connect(partial(self.handle_chord_change, button))
+        layout_items: LayoutItems = []
 
-            self.buttons.append(button)
-            self.chord_name_buttons[chord_name] = button
+        for chords in chords_by_rows:
+            row_items: LayoutItems = []
 
-        layout = vertical_layout(self.format_grid_rows(self.buttons, grid_width))
+            for _chord_name in chords:
+                assert _chord_name in chord_by_names, f"{_chord_name} unknown"
 
-        self.setLayout(layout)
+                button = PushPullButton(_chord_name)
+                button.toggled.connect(partial(self.handle_chord_change, button, _chord_name))
+
+                self.chord_buttons[_chord_name] = button
+
+                row_items.append(button)
+
+            layout_items.append(horizontal_layout(row_items))
+
+        self.set(chord_name)
+
+        self.setLayout(vertical_layout(layout_items))
 
     def set(self, chord_name: str):
-        with block_signal(self.buttons):
-            if not chord_name:
-                self.clear()
-            else:
-                self.handle_button_states(self.chord_name_buttons[chord_name])
+        if chord_name == "":
+            return
 
-    def handle_chord_change(self, button, state):
-        self.handle_button_states(button, empty_allowed=True)
+        chord_button = self.chord_buttons[chord_name]
 
-        self.value = button.text() if state else ""
+        if self._current_button and self._current_button != chord_button:
+            with block_signal([self._current_button]):
+                self._current_button.release()
+
+        if not chord_button.pressed:
+            with block_signal([chord_button]):
+                chord_button.toggle()
+
+        self._current_button = chord_button
+
+    def handle_chord_change(self, button: PushPullButton, chord_name: str, state: bool):
+        if state:
+            if self._current_button and self._current_button.pressed:
+                with block_signal([self._current_button]):
+                    self._current_button.release()
+
+            self._current_button = button
+        else:
+            self._current_button = None
+
+        self.value = chord_name if state else ""
 
         self.value_changed.emit(self.value)

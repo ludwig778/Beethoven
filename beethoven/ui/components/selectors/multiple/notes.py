@@ -13,9 +13,7 @@ class NoteMultipleSelector(BaseMultipleSelector):
             **kwargs
         )
 
-        self.notes = {
-            str(note): note for _, notes in NOTES_DATA.items() for note in notes
-        }
+        self.notes = {str(note): note for _, notes in NOTES_DATA.items() for note in notes}
 
     def get_checked_notes(self):
         return [self.notes[item_text] for item_text in self.get_checked_texts()]

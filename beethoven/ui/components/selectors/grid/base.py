@@ -22,7 +22,7 @@ class BaseGridSelector(QWidget):
         layouts = []
 
         for i in range(ceil(len(objects) / num)):
-            layouts.append(horizontal_layout(objects[i * num:(i + 1) * num]))
+            layouts.append(horizontal_layout(objects[i * num : (i + 1) * num]))
 
         return layouts
 

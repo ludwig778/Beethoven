@@ -1,275 +1,296 @@
+from typing import List, Optional
+
+from colour import Color
+
+
+def hsl(hue: int = 0, saturation: int = 0, lightness: int = 0) -> Color:
+    return Color(hsl=(hue / 360, saturation / 100, lightness / 100))
+
+
+WHITE = hsl(0, 0, 100)
+SOFT_GRAY = hsl(0, 0, 97)
+SOFT_GRAY_2 = hsl(0, 0, 95)
+LIGHT_GRAY = hsl(0, 0, 85)
+LIGHT_GRAY_2 = hsl(0, 0, 76)
+MEDIUM_GRAY = hsl(0, 0, 70)
+BLACK = hsl(0, 0, 0)
+
+SOFT_GREEN = hsl(120, 60, 85)
+LIGHT_GREEN = hsl(120, 60, 70)
+GREEN = hsl(120, 60, 55)
+SLIGHTLY_DARKER_GREEN = hsl(120, 60, 45)
+DARKER_GREEN = hsl(120, 60, 42)
+
+LIGHT_ORANGE = hsl(45, 100, 70)
+ORANGE = hsl(45, 100, 55)
+SLIGHTLY_DARKER_ORANGE = hsl(45, 100, 47)
+DARKER_ORANGE = hsl(45, 100, 44)
+
+SOFT_BLUE = hsl(199, 92, 80)
+LIGHT_BLUE = hsl(199, 92, 74)
+BLUE = hsl(199, 92, 62)
+SLIGHTLY_DARKER_BLUE = hsl(199, 92, 47)
+
+SOFT_RED = hsl(14, 100, 89)
+LIGHT_RED = hsl(14, 100, 78)
+RED = hsl(14, 100, 57)
+SLIGHTLY_DARKER_RED = hsl(14, 100, 50)
+
+MAIN_WINDOW_GRAY = hsl(0, 0, 92)
+BORDER_COLOR = LIGHT_GRAY_2
+BUTTON_BG_COLOR = LIGHT_GRAY
+
+FRAME_UPPER_TEXT = hsl(0, 0, 53)
+FRAME_MAIN_TEXT = hsl(0, 0, 33)
+
+ERROR_COLOR = RED
+
+
+def setup_style(styles: dict, path: Optional[List[str]] = None):
+    style = ""
+    path = path or []
+
+    for key, style_data in styles.items():
+        if isinstance(style_data, dict):
+            style += setup_style(style_data, path=path + [key])
+        else:
+            style += "".join(path + [key]) + " {" + style_data + "}\n"
+
+    return style
+
+
 def get_stylesheet() -> str:
-    return """
-    * {
-        font-size: 12px;
-
-        padding: 0px;
-        margin: 0px;
-    }
-    MainWindow {
-        max-width: 550px; min-width: 550px;
-        max-height: 400px; min-height: 400px;
-    }
-    HarmonyGrid QListView {
-        max-height: 80px; min-height: 80px;
-    }
-    ChordGrid QListView {
-        max-height: 50px; min-height: 50px;
-    }
-    HarmonyGrid QPushButton {
-        height: 40px;
-        width: 72px;
-    }
-    ChordGrid QPushButton {
-        height: 50px;
-        width: 35px;
-    }
-    Button {
-        font-size: 12px;
-    }
-    PushPullButton[pressed=true] {
-        background-color: gray;
-        color: white;
-    }
-    ScalePicker * {
-        font-size: 12px;
-        font: bold;
-        height: 24px;
-    }
-    ScalePicker NoteComboBox {
-        max-width: 34px; min-width: 34px;
-    }
-    ScalePicker ScaleComboBox {
-        max-width: 100px; min-width: 100px;
-    }
-    ScalePicker OctaveSpinBox {
-        height: 22px;
-    }
-    ChordPicker {
-        max-width: 500px; min-width: 500px;
-    }
-    ChordPicker * {
-        height: 50px;
-    }
-    ChordPicker QLabel {
-        font-size: 13px;
-        font: bold;
-        margin: 5px auto 10px 10px;
-    }
-    ChordPicker QComboBox {
-        font: bold;
-    }
-    ChordPicker DegreeAlterationComboBox {
-        font-size: 26px;
-        font: bold;
-        max-width: 70px; min-width: 70px;
-    }
-    ChordPicker #duration_section QLabel {
-        margin: 10px auto 15px 95px;
-    }
-    DurationSelector {
-        height: 120px;
-        max-width: 170px; min-width: 170px;
-    }
-    ChordPicker #duration_section DurationSelector {
-    }
-    QStackedLayout {
-        max-width: 400px; min-width: 400px;
-        max-height: 400px; min-height: 400px;
-    }
-    PlayerControl {
-        max-width: 200px; min-width: 200px;
-    }
-    PlayerControl QPushButton {
-        height: 23px;
-        font-size: 13px;
-        font: bold;
-    }
-    ComposeWidget #label_section {
-        max-width: 120px; min-width: 120px;
-    }
-    MainWindow QLabel {
-        font-size: 12px;
-        font: bold;
-    }
-    MainWindow QSpinBox {
-        height: 20px;
-        font-size: 13px;
-        font: bold;
-        width: 26px;
-    }
-    MainWindow QComboBox {
-        height: 22px;
-        font-size: 13px;
-        font: bold;
-    }
-    HarmonyTrainer #step_interval_section QPushButton {
-        width: 50px;
-    }
-    QLineEdit {
-        height: 38px;
-        font-size: 20px;
-        font: bold;
-    }
-    FramedText {
-        background-color: white;
-        border: 1px solid #ababab;
-        border-radius: 3px;
-        height: 40px;
-    }
-    FramedText #upper_text {
-        margin-top: -4px;
-        color: #888;
-        font-size: 9px;
-    }
-    FramedText #lower_text {
-        font-size: 20px;
-        color: #555;
-        font: bold;
-    }
-    TuningDialog {
-        max-width: 200px; min-width: 200px;
-        max-height: 350px; min-height: 350px;
-    }
-    TuningDialog * {
-        font-size: 15px;
-    }
-    TuningDialog TuningComboBox {
-        padding: 4px;
-    }
-    TuningDialog StringNumberSpinBox {
-        max-width: 40px; min-width: 40px;
-    }
-    TuningDialog QPushButton {
-        font-size: 17px;
-        height: 30px;
-    }
-    StringSelectorRow QLabel {
-        max-width: 62px;
-    }
-    StringSelectorRow NoteComboBox {
-        max-width: 44px; min-width: 44px;
-        padding: 2px 5px 2px 4px;
-    }
-
-    MidiDialog {
-        max-width: 395px; min-width: 395px;
-        max-height: 340x; min-height: 340px;
-    }
-    MidiDialog * {
-        font-size: 15px;
-    }
-    MidiDialog MidiInputComboBox {
-        padding: 4px;
-        height: 23px;
-        max-width: 255px; min-width: 255px;
-    }
-    MidiDialog MidiOutputSelector {
-        font-size: 16px;
-        max-height: 176px; min-height: 176px;
-    }
-    MidiDialog QPushButton {
-        font-size: 17px;
-        height: 30px;
-    }
-
-    PlayerDialog {
-        max-width: 750px; min-width: 750px;
-        max-height: 385x; min-height: 385px;
-    }
-    PlayerDialog * {
-        font-size: 15px;
-    }
-    PlayerDialog MidiOutputComboBox {
-        font-size: 15px;
-        width: 20px;
-    }
-    PlayerDialog MidiInputComboBox {
-        padding: 4px;
-        height: 23px;
-        max-width: 255px; min-width: 255px;
-    }
-    PlayerDialog MidiOutputSelector {
-        font-size: 16px;
-        max-height: 176px; min-height: 176px;
-    }
-    PlayerDialog Button {
-        font-size: 17px;
-        height: 30px;
-    }
-    PlayerDialog #button_box * {
-        width: 230px;
-    }
-    PlayerDialog QLabel {
-        font-size: 18px;
-        font: bold;
-        color: #444;
-    }
-    PlayerDialog #settings_label {
-        font-size: 13px;
-        padding-bottom: -1px;
-        color: #808080;
-    }
-
-    PlayerRow QComboBox {
-        font-size: 16px;
-        height: 30px;
-    }
-    PlayerRow #instrument_name {
-        max-width: 170px; min-width: 170px;
-    }
-    PlayerRow #instrument_style {
-        max-width: 140px; min-width: 140px;
-    }
-    PlayerRow MidiOutputComboBox {
-        max-width: 170px; min-width: 170px;
-    }
-    PlayerRow MidiChannelComboBox {
-        max-width: 40px; min-width: 40px;
-    }
-    PlayerRow #enable_button {
-        max-width: 120px; min-width: 120px;
-    }
-    PlayerRow #delete_button {
-        background-color: #ff0000;
-        max-width: 32px; min-width: 32px;
-    }
-
-    MidiAddDialog {
-        max-width: 280px;
-        min-width: 280px;
-        max-height: 140px;
-        min-height: 140px;
-    }
-    MidiAddDialog QLabel {
-        font-size: 16px;
-    }
-    MidiAddDialog Button {
-        font-size: 17px;
-        height: 30px;
-    }
-    MidiAddDialog QLineEdit {
-        font: normal;
-    }
-
-    TuningSaveDialog {
-        max-width: 280px;
-        min-width: 280px;
-        max-height: 140px;
-        min-height: 140px;
-    }
-    TuningSaveDialog QLabel {
-        font-size: 16px;
-    }
-    TuningSaveDialog #error_label {
-        font-size: 14px;
-        color: red;
-    }
-    TuningSaveDialog Button {
-        font-size: 17px;
-        height: 30px;
-    }
-    TuningSaveDialog QLineEdit {
-        font: normal;
-    }
-    """
+    return setup_style(
+        {
+            "*": (
+                "padding: 0px;"
+                "margin:  0px;"
+                f"color: {BLACK};"
+                # "border: 1px solid red;"
+            ),
+            "MainWindow": ("min-width: 500px;" f"background-color: {MAIN_WINDOW_GRAY};"),
+            "QDialog": {
+                "": f"background-color: {MAIN_WINDOW_GRAY};",
+                " #error_label": (f"color: {ERROR_COLOR};" "font: bold;" "font-size: 12px;"),
+            },
+            "QListView": (f"background-color: {SOFT_GRAY};"),
+            "QComboBox": {
+                " QAbstractItemView": (f"selection-background-color: {LIGHT_BLUE};"),
+            },
+            "QSpinBox": f"background-color: {SOFT_GRAY};",
+            "QPushButton": {
+                "": (f"background-color: {SOFT_GRAY};" f"border: 1px solid {BORDER_COLOR};"),
+                ":hover": f"background-color: {LIGHT_GRAY};",
+                ":pressed": f"background-color: {MEDIUM_GRAY};",
+                "#blue": {
+                    ":hover": f"background-color: {LIGHT_BLUE};",
+                    ":pressed": f"background-color: {BLUE};",
+                },
+                "#green": {
+                    ":hover": f"background-color: {LIGHT_GREEN};",
+                    ":pressed": f"background-color: {GREEN};",
+                },
+                "#red": {
+                    ":hover": f"background-color: {LIGHT_RED};",
+                    ":pressed": f"background-color: {RED};",
+                },
+            },
+            "HarmonyTrainerWidget > ": {
+                "#step_interval_section > #mode_combobox": ("width: 70px;" "padding-left: 20px;")
+            },
+            "HarmonyPicker": {
+                "": ("min-height: 71px;" "max-height: 71px;"),
+                " > BpmSpinBox": ("min-width: 70px;" "max-width: 70px;"),
+            },
+            "ComposerGrid QPushButton": {
+                "#green": {
+                    ":hover": f"background-color: {SOFT_GREEN};",
+                    ":pressed": f"background-color: {LIGHT_GREEN};",
+                },
+                "#red": {
+                    ":hover": f"background-color: {SOFT_RED};",
+                    ":pressed": f"background-color: {LIGHT_RED};",
+                },
+                "#blue": {
+                    ":hover": f"background-color: {SOFT_BLUE};",
+                    ":pressed": f"background-color: {LIGHT_BLUE};",
+                    "[pressed=true]": f"background-color: {LIGHT_BLUE};",
+                    ":hover[pressed=true]": f"background-color: {BLUE};",
+                    ":pressed[pressed=true]": f"background-color: {SLIGHTLY_DARKER_BLUE};",
+                },
+            },
+            "HarmonyGrid": {
+                " QListView": f"border: 1px solid {BORDER_COLOR};",
+                " > QPushButton": ("height: 100%;" "width: 40px;"),
+            },
+            "ChordGrid": {
+                " QListView": f"border: 1px solid {BORDER_COLOR};",
+                " > QPushButton": ("height: 100%;" "width: 40px;"),
+            },
+            "ScalePicker > ": {
+                "NoteComboBox": (
+                    "padding-left: 10px;" "margin-left: -4px;" "min-width: 50px;" "max-width: 50px;"
+                ),
+                "ScaleComboBox": (
+                    "padding-left: 12px;" "margin-left: -3px;" "min-width: 100px;" "max-width: 100px;"
+                ),
+                "OctaveSpinBox": (
+                    "padding-left: 4px;" "margin-left: -4px;" "min-width: 36px;" "max-width: 36px;"
+                ),
+            },
+            "ChordPicker": {
+                "": ("min-width: 500px;" "max-width: 500px;"),
+                " QPushButton": {
+                    "": ("height: 24px;" "width: 65px;"),
+                    "[pressed=true]": f"background-color: {LIGHT_GREEN};",
+                },
+                " > ": {
+                    "DegreeAlterationComboBox": ("padding-left: 10px;" "width: 40px;"),
+                },
+                " DurationSelector > ": {
+                    "SpinBox": ("padding-left: 10px;" "width: 50px;"),
+                    "QComboBox": ("padding-left: 15px;" "width: 80px;"),
+                },
+                " InversionSpinBox": "width: 40px;",
+            },
+            "FramedText": {
+                "": (
+                    "min-height: 33px;"
+                    "max-height: 33px;"
+                    f"background-color: {WHITE};"
+                    f"border: 1px solid {BORDER_COLOR};"
+                    "border-radius: 5px;"
+                ),
+                "#upper_text": ("font-size: 8px;" "font: bold;" f"color: {FRAME_UPPER_TEXT};"),
+                "#main_text": (
+                    "padding-top: 1px;" "font-size: 18px;" "font: bold;" f"color: {FRAME_MAIN_TEXT};"
+                ),
+            },
+            "SequencerWidget": {
+                "": ("min-height: 71px;" "max-height: 71px;" "min-width: 160px;" "max-width: 160px;"),
+                " > QPushButton": {
+                    "": "height: 33.6%;",
+                    "#key_step": {
+                        "": ("border-top-left-radius: 5px;" "border-top-right-radius: 5px;"),
+                        ":hover": f"background-color: {LIGHT_ORANGE};",
+                        "[pressed=true]": f"background-color: {ORANGE};",
+                        ":hover[pressed=true]": f"background-color: {SLIGHTLY_DARKER_ORANGE};",
+                    },
+                    "#chord_step": {
+                        ":hover": f"background-color: {LIGHT_BLUE};",
+                        "[pressed=true]": f"background-color: {BLUE};",
+                        ":hover[pressed=true]": f"background-color: {SLIGHTLY_DARKER_BLUE};",
+                    },
+                    "#play": {
+                        "": "border-bottom-left-radius: 5px;",
+                        ":hover": f"background-color: {LIGHT_GREEN};",
+                        "[pressed=true]": f"background-color: {GREEN};",
+                        ":hover[pressed=true]": f"background-color: {SLIGHTLY_DARKER_GREEN};",
+                    },
+                    "#stop": {
+                        "": "border-bottom-right-radius: 5px;",
+                        ":hover": f"background-color: {LIGHT_RED};",
+                        ":pressed": f"background-color: {RED};",
+                    },
+                },
+            },
+            "WidgetSelectorComboBox > QComboBox": ("width: 130px;" "padding-left: 35px;"),
+            "TimeSignatureSelector > ": {
+                "SpinBox": ("min-width: 50px;" "max-width: 50px;"),
+                "QComboBox": (
+                    "padding-left: 12px;" "margin-left: -3px;" "min-width: 50px;" "max-width: 50px;"
+                ),
+            },
+            "TuningDialog": {
+                "": ("min-height: 321px;" "max-height: 321px;" "min-width: 200px;" "max-width: 200px;"),
+                " > ": {
+                    "QPushButton": ("height: 23px;"),
+                    "TuningComboBox": ("padding-left: 12px;" "min-width: 160px;" "max-width: 160px;"),
+                    "StringSelector QLabel": "margin-left: 20px;",
+                    "StringSelector QComboBox": (
+                        "margin-right: 20px;" "padding-left: 12px;" "min-width: 55px;" "max-width: 55px;"
+                    ),
+                    "StringNumberSpinBox": "width: 35px;",
+                    "StringSelector": {
+                        "": ("min-height: 206px;" "max-height: 206px;"),
+                        " > StringSelectorRow": ("min-height: 24px;" "max-height: 24px;"),
+                    },
+                },
+            },
+            "TuningSaveDialog": {
+                "": ("min-height: 123px;" "max-height: 123px;" "min-width: 200px;" "max-width: 200px;"),
+                " > QPushButton": "height: 23px;",
+                " > QLineEdit": "height: 24px;",
+            },
+            "MidiDialog": {
+                "": ("min-height: 265px;" "max-height: 265px;" "min-width: 240px;" "max-width: 240px;"),
+                " > ": {
+                    "MidiInputComboBox": "padding-left: 16px;",
+                    "QPushButton": "height: 23px;",
+                    "#refresh": ("height: 16px;" "max-width: 130px;"),
+                },
+            },
+            "MidiAddDialog": {
+                "": ("min-height: 123px;" "max-height: 123px;" "min-width: 200px;" "max-width: 200px;"),
+                " > ": {
+                    "QPushButton": "height: 23px;",
+                    "QLineEdit": "height: 24px;",
+                },
+            },
+            "PlayerDialog": {
+                "": ("min-height: 315px;" "max-height: 315px;" "min-width: 670px;" "max-width: 670px;"),
+                " ": {
+                    "#system_players": {
+                        "QLabel": ("min-width: 105px;" "max-width: 105px;"),
+                        "#label_box > #settings_label": "margin-left: 110px;",
+                    },
+                    "#regular_players > #label_box > #settings_label": "margin-left: 5px;",
+                    "#button_box": ("min-width: 220px;" "max-width: 220px;"),
+                    "Button": "height: 23px;",
+                    "PlayerRow": {
+                        "": ("min-height: 30px;" "max-height: 30px;"),
+                        " > ": {
+                            "#instrument_name": (
+                                "width: 110px;" "padding-left: 12px;" "margin-left: -8px;"
+                            ),
+                            "#instrument_style": (
+                                "width: 120px;" "padding-left: 12px;" "margin-left: -4px;"
+                            ),
+                            "MidiOutputComboBox": (
+                                "width: 145px;" "padding-left: 12px;" "margin-left: 11px;"
+                            ),
+                            "MidiChannelComboBox": (
+                                "width: 30px;" "padding-left: 12px;" "margin-left: -4px;"
+                            ),
+                            "Button": {
+                                "": "border-radius: 5px",
+                                "#active": {
+                                    "": (
+                                        "margin-right: 3px;"
+                                        "min-height: 23px;"
+                                        "width: 72px;"
+                                        f"background-color: {LIGHT_ORANGE};"
+                                    ),
+                                    ":hover": f"background-color: {SLIGHTLY_DARKER_ORANGE};",
+                                    ":pressed": f"background-color: {DARKER_ORANGE};",
+                                    ":hover[pressed=true]": f"background-color: {SLIGHTLY_DARKER_GREEN};",
+                                    "[pressed=true]": f"background-color: {GREEN};",
+                                    ":pressed[pressed=true]": f"background-color: {DARKER_GREEN};",
+                                },
+                                "#delete": {
+                                    "": (
+                                        "min-height: 23px;"
+                                        "width: 55px;"
+                                        f"background-color: {LIGHT_RED};"
+                                    ),
+                                    ":hover": f"background-color: {RED};",
+                                    ":pressed": f"background-color: {SLIGHTLY_DARKER_RED};",
+                                },
+                            },
+                        },
+                    },
+                    "#label_box > #midi_settings_label": "margin-left: 158px;",
+                },
+            },
+        }
+    )

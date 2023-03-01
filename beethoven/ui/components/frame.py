@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QFrame, QLabel, QWidget
 
 from beethoven.helpers.sequencer import get_chord_from_items
 from beethoven.models import Chord, ChordItem, Degree, HarmonyItem, Note, Scale
-from beethoven.ui.layouts import LayoutItem, Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import LayoutItems, Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.utils.alterations import get_degree_alteration_str_from_int
 
 
@@ -15,19 +15,22 @@ class FramedText(QFrame):
 
         self.setAttribute(Qt.WA_StyledBackground)
 
-        layout_items: List[LayoutItem] = []
+        layout_items: LayoutItems = []
 
         self.lower_label = QLabel()
         self.lower_label.setAlignment(Qt.AlignCenter)  # type: ignore
-        self.lower_label.setObjectName("lower_text")
 
         if upper_text:
             upper_label = QLabel(upper_text)
             upper_label.setAlignment(Qt.AlignCenter)  # type: ignore
             upper_label.setObjectName("upper_text")
 
+            self.lower_label.setObjectName("main_text")
+
             layout_items = [upper_label, self.lower_label, Stretch()]
         else:
+            self.lower_label.setObjectName("main_text")
+
             layout_items = [self.lower_label]
 
         self.setLayout(vertical_layout(layout_items))
@@ -62,9 +65,7 @@ class FramedChord(FramedText):
         self.set_text(f"{str(chord.root)} {chord.name}")
 
     def set_chords(self, chords: List[Chord], separator: str = " "):
-        self.set_text(
-            separator.join([f"{str(chord.root)} {chord.name}" for chord in chords])
-        )
+        self.set_text(separator.join([f"{str(chord.root)} {chord.name}" for chord in chords]))
 
 
 class FramedDegree(FramedText):
@@ -74,9 +75,7 @@ class FramedDegree(FramedText):
         super(FramedDegree, self).__init__(*args, **kwargs)
 
     def set_degree(self, degree: Degree):
-        self.set_text(
-            f"{get_degree_alteration_str_from_int(degree.alteration)}{degree.name}"
-        )
+        self.set_text(f"{get_degree_alteration_str_from_int(degree.alteration)}{degree.name}")
 
     def set_degrees(self, degrees: List[Degree], separator: str = " "):
         self.set_text(

@@ -8,7 +8,7 @@ from beethoven.ui.components.combobox.midi_input import MidiInputComboBox
 from beethoven.ui.components.selectors import MidiOutputSelector
 from beethoven.ui.constants import DEFAULT_MIDI_INPUT
 from beethoven.ui.dialogs.midi_add import MidiAddDialog
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import Spacing, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
 logger = logging.getLogger("dialog.midi")
@@ -26,37 +26,32 @@ class MidiDialog(QDialog):
         self.output_selector = MidiOutputSelector(manager=manager)
 
         self.input_refresh_button = Button("Refresh")
+        self.input_refresh_button.setObjectName("refresh")
 
-        self.ok_button = Button("OK")
-        self.add_output_button = Button("Add")
-        self.delete_output_button = Button("Delete")
+        self.ok_button = Button("OK", object_name="blue")
+        self.add_output_button = Button("Add", object_name="green")
+        self.delete_output_button = Button("Delete", object_name="red")
 
         self.input_combobox.value_changed.connect(self.handle_midi_input_change)
         self.input_refresh_button.clicked.connect(self.input_combobox.refresh)
 
         self.ok_button.clicked.connect(self.close)
         self.add_output_button.clicked.connect(self.add_output)
-        self.delete_output_button.clicked.connect(
-            self.output_selector.delete_selected_outputs
-        )
+        self.delete_output_button.clicked.connect(self.output_selector.delete_selected_outputs)
 
         self.setLayout(
             vertical_layout(
                 [
                     QLabel("Midi Input"),
                     Spacing(size=8),
-                    horizontal_layout(
-                        [
-                            self.input_combobox,
-                            Spacing(size=4),
-                            self.input_refresh_button,
-                        ]
-                    ),
-                    Spacing(size=14),
+                    self.input_combobox,
+                    Spacing(size=10),
+                    self.input_refresh_button,
+                    Spacing(size=18),
                     QLabel("Midi Outputs"),
                     Spacing(size=8),
                     self.output_selector,
-                    Stretch(),
+                    Spacing(size=10),
                     horizontal_layout(
                         [
                             self.ok_button,

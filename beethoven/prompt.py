@@ -5,8 +5,6 @@ from typing import Dict
 from prompt_toolkit import PromptSession, print_formatted_text
 from prompt_toolkit.history import FileHistory
 
-from beethoven.models import Grid
-
 
 class PromptStatus(Enum):
     RUNNING: int = auto()
@@ -21,9 +19,7 @@ class PromptContext:
     state: PromptStatus = PromptStatus.RUNNING
 
 
-session: PromptSession = PromptSession(
-    history=FileHistory(".beethoven_history"), enable_suspend=True
-)
+session: PromptSession = PromptSession(history=FileHistory(".beethoven_history"), enable_suspend=True)
 
 
 class BasePrompt:
@@ -86,7 +82,8 @@ class MainPrompt(BasePrompt):
 class ComposePrompt(BasePrompt):
     def dispatch(self, string, context):
         try:
-            _ = Grid.parse(string)
+            pass
+            # _ = Grid.parse(string)
         except Exception as exc:
             print_formatted_text(str(exc))
 

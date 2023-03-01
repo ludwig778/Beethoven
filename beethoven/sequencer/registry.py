@@ -31,9 +31,7 @@ class RegisteredPlayerMeta(type):
         return cls.instances.get(instrument_name, {})
 
     @classmethod
-    def get_instrument_style(
-        cls, instrument_name, style_name
-    ) -> Optional[RegisteredPlayerMeta]:
+    def get_instrument_style(cls, instrument_name, style_name) -> Optional[RegisteredPlayerMeta]:
         return cls.instances.get(instrument_name, {}).get(style_name)
 
 

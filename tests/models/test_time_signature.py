@@ -27,24 +27,18 @@ def test_time_signature_parsing(string, expected_obj):
 
 @mark.parametrize("beat_unit", [0, 64])
 def test_time_signature_model_raise_out_of_bound_beat_unit(beat_unit):
-    with raises(
-        ValueError, match=f"Invalid beat_unit: {beat_unit}, must be in range 1-32"
-    ):
+    with raises(ValueError, match=f"Invalid beat_unit: {beat_unit}, must be in range 1-32"):
         TimeSignature(beats_per_bar=4, beat_unit=beat_unit)
 
 
 @mark.parametrize("beat_unit", [3, 7])
 def test_time_signature_model_raise_invalid_beat_unit(beat_unit):
-    with raises(
-        ValueError, match=f"Invalid beat_unit: {beat_unit}, must be a multiple of 2"
-    ):
+    with raises(ValueError, match=f"Invalid beat_unit: {beat_unit}, must be a multiple of 2"):
         TimeSignature(beats_per_bar=4, beat_unit=beat_unit)
 
 
 def test_time_section_helper_time_section_generator_first_values():
-    generator = TimeSignature(beats_per_bar=4, beat_unit=4).generate_time_sections(
-        whole_duration
-    )
+    generator = TimeSignature(beats_per_bar=4, beat_unit=4).generate_time_sections(whole_duration)
 
     assert next(generator) == (TimeSection(bar=1, measure=1), Duration.parse("0"))
 
@@ -142,9 +136,7 @@ def test_time_section_helper_time_section_generator_first_values():
         ],
     ],
 )
-def test_time_section_helper_time_section_generator(
-    time_signature, step, count, expected_time_section
-):
+def test_time_section_helper_time_section_generator(time_signature, step, count, expected_time_section):
     generator = time_signature.generate_time_sections(step)
 
     for _ in range(count + 1):

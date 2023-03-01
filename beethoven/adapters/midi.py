@@ -13,9 +13,7 @@ class MidiMessage(BaseModel):
     type: str
 
     def to_mido(self) -> Message:
-        return Message(
-            self.type, note=self.note, channel=self.channel, velocity=self.velocity
-        )
+        return Message(self.type, note=self.note, channel=self.channel, velocity=self.velocity)
 
     class Config:
         arbitrary_types_allowed = True

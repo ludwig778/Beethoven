@@ -2,9 +2,10 @@ import logging
 from fractions import Fraction
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QComboBox, QLabel, QSpinBox, QWidget
+from PySide6.QtWidgets import QComboBox, QLabel, QWidget
 
 from beethoven.models import DurationItem
+from beethoven.ui.components.spinbox import SpinBox
 from beethoven.ui.constants import BASE_DURATIONS
 from beethoven.ui.layouts import horizontal_layout
 from beethoven.ui.utils import block_signal
@@ -16,20 +17,11 @@ class DurationSelector(QWidget):
     value_changed = Signal(object)
     end_of_bar_label = "End of bar"
 
-    def __init__(
-        self,
-        *args,
-        duration_item: DurationItem,
-        enable_denominator: bool = False,
-        **kwargs
-    ):
+    def __init__(self, *args, duration_item: DurationItem, enable_denominator: bool = False, **kwargs):
         super(DurationSelector, self).__init__(*args, **kwargs)
 
-        self.numerator_spinbox = QSpinBox()
-        self.denominator_spinbox = QSpinBox()
-
-        self.numerator_spinbox.setRange(1, 52)
-        self.denominator_spinbox.setRange(1, 52)
+        self.numerator_spinbox = SpinBox(minimum=1, maximum=52)
+        self.denominator_spinbox = SpinBox(minimum=1, maximum=52)
 
         self.duration_unit_combobox = QComboBox()
         self.duration_unit_combobox.addItem(self.end_of_bar_label)
@@ -37,9 +29,7 @@ class DurationSelector(QWidget):
 
         self.numerator_spinbox.valueChanged.connect(self.handle_numerator_change)
         self.denominator_spinbox.valueChanged.connect(self.handle_denominator_change)
-        self.duration_unit_combobox.currentTextChanged.connect(
-            self.handle_duration_unit_change
-        )
+        self.duration_unit_combobox.currentTextChanged.connect(self.handle_duration_unit_change)
 
         self.set(duration_item)
 
@@ -96,9 +86,7 @@ class DurationSelector(QWidget):
 
             self.update_duration_item(base_duration=BASE_DURATIONS.get(value))
 
-    def update_duration_item(
-        self, numerator=None, denominator=None, base_duration=None
-    ):
+    def update_duration_item(self, numerator=None, denominator=None, base_duration=None):
         self.value = DurationItem(
             numerator=numerator or self.value.numerator,
             denominator=denominator or self.value.denominator,

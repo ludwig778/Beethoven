@@ -29,12 +29,7 @@ class SequencerManager(QObject):
     items_change = Signal(HarmonyItem, ChordItem)
 
     def __init__(
-        self,
-        *args,
-        settings: AppSettings,
-        adapters: Adapters,
-        midi_manager: MidiManager,
-        **kwargs
+        self, *args, settings: AppSettings, adapters: Adapters, midi_manager: MidiManager, **kwargs
     ):
         super(SequencerManager, self).__init__(*args, **kwargs)
 
@@ -86,9 +81,7 @@ class SequencerManager(QObject):
         else:
             player_settings = self.settings.player.players
 
-        return setup_players(
-            midi_adapter=self.adapters.midi, player_settings=player_settings
-        )
+        return setup_players(midi_adapter=self.adapters.midi, player_settings=player_settings)
 
     def get_current_items(self) -> Tuple[Optional[HarmonyItem], Optional[ChordItem]]:
         return self.sequencer.current_harmony_item, self.sequencer.current_chord_item

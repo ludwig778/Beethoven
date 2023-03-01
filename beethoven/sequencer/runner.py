@@ -124,8 +124,7 @@ class Sequencer:
             if self.params.continuous or self.params.preview:
                 harmony_time_signature = DEFAULT_TIME_SIGNATURE
                 harmony_time_signature_duration = (
-                    harmony_time_signature.get_duration()
-                    * self.continuous_duration_ratio
+                    harmony_time_signature.get_duration() * self.continuous_duration_ratio
                 )
             else:
                 harmony_time_signature = harmony_item.time_signature

@@ -38,9 +38,7 @@ def get_checked_items(list_widget: QListWidget) -> List[QListWidgetItem]:
 
 
 # TODO: Set as an helper, maybe ?
-def setup_players(
-    midi_adapter: MidiAdapter, player_settings: List[PlayerSetting]
-) -> List[BasePlayer]:
+def setup_players(midi_adapter: MidiAdapter, player_settings: List[PlayerSetting]) -> List[BasePlayer]:
     players = []
 
     for player_setting in player_settings:
@@ -64,9 +62,7 @@ def setup_players(
     return players
 
 
-def run_method_on_widgets(
-    method: Callable, widgets: List[QWidget], *args, **kwargs
-) -> None:
+def run_method_on_widgets(method: Callable, widgets: List[QWidget], *args, **kwargs) -> None:
     for widget in widgets:
         method(widget, *args, **kwargs)
 
@@ -78,7 +74,7 @@ def get_default_chord_item() -> ChordItem:
 def get_default_harmony_item() -> HarmonyItem:
     return HarmonyItem(
         scale=Scale.parse("C4_major"),
-        chord_items=[get_default_chord_item()],
+        chord_items=get_default_harmony_items(),
         bpm=DEFAULT_BPM,
         time_signature=DEFAULT_TIME_SIGNATURE,
     )

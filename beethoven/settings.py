@@ -105,9 +105,7 @@ def get_local_settings() -> Optional[AppSettings]:
     settings_file = FileAdapter(file_path=settings_config_file.path)
 
     if settings_file.exists():
-        return AppSettings(
-            config_file=settings_config_file, **settings_file.read_json()
-        )
+        return AppSettings(config_file=settings_config_file, **settings_file.read_json())
 
     return None
 
@@ -115,9 +113,7 @@ def get_local_settings() -> Optional[AppSettings]:
 def get_default_settings():
     app_settings = AppSettings(
         tuning=TuningSettings(),
-        midi=MidiSettings(
-            opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]
-        ),
+        midi=MidiSettings(opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]),
         player=PlayerSettings(
             max_players=4,
             metronome=PlayerSetting(

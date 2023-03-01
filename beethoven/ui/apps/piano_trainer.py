@@ -8,10 +8,7 @@ from beethoven.models import Chord
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.frame import FramedChord, FramedNote
-from beethoven.ui.components.selectors import (
-    ChordMultipleSelector,
-    NoteMultipleSelector,
-)
+from beethoven.ui.components.selectors import ChordMultipleSelector, NoteMultipleSelector
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 

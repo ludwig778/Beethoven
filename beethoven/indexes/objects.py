@@ -1,11 +1,7 @@
 from typing import Dict, List, Optional
 
 from beethoven.indexes.models import ChordData, IntervalData, NoteData, ScaleData
-from beethoven.indexes.notations import (
-    ChordNotationEnum,
-    IntervalNotationEnum,
-    NoteNotationEnum,
-)
+from beethoven.indexes.notations import ChordNotationEnum, IntervalNotationEnum, NoteNotationEnum
 
 
 class NoteIndex:
@@ -125,9 +121,7 @@ class ChordIndex:
     def get_chords_label_data(self) -> Dict[str, List[ChordData]]:
         return self.label_directory
 
-    def get_chords_by_label_data(
-        self, labels: Optional[List[str]] = None
-    ) -> List[ChordData]:
+    def get_chords_by_label_data(self, labels: Optional[List[str]] = None) -> List[ChordData]:
         filtered_chords = []
 
         for label, chords_data in self.label_directory.items():
@@ -167,9 +161,7 @@ class ScaleIndex:
     def get_scales_label_data(self) -> Dict[str, List[ScaleData]]:
         return self.label_directory
 
-    def get_scales_by_label_data(
-        self, labels: Optional[List[str]] = None
-    ) -> List[ScaleData]:
+    def get_scales_by_label_data(self, labels: Optional[List[str]] = None) -> List[ScaleData]:
         filtered_scales = []
 
         for label, scales_data in self.label_directory.items():

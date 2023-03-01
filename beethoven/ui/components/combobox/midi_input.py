@@ -35,7 +35,7 @@ class MidiInputComboBox(QComboBox):
             self.clear()
             self.addItem(DEFAULT_MIDI_INPUT)
 
-            input_names = list(set(sorted(self.manager.adapters.midi.available_inputs)))
+            input_names = list(sorted(set(self.manager.adapters.midi.available_inputs)))
 
             self.addItems(input_names)
 

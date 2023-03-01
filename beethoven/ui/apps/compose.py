@@ -1,19 +1,17 @@
 import logging
-from typing import List, Tuple, TypeVar
+from typing import List, Optional, Tuple, TypeVar
 
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtWidgets import QWidget
 
 from beethoven.helpers.sequencer import system_tick_logger
-from beethoven.models import ChordItem, HarmonyItem
+from beethoven.models import Bpm, ChordItem, HarmonyItem, Scale, TimeSignature
 from beethoven.sequencer.runner import SequencerItemIterator, SequencerParams
 from beethoven.types import SequencerItems
 from beethoven.ui.components.composer_grid import ComposerGrid
 from beethoven.ui.components.frame import HarmonyChordItemFrames
-from beethoven.ui.components.scale_picker import ScalePicker
-from beethoven.ui.components.selectors.time_signature import TimeSignatureSelector
+from beethoven.ui.components.harmony_picker import HarmonyPicker
 from beethoven.ui.components.sequencer import SequencerWidget
-from beethoven.ui.components.spinbox import BpmSpinBox
 from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
 from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
@@ -42,44 +40,25 @@ class ComposeWidget(QWidget):
         self.composer_grid = ComposerGrid(harmony_items=harmony_items)
         self.composer_grid.items_clicked.connect(self.handle_click_from_grid)
 
-        self.scale_picker = ScalePicker(scale=harmony_items[0].scale)
-        self.time_signature_selector = TimeSignatureSelector()
-        self.bpm_spinbox = BpmSpinBox()
+        self.chord_picker = ChordPickerDialog(chord_item=harmony_items[0].chord_items[0])
+        self.harmony_picker = HarmonyPicker()
+
         self.sequencer_widget = SequencerWidget(manager=self.manager)
-        self.chord_picker = ChordPickerDialog(
-            chord_item=harmony_items[0].chord_items[0], parent=self
-        )
 
         self.composer_grid.chord_grid.modify_button.connect_to_dialog(self.chord_picker)
 
+        self.composer_grid.harmony_grid.item_added.connect(self.handle_added_harmony_item)
+        self.composer_grid.harmony_grid.item_deleted.connect(self.handle_deleted_harmony_item)
         self.composer_grid.chord_grid.item_added.connect(self.handle_added_chord_item)
-        self.composer_grid.chord_grid.item_deleted.connect(
-            self.handle_deleted_chord_item
-        )
+        self.composer_grid.chord_grid.item_deleted.connect(self.handle_deleted_chord_item)
 
-        self.composer_grid.harmony_grid.item_added.connect(
-            self.handle_added_harmony_item
-        )
-        self.composer_grid.harmony_grid.item_deleted.connect(
-            self.handle_deleted_harmony_item
-        )
-
-        self.scale_picker.octave_spinbox.clearFocus()
         self.composer_grid.chord_grid.setFocus()
 
-        self.scale_picker.value_changed.connect(self.handle_scale_change)
-        self.time_signature_selector.value_changed.connect(
-            self.handle_time_signature_change
-        )
-        self.bpm_spinbox.value_changed.connect(self.handle_bpm_change)
         self.chord_picker.value_changed.connect(self.handle_change_from_chord_picker)
+        self.harmony_picker.value_changed.connect(self.handle_harmony_change)
 
-        self.sequencer_widget.key_step_button.toggled.connect(
-            self.handle_sequencer_stepper_change
-        )
-        self.sequencer_widget.chord_step_button.toggled.connect(
-            self.handle_sequencer_stepper_change
-        )
+        self.sequencer_widget.key_step_button.toggled.connect(self.handle_sequencer_stepper_change)
+        self.sequencer_widget.chord_step_button.toggled.connect(self.handle_sequencer_stepper_change)
 
         self.action_binding = QShortcut(QKeySequence("Space"), self)
         self.action_binding.activated.connect(self.handle_action_binding)  # type: ignore
@@ -95,29 +74,12 @@ class ComposeWidget(QWidget):
                 [
                     Spacing(size=3),
                     self.harmony_chord_frames,
-                    Spacing(size=5),
+                    Spacing(size=9),
                     horizontal_layout(
                         [
-                            vertical_layout(
-                                [
-                                    QLabel("Scale :"),
-                                    QLabel("Time Signature :"),
-                                    QLabel("Bpm :"),
-                                ],
-                                object_name="label_section",
-                            ),
-                            Stretch(),
-                            vertical_layout(
-                                [
-                                    self.scale_picker,
-                                    horizontal_layout(
-                                        [self.time_signature_selector, Stretch()]
-                                    ),
-                                    horizontal_layout([self.bpm_spinbox, Stretch()]),
-                                ]
-                            ),
+                            vertical_layout([self.harmony_picker, Stretch()]),
                             Spacing(size=5),
-                            self.sequencer_widget,
+                            vertical_layout([self.sequencer_widget, Stretch()]),
                         ]
                     ),
                     Spacing(size=5),
@@ -176,25 +138,17 @@ class ComposeWidget(QWidget):
 
         return previous_item, previous_index < 0
 
-    def next_items_update(
-        self, harmony_item: HarmonyItem, chord_item: ChordItem
-    ) -> SequencerItems:
+    def next_items_update(self, harmony_item: HarmonyItem, chord_item: ChordItem) -> SequencerItems:
         next_harmony_item = harmony_item
         next_chord_item = chord_item
 
         if self.sequencer_widget.is_key_step_button_pressed():
-            next_chord_item, _ = self._get_next_item(
-                harmony_item.chord_items, chord_item
-            )
+            next_chord_item, _ = self._get_next_item(harmony_item.chord_items, chord_item)
         elif not self.sequencer_widget.is_chord_step_button_pressed():
-            next_chord_item, chord_reset = self._get_next_item(
-                harmony_item.chord_items, chord_item
-            )
+            next_chord_item, chord_reset = self._get_next_item(harmony_item.chord_items, chord_item)
 
             if chord_reset:
-                next_harmony_item, _ = self._get_next_item(
-                    self.harmony_items, harmony_item
-                )
+                next_harmony_item, _ = self._get_next_item(self.harmony_items, harmony_item)
                 next_chord_item = next_harmony_item.chord_items[0]
             else:
                 next_harmony_item = harmony_item
@@ -203,47 +157,33 @@ class ComposeWidget(QWidget):
 
         return next_harmony_item, next_chord_item
 
-    def get_next_items(
-        self, harmony_item: HarmonyItem, chord_item: ChordItem
-    ) -> SequencerItems:
+    def get_next_items(self, harmony_item: HarmonyItem, chord_item: ChordItem) -> SequencerItems:
         if self.sequencer_widget.is_key_step_button_pressed():
             next_harmony_item, _ = self._get_next_item(self.harmony_items, harmony_item)
 
             return next_harmony_item, next_harmony_item.chord_items[0]
         elif self.sequencer_widget.is_chord_step_button_pressed():
-            next_chord_item, _ = self._get_next_item(
-                harmony_item.chord_items, chord_item
-            )
+            next_chord_item, _ = self._get_next_item(harmony_item.chord_items, chord_item)
 
             return harmony_item, next_chord_item
         else:
-            next_chord_item, chord_reset = self._get_next_item(
-                harmony_item.chord_items, chord_item
-            )
+            next_chord_item, chord_reset = self._get_next_item(harmony_item.chord_items, chord_item)
 
             if chord_reset:
-                next_harmony_item, _ = self._get_next_item(
-                    self.harmony_items, harmony_item
-                )
+                next_harmony_item, _ = self._get_next_item(self.harmony_items, harmony_item)
                 next_chord_item = next_harmony_item.chord_items[0]
             else:
                 next_harmony_item = harmony_item
 
             return next_harmony_item, next_chord_item
 
-    def get_previous_items(
-        self, harmony_item: HarmonyItem, chord_item: ChordItem
-    ) -> SequencerItems:
+    def get_previous_items(self, harmony_item: HarmonyItem, chord_item: ChordItem) -> SequencerItems:
         if self.sequencer_widget.is_key_step_button_pressed():
-            previous_harmony_item, _ = self._get_previous_item(
-                self.harmony_items, harmony_item
-            )
+            previous_harmony_item, _ = self._get_previous_item(self.harmony_items, harmony_item)
 
             return previous_harmony_item, previous_harmony_item.chord_items[0]
         elif self.sequencer_widget.is_chord_step_button_pressed():
-            previous_chord_item, _ = self._get_previous_item(
-                harmony_item.chord_items, chord_item
-            )
+            previous_chord_item, _ = self._get_previous_item(harmony_item.chord_items, chord_item)
 
             return harmony_item, previous_chord_item
         else:
@@ -252,9 +192,7 @@ class ComposeWidget(QWidget):
             )
 
             if chord_reset:
-                previous_harmony_item, _ = self._get_previous_item(
-                    self.harmony_items, harmony_item
-                )
+                previous_harmony_item, _ = self._get_previous_item(self.harmony_items, harmony_item)
                 previous_chord_item = previous_harmony_item.chord_items[-1]
             else:
                 previous_harmony_item = harmony_item
@@ -264,11 +202,8 @@ class ComposeWidget(QWidget):
     def handle_items_change(self, harmony_item: HarmonyItem, chord_item: ChordItem):
         self.composer_grid.set_current_items(harmony_item, chord_item)
 
-        self.scale_picker.set(harmony_item.scale)
         self.chord_picker.set(chord_item)
-
-        self.time_signature_selector.set(harmony_item.time_signature)
-        self.bpm_spinbox.set(harmony_item.bpm)
+        self.harmony_picker.set(harmony_item)
 
         self.update_frame_display()
 
@@ -338,10 +273,7 @@ class ComposeWidget(QWidget):
 
         self.composer_grid.harmony_grid.refresh_current_index()
 
-        if (
-            self.manager.sequencer.is_playing_preview()
-            or self.manager.sequencer.is_stopped()
-        ):
+        if self.manager.sequencer.is_playing_preview() or self.manager.sequencer.is_stopped():
             self.params.set_options(preview=True)
 
         self.manager.sequencer.grid_play.emit()
@@ -399,39 +331,36 @@ class ComposeWidget(QWidget):
 
         self._set_current_chord_item(chord_item)
 
-    def handle_scale_change(self, scale):
+    def handle_harmony_change(
+        self,
+        scale: Optional[Scale],
+        time_signature: Optional[TimeSignature],
+        bpm: Optional[Bpm],
+    ):
         logger.info(
-            f"hid={self.sequencer_iterator.current_items[0].id} setting scale={scale.to_log_string()}"
+            f"scale={scale.to_log_string() if scale else 'None'} "
+            f"time_signature={str(time_signature)} bpm={str(bpm)}"
         )
 
-        self.sequencer_iterator.current_items[0].scale = scale
-        self.composer_grid.harmony_grid.refresh_current_index()
+        if time_signature:
+            self.sequencer_iterator.current_items[0].time_signature = time_signature
+            self.composer_grid.harmony_grid.refresh_current_index()
 
-        self.sequencer_iterator.reset(self.sequencer_iterator.current_items)
+        if bpm:
+            self.sequencer_iterator.current_items[0].bpm = bpm
+            self.composer_grid.harmony_grid.refresh_current_index()
 
-        if self.sequencer_widget.is_play_button_pressed():
-            self.manager.sequencer.grid_play.emit()
-        else:
-            self.update_frame_display()
+        if scale:
+            self.sequencer_iterator.current_items[0].scale = scale
+            self.composer_grid.harmony_grid.refresh_current_index()
 
-    def handle_time_signature_change(self, time_signature):
-        logger.info(
-            f"hid={self.sequencer_iterator.current_items[0].id} setting time_signature={time_signature}"
-        )
+            self.sequencer_iterator.reset(self.sequencer_iterator.current_items)
 
-        self.sequencer_iterator.current_items[0].time_signature = time_signature
-        self.composer_grid.harmony_grid.refresh_current_index()
-
-        if self.sequencer_widget.is_play_button_pressed():
-            self.manager.sequencer.grid_play.emit()
-
-    def handle_bpm_change(self, bpm):
-        logger.info(
-            f"hid={self.sequencer_iterator.current_items[0].id} setting bpm={bpm}"
-        )
-
-        self.sequencer_iterator.current_items[0].bpm = bpm
-        self.composer_grid.harmony_grid.refresh_current_index()
+        if scale or time_signature:
+            if self.manager.sequencer.is_playing():
+                self.manager.sequencer.grid_play.emit()
+            else:
+                self.update_frame_display()
 
     def update_frame_display(self):
         if self.sequencer_widget.is_chord_step_button_pressed():

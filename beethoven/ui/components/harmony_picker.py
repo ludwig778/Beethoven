@@ -3,7 +3,7 @@ import logging
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QWidget
 
-from beethoven.models import HarmonyItem
+from beethoven.models import Bpm, HarmonyItem
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.components.selectors.time_signature import TimeSignatureSelector
 from beethoven.ui.components.spinbox import BpmSpinBox
@@ -59,7 +59,7 @@ class HarmonyPicker(QWidget):
 
     @property
     def bpm(self):
-        return self.bpm_spinbox.value
+        return self.bpm_spinbox.value()
 
     def set(self, harmony_item: HarmonyItem):
         self.scale_picker.set(harmony_item.scale)
@@ -76,7 +76,7 @@ class HarmonyPicker(QWidget):
 
         self.value_changed.emit(None, time_signature, None)
 
-    def handle_bpm_change(self, bpm):
+    def handle_bpm_change(self, bpm: Bpm):
         logger.debug(str(bpm))
 
         self.value_changed.emit(None, None, bpm)

@@ -1,8 +1,9 @@
 import logging
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QDialog, QLabel, QPushButton
+from PySide6.QtWidgets import QDialog, QLabel
 
+from beethoven.ui.components.buttons import Button
 from beethoven.ui.components.combobox import TuningComboBox
 from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.spinbox import StringNumberSpinBox
@@ -27,13 +28,11 @@ class TuningDialog(QDialog):
         self.tuning_selector = TuningComboBox(tuning_settings=self.tuning_settings)
         self.current_tuning = self.tuning_settings.defaults[self.tuning_selector.value]
 
-        self.string_spinbox = StringNumberSpinBox(
-            string_number=len(self.current_tuning.notes)
-        )
+        self.string_spinbox = StringNumberSpinBox(string_number=len(self.current_tuning.notes))
         self.string_selectors = StringSelector(initial_tuning=self.current_tuning)
-        self.ok_button = QPushButton("OK")
-        self.save_button = QPushButton("Save")
-        self.delete_button = QPushButton("Delete")
+        self.ok_button = Button("OK", object_name="blue")
+        self.save_button = Button("Save", object_name="green")
+        self.delete_button = Button("Delete", object_name="red")
 
         self.ok_button.clicked.connect(self.close)
         self.save_button.clicked.connect(self.save_tuning)
@@ -47,7 +46,13 @@ class TuningDialog(QDialog):
         self.setLayout(
             vertical_layout(
                 [
-                    self.tuning_selector,
+                    horizontal_layout(
+                        [
+                            Stretch(),
+                            self.tuning_selector,
+                            Stretch(),
+                        ]
+                    ),
                     Spacing(size=8),
                     horizontal_layout(
                         [
@@ -60,7 +65,6 @@ class TuningDialog(QDialog):
                     ),
                     Spacing(size=12),
                     self.string_selectors,
-                    Spacing(size=10),
                     Stretch(),
                     horizontal_layout(
                         [
@@ -127,13 +131,9 @@ class TuningDialog(QDialog):
         self.update_delete_button_state()
 
     def update_delete_button_state(self):
-        is_default_tuning = (
-            self.tuning_selector.value not in self.tuning_settings.defaults
-        )
+        is_default_tuning = self.tuning_selector.value not in self.tuning_settings.defaults
 
         if self.delete_button.isEnabled() != is_default_tuning:
-            logger.debug(
-                f"update tuning delete button {'active' if is_default_tuning else 'inactive'}"
-            )
+            logger.debug(f"update tuning delete button {'active' if is_default_tuning else 'inactive'}")
 
             return self.delete_button.setEnabled(is_default_tuning)

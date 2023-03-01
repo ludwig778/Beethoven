@@ -28,9 +28,7 @@ def play_note(
     velocity: int = 127,
     duration: Duration = Duration.parse("1"),
 ) -> None:
-    note_on, note_off = get_on_off_messages(
-        note_index, output, channel, velocity=velocity
-    )
+    note_on, note_off = get_on_off_messages(note_index, output, channel, velocity=velocity)
 
     output.send(note_on.to_mido())
 
@@ -50,9 +48,7 @@ def play_notes(
     notes_off = []
 
     for note in notes:
-        note_on, note_off = get_on_off_messages(
-            note.midi_index, output, channel, velocity=velocity
-        )
+        note_on, note_off = get_on_off_messages(note.midi_index, output, channel, velocity=velocity)
 
         notes_on.append(note_on)
         notes_off.append(note_off)

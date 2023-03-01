@@ -29,17 +29,13 @@ class HarmonyDelegate(BaseDelegate):
         return (
             max(
                 QFontMetrics(self.bold_font).horizontalAdvance(str(obj.scale)),
-                QFontMetrics(self.bold_font).horizontalAdvance(
-                    self._format_chords(obj)
-                ),
+                QFontMetrics(self.bold_font).horizontalAdvance(self._format_chords(obj)),
             )
             + self.extra_width
         )
 
     def sizeHint(self, option, index):
-        return QSize(
-            self._get_max_width(index.data(Qt.DisplayRole)), option.rect.height()
-        )
+        return QSize(self._get_max_width(index.data(Qt.DisplayRole)), option.rect.height())
 
     def paint(self, painter, option, index):
         obj = index.data(Qt.DisplayRole)
@@ -53,13 +49,9 @@ class HarmonyDelegate(BaseDelegate):
 
         painter.fillRect(
             option.rect,
-            self.highlighted_background_color
-            if is_highlighted
-            else self.background_color,
+            self.highlighted_background_color if is_highlighted else self.background_color,
         )
-        painter.setPen(
-            self.highlighted_text_color if is_highlighted else self.text_color
-        )
+        painter.setPen(self.highlighted_text_color if is_highlighted else self.text_color)
 
         display_strings = [
             str(obj.scale),
@@ -75,9 +67,7 @@ class HarmonyDelegate(BaseDelegate):
         ]
 
         current_offset = 0
-        for offset, font, string in zip(
-            self.display_offsets, display_fonts, display_strings
-        ):
+        for offset, font, string in zip(self.display_offsets, display_fonts, display_strings):
             current_offset += offset
 
             painter.setFont(font)
@@ -101,9 +91,7 @@ class ChordDelegate(BaseDelegate):
         )
 
     def sizeHint(self, option, index):
-        return QSize(
-            self._get_max_width(index.data(Qt.DisplayRole)), option.rect.height()
-        )
+        return QSize(self._get_max_width(index.data(Qt.DisplayRole)), option.rect.height())
 
     def paint(self, painter, option, index):
         obj = index.data(Qt.DisplayRole)
@@ -116,13 +104,9 @@ class ChordDelegate(BaseDelegate):
 
         painter.fillRect(
             option.rect,
-            self.highlighted_background_color
-            if is_highlighted
-            else self.background_color,
+            self.highlighted_background_color if is_highlighted else self.background_color,
         )
-        painter.setPen(
-            self.highlighted_text_color if is_highlighted else self.text_color
-        )
+        painter.setPen(self.highlighted_text_color if is_highlighted else self.text_color)
 
         chord_rect = (
             QRect(left, 15 - (height / 2), width, height)

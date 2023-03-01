@@ -16,10 +16,13 @@ LayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout, QStackedLayout, Stretch, S
 StackedLayoutItem = Union[QWidget, QHBoxLayout, QVBoxLayout, QStackedLayout]
 BoxLayout = TypeVar("BoxLayout", QHBoxLayout, QVBoxLayout)
 
+LayoutItems = List[LayoutItem]
+StackedLayoutItems = List[StackedLayoutItem]
+
 
 def layout_widget_factory(
     layout_class: Type[BoxLayout],
-    layout_items: List[LayoutItem],
+    layout_items: LayoutItems,
     object_name: str = "",
     spacing: int = 0,
     margins: Tuple[int, int, int, int] = (0, 0, 0, 0),
@@ -34,7 +37,7 @@ def layout_widget_factory(
         elif isinstance(layout_item, (QHBoxLayout, QVBoxLayout)):
             layout.addLayout(layout_item)
         elif isinstance(layout_item, Stretch):
-            layout.addStretch(stretch=1)
+            layout.addStretch()
         elif isinstance(layout_item, Spacing):
             layout.addSpacing(layout_item.size)
 
@@ -51,16 +54,16 @@ def layout_widget_factory(
     return layout
 
 
-def horizontal_layout(layout_items: List[LayoutItem], **kwargs) -> QHBoxLayout:
+def horizontal_layout(layout_items: LayoutItems, **kwargs) -> QHBoxLayout:
     return layout_widget_factory(QHBoxLayout, layout_items, **kwargs)
 
 
-def vertical_layout(layout_items: List[LayoutItem], **kwargs) -> QVBoxLayout:
+def vertical_layout(layout_items: LayoutItems, **kwargs) -> QVBoxLayout:
     return layout_widget_factory(QVBoxLayout, layout_items, **kwargs)
 
 
 def stacked_layout(
-    layout_items: List[StackedLayoutItem],
+    layout_items: StackedLayoutItems,
     spacing: int = 0,
     margins: Tuple[int, int, int, int] = (0, 0, 0, 0),
 ) -> QStackedLayout:

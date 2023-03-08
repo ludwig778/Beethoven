@@ -8,6 +8,7 @@ from beethoven.sequencer.registry import RegisteredPlayerMeta
 from beethoven.settings import PlayerSetting
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
+from beethoven.ui.dialogs.midi import MidiDialog
 from beethoven.ui.layouts import LayoutItems, Spacing, Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 from beethoven.ui.utils import block_signal
@@ -147,6 +148,10 @@ class PlayerDialog(QDialog):
 
         self.ok_button = Button("OK", object_name="blue")
         self.add_button = Button("Add Player", object_name="green")
+        self.midi_setting_button = PushPullButton("Midi Settings")
+
+        self.midi_dialog = MidiDialog(manager=manager)
+        self.midi_setting_button.connect_to_dialog(self.midi_dialog)
 
         instrument_settings_label = QLabel("Instrument settings :")
         instrument_settings_label.setObjectName("settings_label")
@@ -226,6 +231,7 @@ class PlayerDialog(QDialog):
                         [
                             self.ok_button,
                             self.add_button,
+                            self.midi_setting_button,
                         ],
                         object_name="button_box",
                     ),

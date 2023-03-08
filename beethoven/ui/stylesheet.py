@@ -66,7 +66,7 @@ def get_stylesheet() -> str:
                 f"color: {BLACK};"
                 # "border: 1px solid red;"
             ),
-            "MainWindow": f"min-width: 500px;background-color: {MAIN_WINDOW_GRAY};",
+            "MainWindow": f"min-width: 530px;background-color: {MAIN_WINDOW_GRAY};",
             "QDialog": {
                 "": f"background-color: {MAIN_WINDOW_GRAY};",
                 " #error_label": f"color: {ERROR_COLOR};font: bold;font-size: 12px;",
@@ -163,7 +163,7 @@ def get_stylesheet() -> str:
                 "#main_text": f"padding-top: 1px;font-size: 18px;font: bold;color: {FRAME_MAIN_TEXT};",
             },
             "SequencerWidget": {
-                "": "min-height: 71px;max-height: 71px;min-width: 160px;max-width: 160px;",
+                "": "min-height: 71px;max-height: 71px;min-width: 130px;max-width: 130px;",
                 " > QPushButton": {
                     "": "height: 33.6%;",
                     "#key_step": {
@@ -236,7 +236,7 @@ def get_stylesheet() -> str:
                         " #label_box > #settings_label": "margin-left: 110px;",
                     },
                     "#regular_players > #label_box > #settings_label": "margin-left: 5px;",
-                    "#button_box": "min-width: 220px;max-width: 220px;",
+                    "#button_box": "min-width: 290px;max-width: 290px;",
                     "Button": "height: 23px;",
                     "PlayerRow": {
                         "": "min-height: 30px;max-height: 30px;",

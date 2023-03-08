@@ -110,6 +110,8 @@ class TuningDialog(QDialog):
 
         del self.tuning_settings.user_defined[tuning_name]
 
+        self.configuration_changed.emit()
+
         self.tuning_selector.delete_current()
 
     def handle_string_number_change(self, string_number):

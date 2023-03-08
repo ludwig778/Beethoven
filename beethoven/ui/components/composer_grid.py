@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QAbstractItemView, QListView, QStyledItemDelegate, QWidget
@@ -239,3 +239,6 @@ class ComposerGrid(QWidget):
 
         self.chord_grid.set_first_item_as_current_item()
         self.chord_grid.set_current_item(chord_item)
+
+    def get_current_items(self) -> Tuple[HarmonyItem, ChordItem]:
+        return self.harmony_grid.current_item, self.chord_grid.current_item

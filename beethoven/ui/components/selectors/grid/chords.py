@@ -58,6 +58,11 @@ class ChordGridSelector(QWidget):
 
     def set(self, chord_name: str):
         if chord_name == "":
+            if self._current_button:
+                with block_signal([self._current_button]):
+                    self._current_button.release()
+
+                self._current_button = None
             return
 
         chord_button = self.chord_buttons[chord_name]

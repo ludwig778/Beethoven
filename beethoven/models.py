@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from copy import copy, deepcopy
+from copy import copy
 from dataclasses import dataclass, field, replace
 from fractions import Fraction
 from functools import lru_cache
@@ -94,6 +94,10 @@ class Note:
 
     def __str__(self):
         return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave or ''}"
+
+    @property
+    def index(self):
+        return self.midi_index % 12
 
     @property
     def midi_index(self) -> int:
@@ -233,10 +237,7 @@ class Note:
         return Interval(name=name, alteration=alteration)
 
     def remove_octave(self) -> Note:
-        note = deepcopy(self)
-        note.octave = None
-
-        return note
+        return replace(self, octave=None)
 
     @staticmethod
     def remove_notes_octave(notes: List[Note]) -> List[Note]:
@@ -528,10 +529,9 @@ class Scale:
         ]
 
     def get_note_from_degree(self, degree: Degree) -> Note:
-        note = deepcopy(self.notes[degree.index])
-        note.alteration += degree.alteration
+        note = self.notes[degree.index]
 
-        return note
+        return replace(note, alteration=note.alteration + degree.alteration)
 
     def get_diatonic_chords(self) -> List[Chord]:
         chords = []

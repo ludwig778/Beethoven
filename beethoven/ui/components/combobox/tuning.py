@@ -15,9 +15,11 @@ class TuningComboBox(QComboBox):
     def __init__(self, *args, tuning_settings: TuningSettings, **kwargs):
         super(TuningComboBox, self).__init__(*args, **kwargs)
 
-        self.addItems(tuning_settings.tunings.keys())
+        self.tuning_settings = tuning_settings
 
-        self.set(list(tuning_settings.defaults.keys())[0])
+        self.addItems(self.tuning_settings.tunings.keys())
+
+        self.set(list(self.tuning_settings.defaults.keys())[0])
 
         self.currentTextChanged.connect(self.handle_tuning_change)
 
@@ -30,6 +32,20 @@ class TuningComboBox(QComboBox):
 
         with block_signal([self]):
             self.setCurrentText(tuning_name)
+
+    def refresh(self):
+        self.clear()
+
+        tuning_names = list(self.tuning_settings.tunings.keys())
+
+        self.addItems(tuning_names)
+
+        if self.value in tuning_names:
+            self.set(self.value)
+        else:
+            self.setCurrentText(tuning_names[0])
+
+            self.value = tuning_names[0]
 
     def delete_current(self):
         current_index = self.currentIndex()

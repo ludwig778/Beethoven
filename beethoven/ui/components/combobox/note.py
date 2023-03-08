@@ -25,6 +25,8 @@ class NoteComboBox(QComboBox):
         self.currentIndexChanged.connect(self.handle_note_change)
 
     def set(self, note: Note):
+        logger.debug(str(note))
+
         self.value = note
 
         with block_signal([self]):
@@ -32,5 +34,7 @@ class NoteComboBox(QComboBox):
 
     def handle_note_change(self, value):
         self.value = self.available_notes[value]
+
+        logger.debug(str(self.value))
 
         self.value_changed.emit(self.value)

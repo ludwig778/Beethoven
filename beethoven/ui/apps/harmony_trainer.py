@@ -12,6 +12,7 @@ from beethoven.models import Bpm, ChordItem, HarmonyItem, Note, Scale, TimeSigna
 from beethoven.sequencer.runner import SequencerItemIterator, SequencerParams
 from beethoven.types import SequencerItems
 from beethoven.ui.components.composer_grid import ChordGrid
+from beethoven.ui.components.display_container import DisplayContainerWidget
 from beethoven.ui.components.frame import HarmonyChordItemFrames
 from beethoven.ui.components.harmony_picker import HarmonyPicker
 from beethoven.ui.components.sequencer import SequencerWidget
@@ -162,6 +163,11 @@ class HarmonyTrainerWidget(QWidget):
         self.chord_picker = ChordPickerDialog(
             chord_item=self.harmony_item_generator.current_item.chord_items[0]
         )
+        self.display_container = DisplayContainerWidget(
+            manager=self.manager,
+            harmony_item=self.harmony_item_generator.current_item,
+            chord_item=self.chord_grid.current_item,
+        )
         self.harmony_picker = HarmonyPicker()
 
         self.sequencer_widget = SequencerWidget(manager=self.manager)
@@ -207,6 +213,8 @@ class HarmonyTrainerWidget(QWidget):
                     horizontal_layout(
                         [
                             vertical_layout([self.harmony_picker, Stretch()]),
+                            Spacing(size=5),
+                            self.display_container,
                             Spacing(size=5),
                             vertical_layout([self.sequencer_widget, Stretch()]),
                         ]
@@ -338,6 +346,8 @@ class HarmonyTrainerWidget(QWidget):
 
         self.chord_picker.set(chord_item)
 
+        self.display_container.update_items(harmony_item, chord_item)
+
         self.update_frame_display()
 
     def handle_action_binding(self):
@@ -428,6 +438,8 @@ class HarmonyTrainerWidget(QWidget):
         if self.sequencer_widget.is_play_button_pressed():
             self.manager.sequencer.grid_play.emit()
         else:
+            self.handle_items_change(harmony_item, chord_item)
+
             self.update_frame_display()
 
     def handle_added_chord_item(self, chord_item: ChordItem):

@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, List
 
+from colour import Color
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QWidget
 
@@ -74,7 +75,7 @@ def get_default_chord_item() -> ChordItem:
 def get_default_harmony_item() -> HarmonyItem:
     return HarmonyItem(
         scale=Scale.parse("C4_major"),
-        chord_items=get_default_harmony_items(),
+        chord_items=[get_default_chord_item()],
         bpm=DEFAULT_BPM,
         time_signature=DEFAULT_TIME_SIGNATURE,
     )
@@ -99,3 +100,7 @@ def resource_path(relative_path: str) -> Path:
         base_path = Path(".") / "beethoven/ui/resources"
 
     return base_path / relative_path
+
+
+def color_from_hsl(hue: int = 0, saturation: int = 0, lightness: int = 0) -> Color:
+    return Color(hsl=(hue / 360, saturation / 100, lightness / 100))

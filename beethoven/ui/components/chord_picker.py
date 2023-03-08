@@ -107,6 +107,7 @@ class ChordPicker(QWidget):
 
         with block_signal(
             [
+                self.chord_grid_selector,
                 self.root_grid_selector,
                 self.degree_grid_selector,
                 self.degree_alteration_combobox,

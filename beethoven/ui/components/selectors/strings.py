@@ -1,5 +1,5 @@
 import logging
-from typing import Sequence
+from typing import List, Tuple, cast
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QWidget
@@ -7,35 +7,9 @@ from PySide6.QtWidgets import QLabel, QWidget
 from beethoven.models import Note
 from beethoven.settings import TuningSetting
 from beethoven.ui.components.combobox import NoteComboBox
-from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import LayoutItems, Stretch, horizontal_layout, vertical_layout
 
 logger = logging.getLogger("selectors.string")
-
-
-class StringSelectorRow(QWidget):
-    value_changed = Signal(Note)
-
-    def __init__(self, *args, note: Note, **kwargs):
-        super(StringSelectorRow, self).__init__(*args, **kwargs)
-
-        self.number_label = QLabel()
-        self.note_combobox = NoteComboBox(note=note)
-
-        self.set(note)
-
-        self.note_combobox.value_changed.emit(self.value_changed)
-
-        self.setLayout(horizontal_layout([self.number_label, self.note_combobox]))
-
-    @property
-    def value(self):
-        return self.note_combobox.value
-
-    def set_label(self, text: str) -> None:
-        self.number_label.setText(text)
-
-    def set(self, note: Note):
-        self.note_combobox.set(note)
 
 
 class StringSelector(QWidget):
@@ -46,13 +20,29 @@ class StringSelector(QWidget):
     def __init__(self, *args, initial_tuning=None, **kwargs):
         super(StringSelector, self).__init__(*args, **kwargs)
 
-        self.string_rows: Sequence = [StringSelectorRow(note=self.DEFAULT_NOTE) for _ in range(8)]
-        layout_items = self.string_rows + [Stretch()]
+        layout_items: LayoutItems = []
+
+        self.string_rows: List[Tuple[QLabel, NoteComboBox]] = []
+        self.string_row_widgets: List[QWidget] = []
+
+        for _ in range(8):
+            note_combobox = NoteComboBox(note=self.DEFAULT_NOTE)
+            note_combobox.value_changed.connect(self.handle_tuning_change)
+
+            string_row = (QLabel(""), note_combobox)
+
+            widget = QWidget()
+            widget.setLayout(horizontal_layout(cast(LayoutItems, string_row)))
+            widget.setObjectName("string_selector_row")
+
+            self.string_rows.append(string_row)
+            self.string_row_widgets.append(widget)
+
+            layout_items.append(widget)
 
         self.set(initial_tuning)
 
-        for string_row in self.string_rows:
-            string_row.value_changed.emit(self.handle_tuning_change)
+        layout_items.append(Stretch())
 
         self.setLayout(vertical_layout(layout_items))
 
@@ -69,35 +59,42 @@ class StringSelector(QWidget):
             offset = 6 - string_number
 
         for index, note in enumerate(reversed(tuning.notes)):
-            self.string_rows[index + offset].set(note)
+            self.string_rows[index + offset][1].set(note)
 
         self.update_string_number(string_number)
 
     def update_string_number(self, string_number: int):
-        displayed_rows = []
+        displayed_string_rows = []
 
         for index, string_order_row in enumerate(self.STRING_ORDER):
             string_row = self.string_rows[string_order_row]
+            string_row_widget = self.string_row_widgets[string_order_row]
 
             if string_number > index:
-                string_row.setVisible(True)
-                displayed_rows.append(string_row)
+                string_row_widget.setVisible(True)
+                displayed_string_rows.append(string_row)
             else:
-                string_row.setVisible(False)
+                string_row_widget.setVisible(False)
 
         string_index = 1
         for string_row in self.string_rows:
-            if string_row in displayed_rows:
-                string_row.set_label(f"String {string_index}")
+            if string_row not in displayed_string_rows:
+                continue
 
-                string_index += 1
+            string_row[0].setText(f"String {string_index}")
+
+            string_index += 1
+
+        self.handle_tuning_change()
 
     def handle_tuning_change(self):
-        tuning = TuningSetting(
-            notes=[
-                string_row.value for string_row in reversed(self.string_rows) if string_row.isVisible()
-            ]
-        )
+        tuning_notes = []
+
+        for string_row, string_row_widget in zip(self.string_rows[::-1], self.string_row_widgets[::-1]):
+            if string_row_widget.isVisible():
+                tuning_notes.append(string_row[1].value)
+
+        tuning = TuningSetting(notes=tuning_notes)
 
         self.value = tuning
 

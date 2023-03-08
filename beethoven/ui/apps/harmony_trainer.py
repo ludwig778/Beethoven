@@ -94,6 +94,15 @@ class HarmonyItemGenerator:
 
         self.original_item = replace(self.original_item, time_signature=time_signature)
 
+    @property
+    def previous_item(self) -> HarmonyItem:
+        previous_index = max(0, self._index - 1)
+
+        return replace(
+            self.original_item,
+            scale=replace(self.original_item.scale, tonic=self._tonics[previous_index]),
+        )
+
     def setup(self, scale: Optional[Scale] = None, generator_name: Optional[str] = None):
         if scale:
             self.original_item = replace(self.original_item, scale=scale)
@@ -300,7 +309,7 @@ class HarmonyTrainerWidget(QWidget):
             next_chord_item, chord_reset = self._get_next_item(harmony_item.chord_items, chord_item)
 
             if chord_reset:
-                next_harmony_item = self.harmony_item_generator.current_item
+                next_harmony_item = self.harmony_item_generator.next_item
 
         return next_harmony_item, next_chord_item
 
@@ -318,7 +327,7 @@ class HarmonyTrainerWidget(QWidget):
             )
 
             if chord_reset:
-                previous_harmony_item, _ = self.harmony_item_generator.previous()
+                previous_harmony_item = self.harmony_item_generator.previous_item
                 previous_chord_item = previous_harmony_item.chord_items[-1]
             else:
                 previous_harmony_item = harmony_item
@@ -329,13 +338,16 @@ class HarmonyTrainerWidget(QWidget):
         next_harmony_item = harmony_item
         next_chord_item = chord_item
 
+        if harmony_item == self.harmony_item_generator.next_item:
+            self.harmony_item_generator.next()
+
         if self.sequencer_widget.is_key_step_button_pressed():
             next_chord_item, _ = self._get_next_item(harmony_item.chord_items, chord_item)
         elif not self.sequencer_widget.is_chord_step_button_pressed():
             next_chord_item, chord_reset = self._get_next_item(harmony_item.chord_items, chord_item)
 
             if chord_reset:
-                next_harmony_item, _ = self.harmony_item_generator.next()
+                next_harmony_item = self.harmony_item_generator.next_item
 
         return next_harmony_item, next_chord_item
 
@@ -374,11 +386,14 @@ class HarmonyTrainerWidget(QWidget):
             self.manager.sequencer.grid_play.emit()
 
     def handle_next_binding(self):
-        next_items = self.get_next_items(*self.sequencer_iterator.current_items)
+        next_harmony_item, next_chord_item = self.get_next_items(*self.sequencer_iterator.current_items)
 
-        self.sequencer_iterator.reset(next_items)
+        if next_harmony_item != self.harmony_item_generator.current_item:
+            next_harmony_item, _ = self.harmony_item_generator.next()
 
-        logger.info(f"hid={next_items[0].id} cid={next_items[1].id}")
+        self.sequencer_iterator.reset((next_harmony_item, next_chord_item))
+
+        logger.info(f"hid={next_harmony_item.id} cid={next_chord_item.id}")
 
         if self.sequencer_widget.is_play_button_pressed():
             self.manager.sequencer.grid_play.emit()
@@ -386,11 +401,16 @@ class HarmonyTrainerWidget(QWidget):
             self.handle_items_change(*self.sequencer_iterator.current_items)
 
     def handle_previous_binding(self):
-        previous_items = self.get_previous_items(*self.sequencer_iterator.current_items)
+        previous_harmony_item, previous_chord_item = self.get_previous_items(
+            *self.sequencer_iterator.current_items
+        )
 
-        self.sequencer_iterator.reset(previous_items)
+        if previous_harmony_item != self.harmony_item_generator.current_item:
+            previous_harmony_item, _ = self.harmony_item_generator.previous()
 
-        logger.info(f"hid={previous_items[0].id} cid={previous_items[1].id}")
+        self.sequencer_iterator.reset((previous_harmony_item, previous_chord_item))
+
+        logger.info(f"hid={previous_harmony_item.id} cid={previous_chord_item.id}")
 
         if self.sequencer_widget.is_play_button_pressed():
             self.manager.sequencer.grid_play.emit()

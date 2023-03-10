@@ -93,7 +93,7 @@ class Note:
         return hash(self.name + str(self.alteration) + str(self.octave))
 
     def __str__(self):
-        return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave or ''}"
+        return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave if self.octave is not None else ''}"
 
     @property
     def index(self):
@@ -588,11 +588,11 @@ class Duration:
     @staticmethod
     def get_base_duration_string(base_duration: Duration, short: bool = True):
         return {
-            Duration.parse("4"): ("w", "whole"),
-            Duration.parse("2"): ("h", "half"),
-            Duration.parse("1"): ("q", "quarter"),
-            Duration.parse("1/2"): ("e", "eighth"),
-            Duration.parse("1/4"): ("s", "sixteenth"),
+            Duration.parse("4"): ("whole", "w"),
+            Duration.parse("2"): ("half", "h"),
+            Duration.parse("1"): ("quarter", "q"),
+            Duration.parse("1/2"): ("eighth", "e"),
+            Duration.parse("1/4"): ("sixteenth", "s"),
         }[base_duration][int(short)]
 
     def __hash__(self):

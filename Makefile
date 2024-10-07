@@ -17,37 +17,38 @@ py:
 	poetry run ipython3 ${ARGS}
 
 lint:
-	python3 -m flake8 .
+	poetry run python3 -m flake8 beethoven
 
 isort:
-	python3 -m isort .
+	poetry run python3 -m isort .
 
 black:
 	poetry run black --line-length 105 .
 
 mypy:
-	mypy .
+	poetry run mypy ${ARGS}
 
 piprot:
-	piprot pyproject.toml
+	poetry run piprot pyproject.toml
 
 format: isort black
 sure: tests lint mypy piprot
+check: lint mypy piprot
 
 debug:
 	while :; do inotifywait -e modify -r .;clear;make ${ARGS};sleep .1 ;done
 
 tests:
-	pytest ${TEST_ARGS}
+	poetry run pytest ${TEST_ARGS}
 
 test_on:
-	pytest ${TEST_ARGS} ${ARGS}
+	poetry run pytest ${TEST_ARGS} ${ARGS}
 
 cov:
-	pytest ${TEST_ARGS} --cov=beethoven
+	poetry run pytest ${TEST_ARGS} --cov=beethoven
 
 cov_html:
-	pytest ${TEST_ARGS} --cov=beethoven --cov-report html:coverage_html
+	poetry run pytest ${TEST_ARGS} --cov=beethoven --cov-report html:coverage_html
 
 clean: build_clean
 	rm -rf coverage_html .coverage .mypy_cache .pytest_cache

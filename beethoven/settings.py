@@ -1,73 +1,93 @@
-import json
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from os import environ
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from hartware_lib.adapters.file import FileAdapter
-from hartware_lib.pydantic.field_types import BooleanFromString
-from pydantic import BaseModel, BaseSettings, Field, validator
+from hartware_lib.adapters.filesystem import FileAdapter
+from hartware_lib.serializers.dataclasses import DataClassExtraSerializer
+from hartware_lib.serializers.main import deserialize, serialize
 
 from beethoven.models import Note
-from beethoven.utils.pydantic import use_env_variables_over_config_file
 
 
-class TuningSetting(BaseModel):
+HOME_PATH = Path.home()
+BEETHOVEN_CONFIG_PATH = HOME_PATH / Path(".config", "beethoven", "config.json")
+
+
+@dataclass
+class TuningSetting:
     notes: List[Note]
 
-    @validator("notes")
-    def check_notes_count(cls, notes):
-        if 4 <= len(notes) <= 8:
-            return notes
+    def build(cls, notes: List[Note]) -> TuningSetting:
+        if all([isinstance(n, Note) for n in notes]):
+            raise AssertionError("Tuning must been given Notes")
 
-        raise AssertionError("Tuning must have between 4 and 8 strings")
+        if len(notes) < 4 or len(notes) > 8:
+            raise AssertionError("Tuning must have between 4 and 8 strings")
 
-    def dict(self, *args, **kwargs):
+        return cls(notes)
+
+    def dict(self, *args, **kwargs) -> Dict[str, Note]:
         return ",".join(map(str, self.notes))
 
     @classmethod
-    def from_str(cls, notes):
+    def build_from_str(cls, notes: List[Note]) -> TuningSetting:
         return cls(notes=Note.parse_list(notes))
 
 
-class TuningSettings(BaseModel):
-    defaults: Dict[str, TuningSetting] = {
-        "E Standard": TuningSetting.from_str("E,A,D,G,B,E"),
-        "E Standard 4str": TuningSetting.from_str("E,A,D,G"),
-        "E Standard 5str": TuningSetting.from_str("E,A,D,G,C"),
-        "D Dropped": TuningSetting.from_str("D,A,D,G,B,E"),
-        "B Standard": TuningSetting.from_str("B,E,A,D,F#,B"),
-        "B Standard 7str": TuningSetting.from_str("B,E,A,D,G,B,E"),
-        "F# Standard 8str": TuningSetting.from_str("F#,B,E,A,D,G,B,E"),
-    }
-    user_defined: Dict[str, TuningSetting] = {}
+@dataclass
+class TuningSettings:
+    user_defined: Dict[str, TuningSetting] = field(default_factory=dict)
 
-    @validator("defaults", "user_defined", pre=True)
-    def setup_tuning_objects(cls, tunings):
+    @property
+    def default(self) -> Dict[str, TuningSetting]:
         return {
-            tuning: TuningSetting.from_str(tuning_setting)
-            if isinstance(tuning_setting, str)
-            else tuning_setting
-            for tuning, tuning_setting in tunings.items()
+            "E Standard": TuningSetting.build_from_str("E,A,D,G,B,E"),
+            "E Standard 4str": TuningSetting.build_from_str("E,A,D,G"),
+            "E Standard 5str": TuningSetting.build_from_str("E,A,D,G,C"),
+            "D Dropped": TuningSetting.build_from_str("D,A,D,G,B,E"),
+            "B Standard": TuningSetting.build_from_str("B,E,A,D,F#,B"),
+            "B Standard 7str": TuningSetting.build_from_str("B,E,A,D,G,B,E"),
+            "F# Standard 8str": TuningSetting.build_from_str("F#,B,E,A,D,G,B,E"),
         }
+
+    # @validator("defaults", "user_defined", pre=True)
+    # def setup_tuning_objects(cls, tunings):
+    # TODO REMOVE COMMENTS
+    # @classmethod
+    # def build(cls, tunings: List[TuningSetting]) -> TuningSettings:
+    #     return {
+    #         tuning: TuningSetting.from_str(tuning_setting)
+    #         if isinstance(tuning_setting, str)
+    #         else tuning_setting
+    #         for tuning, tuning_setting in tunings.items()
+    #     }
 
     @property
     def tunings(self):
         return {**self.defaults, **self.user_defined}
 
 
-class MidiSettings(BaseModel):
+@dataclass
+class MidiSettings:
     selected_input: Optional[str] = None
-    opened_outputs: List[str]
+    opened_outputs: List[str] = field(default_factory=list)
 
 
-class PlayerSetting(BaseModel):
+@dataclass
+class PlayerSetting:
     instrument_name: Optional[str] = None
     instrument_style: Optional[str] = None
     output_name: Optional[str] = None
     channel: int = 0
+    mapping: str = ""
     enabled: bool = False
 
 
-class PlayerSettings(BaseModel):
+@dataclass
+class PlayerSettings:
     max_players: int
 
     metronome: PlayerSetting
@@ -75,103 +95,97 @@ class PlayerSettings(BaseModel):
     players: List[PlayerSetting]
 
 
-class SettingsConfigFile(BaseSettings):
-    path: Path = Path.home() / Path(".config", "beethoven", "config.json")
-
-    class Config:
-        case_sensitive = False
-        env_prefix = "BEETHOVEN_CONFIG_"
-
-
-class AppSettings(BaseSettings):
-    test: BooleanFromString = Field(default=False)  # type: ignore
-    debug: BooleanFromString = Field(default=False)  # type: ignore
-
-    config_file: SettingsConfigFile = Field(default_factory=SettingsConfigFile)
-
-    tuning: TuningSettings
+@dataclass
+class AppSettings:
+    tunings: TuningSettings
     midi: MidiSettings
     player: PlayerSettings
 
-    class Config:
-        case_sensitive = False
-        env_prefix = "BEETHOVEN_"
-        customise_sources = use_env_variables_over_config_file
+    test: bool = False
+    debug: bool = False
 
+    _prefix = "beethoven"
 
-def get_local_settings() -> Optional[AppSettings]:
-    settings_config_file = SettingsConfigFile()
-
-    settings_file = FileAdapter(file_path=settings_config_file.path)
-
-    if settings_file.exists():
-        return AppSettings(config_file=settings_config_file, **settings_file.read_json())
-
-    return None
-
-
-def get_default_settings():
-    app_settings = AppSettings(
-        tuning=TuningSettings(),
-        midi=MidiSettings(opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]),
-        player=PlayerSettings(
-            max_players=4,
-            metronome=PlayerSetting(
-                instrument_name="Metronome",
-                output_name="Beethoven:metronome",
-                channel=0,
-                enabled=True,
+    @classmethod
+    def get_default(cls) -> AppSettings:
+        return cls(
+            tunings=TuningSettings(),
+            midi=MidiSettings(opened_outputs=["Beethoven", "Beethoven:preview", "Beethoven:metronome"]),
+            player=PlayerSettings(
+                max_players=4,
+                metronome=PlayerSetting(
+                    instrument_name="Metronome",
+                    output_name="Beethoven:metronome",
+                    channel=0,
+                    enabled=True,
+                ),
+                preview=PlayerSetting(
+                    instrument_name="Piano",
+                    output_name="Beethoven:preview",
+                    channel=0,
+                    enabled=True,
+                ),
+                players=[],
             ),
-            preview=PlayerSetting(
-                instrument_name="Piano",
-                output_name="Beethoven:preview",
-                channel=0,
-                enabled=True,
-            ),
-            players=[],
-        ),
-    )
+        )
 
-    return app_settings
+    @classmethod
+    def load(cls, config_file: Path = BEETHOVEN_CONFIG_PATH) -> AppSettings:
+        settings_file = FileAdapter(path=config_file)
 
+        settings = None
+        if settings_file.exists:
+            try:
+                settings = deserialize(settings_file.read(), extra_serializers=[
+                    DataClassExtraSerializer(
+                        AppSettings,
+                        TuningSettings,
+                        TuningSetting,
+                        MidiSettings,
+                        PlayerSettings,
+                        PlayerSetting
+                    )
+                ])
+            except Exception as exc:
+                print(exc)
 
-def get_settings() -> AppSettings:
-    return get_local_settings() or get_default_settings()
+        if not settings:
+            settings = cls.get_default()
 
+        if "BEETHOVEN_DEBUG" in environ:
+            settings.debug = environ["BEETHOVEN_DEBUG"].lower() in ("1", "true", "yes")
+        if "BEETHOVEN_TEST" in environ:
+            settings.test = environ["BEETHOVEN_TEST"].lower() in ("1", "true", "yes")
 
-def setup_settings():
-    local_settings = get_local_settings()
+        return settings
 
-    if local_settings:
-        return local_settings
+    @classmethod
+    def load_default(cls) -> AppSettings:
+        settings = cls.get_default()
 
-    settings = get_default_settings()
+        if "BEETHOVEN_DEBUG" in environ:
+            settings.debug = environ["BEETHOVEN_DEBUG"].lower() in ("1", "true", "yes")
+        if "BEETHOVEN_TEST" in environ:
+            settings.test = environ["BEETHOVEN_TEST"].lower() in ("1", "true", "yes")
 
-    save_settings(settings)
+        return settings
 
-    return settings
+    def save(self, config_file: Path = BEETHOVEN_CONFIG_PATH) -> None:
+        settings_file = FileAdapter(path=config_file)
 
+        if not settings_file.directory.exists:
+            settings_file.create_parent_dir()
 
-def serialize_settings(settings: AppSettings) -> str:
-    settings_dict = settings.dict(exclude={"config_file"})
+        serialized_settings = serialize(
+            self, indent=4, extra_serializers=[DataClassExtraSerializer()]
+        )
 
-    return json.dumps(settings_dict, indent=2)
+        settings_file.write(serialized_settings)
 
+    @staticmethod
+    def delete(config_file: Path = BEETHOVEN_CONFIG_PATH) -> None:
+        if config_file:
+            settings_file = FileAdapter(path=config_file)
 
-def save_settings(settings: AppSettings):
-    settings_file = FileAdapter(file_path=settings.config_file.path)
-
-    if not settings_file.file_path.parent.exists():
-        settings_file.create_parent_dir()
-
-    serialized_settings = serialize_settings(settings)
-
-    settings_file.save(serialized_settings)
-
-
-def delete_settings(settings: AppSettings):
-    if settings.config_file.path:
-        settings_file = FileAdapter(file_path=settings.config_file.path)
-
-        if settings_file.exists():
-            settings_file.delete()
+            if settings_file.exists:
+                settings_file.delete()

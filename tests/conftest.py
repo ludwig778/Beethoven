@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from hartware_lib.adapters.directory import DirectoryAdapter
+from hartware_lib.adapters.filesystem import DirectoryAdapter, FileAdapter
 from pytest import fixture
 
 from beethoven.adapters.factory import get_adapters
-from beethoven.adapters.local_file import LocalFileAdapter
-from tests.mocks.midi_adapter import MockedInput, MockedMidiAdapter, MockedOutput
+from tests.mocks.midi_adapter import (MockedInput, MockedMidiAdapter,
+                                      MockedOutput)
 
 
 @fixture
@@ -26,14 +26,14 @@ def mock_midi_adapter(monkeypatch):
 
 @fixture(scope="function", autouse=True)
 def clean_test_directory_():
-    test_directory = DirectoryAdapter(dir_path=Path(".testing"))
-    test_directory.create_dir()
+    test_directory = DirectoryAdapter(path=Path(".testing"))
+    test_directory.create()
 
     yield
 
-    test_directory.delete_dir()
+    test_directory.delete()
 
 
 @fixture(scope="session")
 def local_file_adapter():
-    return LocalFileAdapter(dir_path=Path("tests", "fixtures", "data"))
+    return FileAdapter(path=Path("tests", "fixtures", "data"))

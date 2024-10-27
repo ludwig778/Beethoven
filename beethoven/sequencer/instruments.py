@@ -145,15 +145,16 @@ class BasicDrum(Drum):
 class JazzDrum(Drum):
     style = "Jazz"
 
-    def play(self, part):
+    def play(self):
         for cursor, note in NoteSorter(
-            kick=note_sequencer(eighth, self.get_note(self.KICK), "+......+"),
-            snare=note_sequencer(eighth, self.get_note(self.SNARE), "..+..+.+"),
-            close_hh=note_sequencer(quarter_triplet, self.get_note(self.RIDE), "+.+"),
-            open_hh=note_sequencer(quarter_triplet, self.get_note(self.OPEN_HH), "..........+." + "." * 12),
-            low_tom=note_sequencer(quarter_triplet, self.get_note(self.LOW_TOM), "." * 12 + "..........+."),
-            floor_tom=note_sequencer(quarter_triplet, self.get_note(self.FLOOR_TOM), "." * 12 + "...........+"),
+            kick=note_sequencer(eighth, [self.get_note(self.KICK)], "+......+"),
+            snare=note_sequencer(eighth, [self.get_note(self.SNARE)], "..+..+.+"),
+            ride=note_sequencer(quarter_triplet, [self.get_note(self.RIDE)], "+.+"),
+            close_hh=note_sequencer(quarter_triplet, [self.get_note(self.CLOSED_HH, velocity=44)], "...........+" + "." * 12),
+            open_hh=note_sequencer(quarter_triplet, [self.get_note(self.OPEN_HH)], "..........+." + "." * 12),
+            low_tom=note_sequencer(quarter_triplet, [self.get_note(self.LOW_TOM)], "." * 12 + "..........+."),
+            floor_tom=note_sequencer(quarter_triplet, [self.get_note(self.FLOOR_TOM)], "." * 12 + "...........+"),
         ):
-            yield part.start_cursor + cursor, note
+            yield self.part.start_cursor + cursor, note
 
         return

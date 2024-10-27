@@ -23,7 +23,7 @@ class GuitarDisplayDialog(QDialog):
 
         self.setWindowTitle("Guitar Display")
 
-        self.tuning_settings = manager.settings.tuning
+        self.tuning_settings = manager.settings.tunings
 
         self.graphic = GuitarDisplay(
             tuning=self.tuning_settings.defaults["E Standard"],

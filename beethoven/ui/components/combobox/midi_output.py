@@ -1,5 +1,3 @@
-from typing import Optional
-
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox
 
@@ -10,7 +8,7 @@ from beethoven.ui.managers import AppManager
 class MidiOutputComboBox(QComboBox):
     value_changed = Signal(str)
 
-    def __init__(self, *args, manager: AppManager, value: Optional[str], **kwargs):
+    def __init__(self, *args, manager: AppManager, value: str | None, **kwargs):
         super(MidiOutputComboBox, self).__init__(*args, **kwargs)
 
         self.manager = manager

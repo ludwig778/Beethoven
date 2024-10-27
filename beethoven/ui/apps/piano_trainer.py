@@ -1,6 +1,4 @@
 import logging
-from random import shuffle
-from typing import Optional
 
 from PySide6.QtWidgets import QWidget
 
@@ -8,7 +6,8 @@ from beethoven.models import Chord
 from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.frame import FramedChord, FramedNote
-from beethoven.ui.components.selectors import ChordMultipleSelector, NoteMultipleSelector
+from beethoven.ui.components.selectors import (ChordMultipleSelector,
+                                               NoteMultipleSelector)
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
@@ -21,7 +20,7 @@ class PianoTrainerWidget(QWidget):
 
         self.manager = manager
 
-        self.notes_checker: Optional[NotesContainerChecker] = None
+        self.notes_checker: NotesContainerChecker | None = None
 
         self.playing_notes_frame = FramedNote()
         self.target_chord_frame = FramedChord()
@@ -73,6 +72,10 @@ class PianoTrainerWidget(QWidget):
         logger.info("teardown")
 
     def notes_changed(self, notes):
+        print("notes_changed", notes)
+
+        notes = dict(notes)
+
         self.playing_notes_frame.set_notes(notes.values())
 
         if not self.notes_checker or self.notes_checker.done:
@@ -83,13 +86,17 @@ class PianoTrainerWidget(QWidget):
                 self.target_chord_frame.clear()
                 self.start_button.setChecked(False)
             elif isinstance(self.notes_checker.current, Chord):
+                print(self.notes_checker.current)
                 self.target_chord_frame.set_chord(self.notes_checker.current)
 
     def start(self, *args):
+        print("Start", args)
+        """
         if not self.start_button.isChecked():
             self.stop()
 
             return
+        """
 
         notes = self.note_selector.get_checked_notes()
         chord_names = self.chord_selector.get_checked_texts()
@@ -100,15 +107,17 @@ class PianoTrainerWidget(QWidget):
             return
 
         chord_list = Chord.chord_product(notes, chord_names)
-        shuffle(chord_list)
+        # shuffle(chord_list)
 
         self.notes_checker = NotesContainerChecker(
             notes_containers=chord_list, type_check=NoteCheckerType.BY_BASE_NOTE
         )
 
         if isinstance(self.notes_checker.current, Chord):
+            print(self.notes_checker.current)
             self.target_chord_frame.set_chord(self.notes_checker.current)
 
     def stop(self):
+        print("Stop")
         self.target_chord_frame.clear()
         self.start_button.setChecked(False)

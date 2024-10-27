@@ -1,16 +1,17 @@
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QLabel, QWidget
 
 from beethoven.helpers.sequencer import get_chord_from_items
 from beethoven.models import Chord, ChordItem, Degree, HarmonyItem, Note, Scale
-from beethoven.ui.layouts import LayoutItems, Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (LayoutItems, Spacing, Stretch,
+                                  horizontal_layout, vertical_layout)
 from beethoven.utils.alterations import get_degree_alteration_str_from_int
 
 
 class FramedText(QFrame):
-    def __init__(self, *args, upper_text: Optional[str] = None, **kwargs):
+    def __init__(self, *args, upper_text: str | None = None, **kwargs):
         super(FramedText, self).__init__(*args, **kwargs)
 
         self.setAttribute(Qt.WA_StyledBackground)
@@ -126,7 +127,7 @@ class HarmonyChordItemFrames(QWidget):
     def update_frames(
         self,
         current_items: Tuple[HarmonyItem, ChordItem],
-        next_items: Optional[Tuple[HarmonyItem, ChordItem]] = None,
+        next_items: Tuple[HarmonyItem, ChordItem] | None = None,
         separator: str = " \u2794 ",
     ):
         scale_roots = [current_items[0].scale.tonic]

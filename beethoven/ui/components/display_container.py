@@ -18,7 +18,7 @@ T = TypeVar("T", HarmonyItem, ChordItem)
 
 class DisplayContainerWidget(QWidget):
     def __init__(
-        self, *args, manager: AppManager, harmony_item: HarmonyItem, chord_item: ChordItem, **kwargs
+        self, *args, manager: AppManager, harmony_item: HarmonyItem, chord_item: ChordItem, parent: QWidget | None = None, **kwargs
     ):
         super(DisplayContainerWidget, self).__init__(*args, **kwargs)
 
@@ -29,12 +29,12 @@ class DisplayContainerWidget(QWidget):
         self.players_display_button = PushPullButton("Players", object_name="players_button")
 
         self.guitar_display_dialog = GuitarDisplayDialog(
-            manager=manager, harmony_item=harmony_item, chord_item=chord_item, parent=self
+            manager=manager, harmony_item=harmony_item, chord_item=chord_item, parent=parent
         )
         self.piano_display_dialog = PianoDisplayDialog(
-            harmony_item=harmony_item, chord_item=chord_item, parent=self
+            harmony_item=harmony_item, chord_item=chord_item, parent=parent
         )
-        self.players_dialog = PlayerDialog(manager=manager, parent=self)
+        self.players_dialog = PlayerDialog(manager=manager, parent=parent)
 
         self.guitar_display_button.connect_to_dialog(self.guitar_display_dialog)
         self.piano_display_button.connect_to_dialog(self.piano_display_dialog)

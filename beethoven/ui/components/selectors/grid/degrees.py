@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
@@ -14,11 +14,11 @@ from beethoven.ui.utils import block_signal
 class DegreeGridSelector(QWidget):
     value_changed = Signal(Degree)
 
-    def __init__(self, *args, degree: Optional[Degree] = None, **kwargs):
+    def __init__(self, *args, degree: Degree | None = None, **kwargs):
         super(DegreeGridSelector, self).__init__(*args, **kwargs)
 
         self.degree_buttons: Dict[Degree, PushPullButton] = {}
-        self._current_button: Optional[PushPullButton] = None
+        self._current_button: PushPullButton | None = None
 
         layout_items: LayoutItems = []
 

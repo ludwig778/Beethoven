@@ -1,14 +1,18 @@
-from typing import List, Tuple, Type, TypeVar, Union
+from dataclasses import dataclass
+from typing import Any, List, Tuple, Type, TypeVar, Union
 
-from pydantic import BaseModel
-from PySide6.QtWidgets import QHBoxLayout, QStackedLayout, QVBoxLayout, QWidget
+# from pydantic import BaseModel
+from PySide6.QtWidgets import (QHBoxLayout, QLayoutItem, QStackedLayout,
+                               QVBoxLayout, QWidget)
 
 
-class Stretch(BaseModel):
+@dataclass
+class Stretch:
     pass
 
 
-class Spacing(BaseModel):
+@dataclass
+class Spacing:
     size: int
 
 
@@ -54,11 +58,11 @@ def layout_widget_factory(
     return layout
 
 
-def horizontal_layout(layout_items: LayoutItems, **kwargs) -> QHBoxLayout:
+def horizontal_layout(layout_items: LayoutItems, **kwargs: Any) -> QHBoxLayout:
     return layout_widget_factory(QHBoxLayout, layout_items, **kwargs)
 
 
-def vertical_layout(layout_items: LayoutItems, **kwargs) -> QVBoxLayout:
+def vertical_layout(layout_items: LayoutItems, **kwargs: Any) -> QVBoxLayout:
     return layout_widget_factory(QVBoxLayout, layout_items, **kwargs)
 
 
@@ -75,3 +79,18 @@ def stacked_layout(
         layout.addWidget(layout_item)  # type: ignore
 
     return layout
+
+
+def clear_layout(layout: Union[BoxLayout, QLayoutItem]) -> None:
+    for i in reversed(range(layout.count())):
+        item: QLayoutItem = layout.takeAt(i)
+
+        inner_layout: QLayoutItem = item.layout()
+        if inner_layout:
+            clear_layout(inner_layout)
+
+            continue
+
+        widget: QWidget = item.widget()
+        if widget:
+            widget.deleteLater()

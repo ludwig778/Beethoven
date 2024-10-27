@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
@@ -13,7 +13,7 @@ from beethoven.ui.utils import block_signal
 class ExtensionsGridSelector(QWidget):
     value_changed = Signal(object)
 
-    def __init__(self, *args, extensions: Optional[List[Interval]], **kwargs):
+    def __init__(self, *args, extensions: List[Interval] | None, **kwargs):
         super(ExtensionsGridSelector, self).__init__(*args, **kwargs)
 
         self._values: Set[Interval] = set()
@@ -53,10 +53,10 @@ class ExtensionsGridSelector(QWidget):
         self.setLayout(horizontal_layout(layout_items))
 
     @property
-    def value(self) -> Optional[List[Interval]]:
+    def value(self) -> List[Interval] | None:
         return list(sorted(self._values)) if self._values else None
 
-    def set(self, extensions: Optional[List[Interval]]):
+    def set(self, extensions: List[Interval] | None):
         self._values = set(extensions) if extensions else set()
 
         new_buttons = set()

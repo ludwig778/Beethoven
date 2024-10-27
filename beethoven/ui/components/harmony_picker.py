@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QLabel, QWidget
 
 from beethoven.models import Bpm, HarmonyItem
 from beethoven.ui.components.scale_picker import ScalePicker
-from beethoven.ui.components.selectors.time_signature import TimeSignatureSelector
+from beethoven.ui.components.selectors.time_signature import \
+    TimeSignatureSelector
 from beethoven.ui.components.spinbox import BpmSpinBox
 from beethoven.ui.constants import C_MAJOR4
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout

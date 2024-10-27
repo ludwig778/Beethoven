@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
@@ -14,11 +14,11 @@ from beethoven.ui.utils import block_signal
 class RootGridSelector(QWidget):
     value_changed = Signal(Note)
 
-    def __init__(self, *args, root: Optional[Note] = None, **kwargs):
+    def __init__(self, *args, root: Note | None = None, **kwargs):
         super(RootGridSelector, self).__init__(*args, **kwargs)
 
         self.root_buttons: Dict[Note, PushPullButton] = {}
-        self._current_button: Optional[PushPullButton] = None
+        self._current_button: PushPullButton | None = None
 
         layout_items: LayoutItems = []
 
@@ -37,7 +37,7 @@ class RootGridSelector(QWidget):
         self.setLayout(horizontal_layout(layout_items))
 
     def set(self, root: Note):
-        root_button = self.root_buttons[root]
+        root_button = self.root_buttons[root.remove_octave()]
 
         if self._current_button and self._current_button != root_button:
             with block_signal([self._current_button]):

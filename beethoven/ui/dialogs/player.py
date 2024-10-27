@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QComboBox, QDialog, QLabel, QVBoxLayout, QWidget
@@ -7,16 +6,23 @@ from PySide6.QtWidgets import QComboBox, QDialog, QLabel, QVBoxLayout, QWidget
 from beethoven.sequencer.registry import RegisteredPlayerMeta
 from beethoven.settings import PlayerSetting
 from beethoven.ui.components.buttons import Button, PushPullButton
-from beethoven.ui.components.combobox import MidiChannelComboBox, MidiOutputComboBox
+from beethoven.ui.components.combobox import (MidiChannelComboBox,
+                                              MidiOutputComboBox)
+from beethoven.ui.dialogs.mapping import MappingDialog
 from beethoven.ui.dialogs.midi import MidiDialog
-from beethoven.ui.layouts import LayoutItems, Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (LayoutItems, Spacing, Stretch,
+                                  horizontal_layout, vertical_layout)
 from beethoven.ui.managers import AppManager
 from beethoven.ui.utils import block_signal
+
+# from beethoven.sequencer.players import BasePlayer
+
 
 logger = logging.getLogger("dialog.players")
 
 
 class PlayerRow(QWidget):
+    player_changed = Signal()
     deleted = Signal(QObject)
 
     def __init__(
@@ -44,6 +50,10 @@ class PlayerRow(QWidget):
         )
         self.channel_combobox = MidiChannelComboBox(midi_channel=self.settings.channel)
 
+        self.mapping_button = PushPullButton("Mapping", object_name="mapping_button")
+        self.mapping_dialog = MappingDialog(manager=manager, parent=self)
+        self.mapping_button.connect_to_dialog(self.mapping_dialog)
+
         self.set_instruments()
         self.set_instrument_styles()
 
@@ -57,6 +67,7 @@ class PlayerRow(QWidget):
             self.instrument_style_combobox,
             self.output_name_combobox,
             self.channel_combobox,
+            self.mapping_button,
         ]
 
         if not self.system_player:
@@ -75,13 +86,29 @@ class PlayerRow(QWidget):
 
         self.setLayout(horizontal_layout(layout_items))
 
+    def refresh_mapping(self):
+        instrument = self.get_current_instrument()
+
+        self.mapping_button.setEnabled(bool(instrument and instrument.mapping is not None))
+
+        if instrument and instrument.mapping:
+            self.mapping_dialog.set_mapping(instrument.mapping)
+
+    def get_current_instrument(self) -> RegisteredPlayerMeta | None:
+        instrument_name = self.instrument_name_combobox.currentText()
+        instrument_style = self.instrument_style_combobox.currentText()
+
+        if instrument_name and instrument_style:
+            return RegisteredPlayerMeta.get_instrument_style(instrument_name, instrument_style)
+
+        return None
+
     def set_instruments(self):
         self.instrument_name_combobox.clear()
 
         self.instrument_name_combobox.addItem("")
 
         instrument_names = RegisteredPlayerMeta.get_instrument_names()
-
         for instrument in instrument_names:
             self.instrument_name_combobox.addItem(instrument)
 
@@ -91,10 +118,12 @@ class PlayerRow(QWidget):
     def set_instrument_styles(self):
         self.instrument_style_combobox.clear()
 
-        if not self.settings.instrument_name:
-            self.instrument_style_combobox.addItem("")
+        self.instrument_style_combobox.addItem("")
 
-            return
+        # if not self.settings.instrument_name:
+        #     self.instrument_style_combobox.addItem("")
+        #
+        #     return
 
         player_style_names = list(
             RegisteredPlayerMeta.get_instrument_styles(self.settings.instrument_name).keys()
@@ -105,7 +134,9 @@ class PlayerRow(QWidget):
         if self.settings.instrument_style and self.settings.instrument_style in player_style_names:
             self.instrument_style_combobox.setCurrentText(self.settings.instrument_style)
 
-    def handle_instrument_name_change(self, name: Optional[str]):
+        self.refresh_mapping()
+
+    def handle_instrument_name_change(self, name: str | None):
         logger.info(f"instrument name set to {name or 'none'}")
 
         self.settings.instrument_name = name or None
@@ -116,13 +147,17 @@ class PlayerRow(QWidget):
         if self.instrument_style_combobox.currentText() != self.settings.instrument_style:
             self.settings.instrument_style = self.instrument_style_combobox.currentText() or None
 
+        self.player_changed.emit()
         self.manager.configuration_changed.emit()
 
-    def handle_instrument_style_change(self, name: Optional[str]):
+    def handle_instrument_style_change(self, name: str | None):
         logger.info(f"instrument style set to {name or 'none'}")
 
         self.settings.instrument_style = name or None
 
+        self.refresh_mapping()
+
+        self.player_changed.emit()
         self.manager.configuration_changed.emit()
 
     def setting_changed(self):
@@ -137,7 +172,7 @@ class PlayerRow(QWidget):
 
 
 class PlayerDialog(QDialog):
-    player_changed = Signal(PlayerSetting)
+    player_changed = Signal()
 
     def __init__(self, *args, manager: AppManager, **kwargs):
         super(PlayerDialog, self).__init__(*args, **kwargs)
@@ -240,7 +275,7 @@ class PlayerDialog(QDialog):
             )
         )
 
-    def add_player(self, player_setting: Optional[PlayerSetting] = None, *args):
+    def add_player(self, player_setting: PlayerSetting | None = None, *args):
         logger.info("add player")
 
         player = self.set_player(player_setting)
@@ -249,7 +284,7 @@ class PlayerDialog(QDialog):
 
         return player
 
-    def set_player(self, player_setting: Optional[PlayerSetting] = None, *args):
+    def set_player(self, player_setting: PlayerSetting | None = None, *args):
         if not self.room_for_player():
             return
 
@@ -262,6 +297,8 @@ class PlayerDialog(QDialog):
             manager=self.manager,
             settings=player_setting,
         )
+
+        player_row.player_changed.connect(self.player_changed.emit)
         player_row.deleted.connect(self.delete_player)
 
         self.player_list.addWidget(player_row)

@@ -1,17 +1,23 @@
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QWidget
 
 from beethoven.models import ChordItem, Degree, DurationItem, Interval, Note
-from beethoven.ui.components.combobox.degree_alteration import DegreeAlterationComboBox
-from beethoven.ui.components.selectors import ChordGridSelector, DegreeGridSelector, RootGridSelector
+from beethoven.ui.components.combobox.degree_alteration import \
+    DegreeAlterationComboBox
+from beethoven.ui.components.selectors import (ChordGridSelector,
+                                               DegreeGridSelector,
+                                               RootGridSelector)
 from beethoven.ui.components.selectors.duration import DurationSelector
-from beethoven.ui.components.selectors.grid.base_note import BaseNoteGridSelector
-from beethoven.ui.components.selectors.grid.extensions import ExtensionsGridSelector
+from beethoven.ui.components.selectors.grid.base_note import \
+    BaseNoteGridSelector
+from beethoven.ui.components.selectors.grid.extensions import \
+    ExtensionsGridSelector
 from beethoven.ui.components.spinbox import InversionSpinBox
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 from beethoven.ui.utils import block_signal
 
 logger = logging.getLogger("chord_picker")
@@ -111,6 +117,7 @@ class ChordPicker(QWidget):
                 self.root_grid_selector,
                 self.degree_grid_selector,
                 self.degree_alteration_combobox,
+                self.duration_selector,
                 self.inversion_spinbox,
                 self.base_note_grid_selector,
                 self.extensions_grid_selector,
@@ -196,14 +203,14 @@ class ChordPicker(QWidget):
 
         self.value_changed.emit(self.value)
 
-    def handle_base_note_change(self, base_note: Optional[Note] = None):
+    def handle_base_note_change(self, base_note: Note | None = None):
         logger.debug(str(base_note))
 
         self.value.base_note = base_note
 
         self.value_changed.emit(self.value)
 
-    def handle_extensions_change(self, extensions: Optional[List[Interval]] = None):
+    def handle_extensions_change(self, extensions: List[Interval] | None = None):
         logger.debug(",".join([str(e) for e in extensions]) if extensions else None)
 
         self.value.extensions = extensions

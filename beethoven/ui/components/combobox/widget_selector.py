@@ -1,11 +1,12 @@
 import logging
-from typing import Dict
+from typing import List, Tuple
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QWidget
 
 from beethoven.ui.components.widget_stack import StackedWidget
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 
 logger = logging.getLogger("widget_selector")
 
@@ -13,13 +14,17 @@ logger = logging.getLogger("widget_selector")
 class WidgetSelectorComboBox(QWidget):
     value_changed = Signal()
 
-    def __init__(self, *args, widgets: Dict[str, QWidget], **kwargs):
+    def __init__(self, *args, widgets: List[Tuple[str, QWidget]], selected_index: int = 0, **kwargs):
         super(WidgetSelectorComboBox, self).__init__(*args, **kwargs)
 
         self.combobox = QComboBox()
-        self.combobox.addItems(list(widgets.keys()))
+        # self.combobox.addItems(list(widgets.keys()))
+        widget_objects = []
+        for widget_name, widget_object in widgets:
+            self.combobox.addItem(widget_name)
+            widget_objects.append(widget_object)
 
-        self.stack = StackedWidget(widgets=widgets)
+        self.stack = StackedWidget(widgets=widget_objects)
 
         self.combobox.currentIndexChanged.connect(self.handle_widget_change)
 

@@ -4,7 +4,8 @@ from typing import Tuple
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
 
 from beethoven.ui.components.buttons import Button
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 from beethoven.ui.managers.app import AppManager
 
 logger = logging.getLogger("dialog.midi_add")

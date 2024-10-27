@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -27,7 +26,7 @@ class IconButton(Button):
 
 class PushPullButton(Button):
     def __init__(
-        self, text: str, *args, pressed: bool = False, pressed_text: Optional[str] = None, **kwargs
+        self, text: str, *args, pressed: bool = False, pressed_text: str | None = None, **kwargs
     ):
         super(PushPullButton, self).__init__(text, *args, **kwargs)
 

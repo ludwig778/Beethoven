@@ -8,10 +8,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QListWidget, QListWidgetItem, QWidget
 
 from beethoven.adapters.midi import MidiAdapter
-from beethoven.models import ChordItem, Degree, DurationItem, HarmonyItem, Scale
-from beethoven.sequencer.players import BasePlayer
-from beethoven.sequencer.registry import RegisteredPlayer
-from beethoven.settings import PlayerSetting
+from beethoven.models import (ChordItem, Degree, Duration, DurationItem,
+                              HarmonyItem, Scale)
+# from beethoven.sequencer.players import BasePlayer
+# from beethoven.sequencer.registry import RegisteredPlayer
+# from beethoven.settings import PlayerSetting
 from beethoven.ui.constants import DEFAULT_BPM, DEFAULT_TIME_SIGNATURE
 
 
@@ -38,31 +39,6 @@ def get_checked_items(list_widget: QListWidget) -> List[QListWidgetItem]:
     return checked_items
 
 
-# TODO: Set as an helper, maybe ?
-def setup_players(midi_adapter: MidiAdapter, player_settings: List[PlayerSetting]) -> List[BasePlayer]:
-    players = []
-
-    for player_setting in player_settings:
-        player_class = RegisteredPlayer.get_instrument_style(
-            player_setting.instrument_name, player_setting.instrument_style
-        )
-
-        if not player_class:
-            continue
-
-        player = player_class()  # type: ignore
-
-        if player_setting.output_name:
-            player.setup_midi(
-                output=midi_adapter.open_output(player_setting.output_name),
-                channel=player_setting.channel,
-            )
-
-        players.append(player)
-
-    return players
-
-
 def run_method_on_widgets(method: Callable, widgets: List[QWidget], *args, **kwargs) -> None:
     for widget in widgets:
         method(widget, *args, **kwargs)
@@ -81,8 +57,83 @@ def get_default_harmony_item() -> HarmonyItem:
     )
 
 
+"""
+        chord_items=[
+            ChordItem(
+                #root=Degree.parse("bbII"),
+                root=Degree.parse("II"),
+                #root=Degree.parse("##II"),
+                #root=Degree.parse("I"),
+                name="7",
+                duration_item=DurationItem(),
+                #inversion=2,
+            ),
+            ChordItem(
+                root=Degree.parse("V"),
+                name="",
+                duration_item=DurationItem(),
+            ),
+            ChordItem(
+                root=Degree.parse("I"),
+                name="",
+                duration_item=DurationItem(),
+            ),
+        ],
+    )
+
 def get_default_harmony_items() -> List[HarmonyItem]:
-    return [get_default_harmony_item()]
+    return [get_default_harmony_item(), get_default_harmony_item()]
+"""
+
+
+def get_default_harmony_items() -> List[HarmonyItem]:
+    # return [get_default_harmony_item()]
+    return [
+        HarmonyItem(
+            scale=Scale.parse("C4_major"),
+            bpm=DEFAULT_BPM,
+            time_signature=DEFAULT_TIME_SIGNATURE,
+            chord_items=[
+                ChordItem(
+                    root=Degree.parse("II"),
+                    name="",
+                    duration_item=DurationItem(base_duration=Duration.parse("4")),
+                ),
+                ChordItem(
+                    root=Degree.parse("V"),
+                    name="",
+                    duration_item=DurationItem(),
+                ),
+                ChordItem(
+                    root=Degree.parse("I"),
+                    name="",
+                    duration_item=DurationItem(),
+                ),
+            ],
+        ),
+        HarmonyItem(
+            scale=Scale.parse("G4_mixolydian"),
+            bpm=DEFAULT_BPM,
+            time_signature=DEFAULT_TIME_SIGNATURE,
+            chord_items=[
+                ChordItem(
+                    root=Degree.parse("IV"),
+                    name="",
+                    duration_item=DurationItem(),
+                ),
+                ChordItem(
+                    root=Degree.parse("VI"),
+                    name="",
+                    duration_item=DurationItem(),
+                ),
+                ChordItem(
+                    root=Degree.parse("III"),
+                    name="",
+                    duration_item=DurationItem(),
+                ),
+            ],
+        ),
+    ]
 
 
 def get_harmony_items_from_list(data_items):

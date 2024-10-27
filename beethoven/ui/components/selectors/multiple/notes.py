@@ -1,5 +1,7 @@
-from beethoven.ui.components.selectors.multiple.base import BaseMultipleSelector
-from beethoven.ui.constants import NOTE_LABELS, NOTES_DATA, SELECTED_NOTE_LABELS
+from beethoven.ui.components.selectors.multiple.base import \
+    BaseMultipleSelector
+from beethoven.ui.constants import (NOTE_LABELS, NOTES_DATA,
+                                    SELECTED_NOTE_LABELS)
 
 
 class NoteMultipleSelector(BaseMultipleSelector):

@@ -3,7 +3,7 @@ import logging
 from PySide6.QtCore import QObject, Signal
 
 from beethoven.adapters.factory import Adapters
-from beethoven.settings import AppSettings, save_settings, serialize_settings
+from beethoven.settings import AppSettings
 from beethoven.ui.managers.midi import MidiManager
 from beethoven.ui.managers.sequencer import SequencerManager
 
@@ -19,7 +19,7 @@ class AppManager(QObject):
         self.adapters = adapters
 
         self.midi = MidiManager(settings=self.settings, midi_adapter=self.adapters.midi)
-        self.sequencer = SequencerManager(
+        self.sequencer_manager = SequencerManager(
             settings=self.settings, adapters=self.adapters, midi_manager=self.midi
         )
 
@@ -29,9 +29,9 @@ class AppManager(QObject):
         logger.info("configuration changed")
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug(serialize_settings(self.settings))
+            logger.debug(self.settings.serialize())
 
-        save_settings(self.settings)
+        self.settings.save()
 
     def close(self):
         logger.debug("shutting down...")

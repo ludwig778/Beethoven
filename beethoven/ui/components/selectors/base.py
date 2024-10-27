@@ -7,7 +7,7 @@ from beethoven.indexes.models import IndexDataModels, ScaleData
 
 
 class BaseSelector(QTreeWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(BaseSelector, self).__init__(*args, **kwargs)
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

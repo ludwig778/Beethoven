@@ -1,15 +1,16 @@
+"""
 import logging
 from copy import deepcopy
 from dataclasses import replace
 from random import shuffle
-from typing import List, Optional, Tuple, TypeVar
+from typing import List, Tuple, TypeVar
 
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QComboBox, QLabel, QWidget
 
 from beethoven.helpers.sequencer import system_tick_logger
-from beethoven.models import Bpm, ChordItem, HarmonyItem, Note, Scale, TimeSignature
-from beethoven.sequencer.runner import SequencerItemIterator, SequencerParams
+from beethoven.models import (Bpm, ChordItem, HarmonyItem, Note, Scale,
+                              TimeSignature)
 from beethoven.types import SequencerItems
 from beethoven.ui.components.composer_grid import ChordGrid
 from beethoven.ui.components.display_container import DisplayContainerWidget
@@ -18,9 +19,10 @@ from beethoven.ui.components.harmony_picker import HarmonyPicker
 from beethoven.ui.components.sequencer import SequencerWidget
 from beethoven.ui.constants import ROOTS_WITH_SHARPS
 from beethoven.ui.dialogs.chord_picker import ChordPickerDialog
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 from beethoven.ui.managers import AppManager
-from beethoven.ui.utils import get_default_harmony_item
+from beethoven.ui.utils import block_signal, get_default_harmony_item
 
 logger = logging.getLogger("app.harmony_trainer")
 
@@ -103,7 +105,7 @@ class HarmonyItemGenerator:
             scale=replace(self.original_item.scale, tonic=self._tonics[previous_index]),
         )
 
-    def setup(self, scale: Optional[Scale] = None, generator_name: Optional[str] = None):
+    def setup(self, scale: Scale | None = None, generator_name: str | None = None):
         if scale:
             self.original_item = replace(self.original_item, scale=scale)
             self.current_item = self.original_item
@@ -170,12 +172,13 @@ class HarmonyTrainerWidget(QWidget):
 
         self.chord_grid = ChordGrid(chord_items=self.harmony_item_generator.current_item.chord_items)
         self.chord_picker = ChordPickerDialog(
-            chord_item=self.harmony_item_generator.current_item.chord_items[0]
+            chord_item=self.harmony_item_generator.current_item.chord_items[0], parent=self,
         )
         self.display_container = DisplayContainerWidget(
             manager=self.manager,
             harmony_item=self.harmony_item_generator.current_item,
             chord_item=self.chord_grid.current_item,
+            parent=self,
         )
         self.harmony_picker = HarmonyPicker()
 
@@ -254,6 +257,8 @@ class HarmonyTrainerWidget(QWidget):
             on_grid_end=self.manager.sequencer.grid_ended.emit,
         )
 
+        self.display_container.players_dialog.player_changed.connect(self.reset_players)
+
         self.manager.sequencer.items_change.connect(self.handle_items_change)
         self.manager.sequencer.setup(self.params)
         self.manager.sequencer.grid_stop.connect(self.reset)
@@ -264,6 +269,8 @@ class HarmonyTrainerWidget(QWidget):
         logger.info("teardown")
 
         self.sequencer_widget.teardown()
+
+        self.display_container.players_dialog.player_changed.disconnect(self.reset_players)
 
         self.manager.sequencer.grid_stop.disconnect(self.reset)
         self.manager.sequencer.items_change.disconnect(self.handle_items_change)
@@ -283,6 +290,24 @@ class HarmonyTrainerWidget(QWidget):
         self.sequencer_iterator.reset((harmony_item, harmony_item.chord_items[0]))
 
         self.handle_items_change(*self.sequencer_iterator.current_items)
+
+    def reset_players(self):
+        logger.info("reset players")
+
+        was_running = False
+        if not self.manager.sequencer.is_stopped():
+            with block_signal([self.manager.sequencer]):
+                self.manager.sequencer.grid_stop.emit()
+
+            was_running = True
+
+        harmony_item = self.params.item_iterator.current_items[0]
+
+        self.params.players = self.manager.sequencer.get_players()
+        self.params.item_iterator.reset((harmony_item, harmony_item.chord_items[0]))
+
+        if was_running:
+            self.manager.sequencer.grid_play.emit()
 
     def _get_next_item(self, items: List[T], current_item: T) -> Tuple[T, bool]:
         next_index = items.index(current_item) + 1
@@ -485,9 +510,9 @@ class HarmonyTrainerWidget(QWidget):
 
     def handle_harmony_change(
         self,
-        scale: Optional[Scale],
-        time_signature: Optional[TimeSignature],
-        bpm: Optional[Bpm],
+        scale: Scale | None,
+        time_signature: TimeSignature | None,
+        bpm: Bpm | None,
     ):
         logger.info(
             f"scale={scale.to_log_string() if scale else 'None'} "
@@ -527,3 +552,4 @@ class HarmonyTrainerWidget(QWidget):
                 current_items=self.sequencer_iterator.current_items,
                 next_items=self.sequencer_iterator.next_items,
             )
+"""

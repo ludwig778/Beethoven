@@ -1,12 +1,13 @@
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 
 from beethoven.ui.components.buttons import PushPullButton
 from beethoven.ui.constants import CHORDS_DATA_FLATTEN
-from beethoven.ui.layouts import LayoutItems, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (LayoutItems, horizontal_layout,
+                                  vertical_layout)
 from beethoven.ui.utils import block_signal
 
 
@@ -17,7 +18,7 @@ class ChordGridSelector(QWidget):
         super(ChordGridSelector, self).__init__(*args, **kwargs)
 
         self.chord_buttons: Dict[str, PushPullButton] = {}
-        self._current_button: Optional[PushPullButton] = None
+        self._current_button: PushPullButton | None = None
 
         chords_by_rows = [
             ["maj", "min", "aug", "dim", "power", "dim power", "aug power"],

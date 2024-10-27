@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
 
 from beethoven.settings import TuningSettings
 from beethoven.ui.components.buttons import Button
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 
 logger = logging.getLogger("dialog.tuning_save")
 

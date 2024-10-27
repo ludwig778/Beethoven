@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Dict, Optional
+from typing import Dict
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
@@ -14,11 +14,11 @@ from beethoven.ui.utils import block_signal
 class BaseNoteGridSelector(QWidget):
     value_changed = Signal(object)
 
-    def __init__(self, *args, base_note: Optional[Note] = None, **kwargs):
+    def __init__(self, *args, base_note: Note | None = None, **kwargs):
         super(BaseNoteGridSelector, self).__init__(*args, **kwargs)
 
         self.base_note_buttons: Dict[Note, PushPullButton] = {}
-        self._current_button: Optional[PushPullButton] = None
+        self._current_button: PushPullButton | None = None
 
         layout_items: LayoutItems = []
 
@@ -36,7 +36,7 @@ class BaseNoteGridSelector(QWidget):
 
         self.setLayout(horizontal_layout(layout_items))
 
-    def set(self, base_note: Optional[Note] = None):
+    def set(self, base_note: Note | None = None):
         if base_note is None:
             if self._current_button and self._current_button.pressed:
                 with block_signal([self._current_button]):

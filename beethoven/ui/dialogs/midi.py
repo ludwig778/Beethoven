@@ -88,4 +88,6 @@ class MidiDialog(QDialog):
         else:
             self.manager.settings.midi.selected_input = None
 
+        self.manager.midi.update_input(name)
+
         self.manager.configuration_changed.emit()

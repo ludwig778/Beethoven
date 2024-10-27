@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from beethoven.ui.utils import color_from_hsl
 
@@ -44,7 +44,7 @@ FRAME_MAIN_TEXT = color_from_hsl(0, 0, 33)
 ERROR_COLOR = RED
 
 
-def setup_style(styles: dict, path: Optional[List[str]] = None):
+def setup_style(styles: dict, path: List[str] | None = None):
     style = ""
     path = path or []
 
@@ -229,7 +229,7 @@ def get_stylesheet() -> str:
                 },
             },
             "PlayerDialog": {
-                "": "min-height: 315px;max-height: 315px;min-width: 670px;max-width: 670px;",
+                "": "min-height: 315px;max-height: 315px;min-width: 750px;max-width: 750px;",
                 " ": {
                     "#system_players": {
                         " QLabel": "min-width: 105px;max-width: 105px;",
@@ -245,6 +245,7 @@ def get_stylesheet() -> str:
                             "#instrument_style": "width: 120px;padding-left: 12px;margin-left: -4px;",
                             "MidiOutputComboBox": "width: 145px;padding-left: 12px;margin-left: 11px;",
                             "MidiChannelComboBox": "width: 30px;padding-left: 12px;margin-left: -4px;",
+                            "#mapping_button": "width: 80px;",
                             "Button": {
                                 "": "border-radius: 5px",
                                 "#active": {
@@ -283,6 +284,12 @@ def get_stylesheet() -> str:
                 " > PushPullButton": "height: 33.6%;",
                 " > #guitar_button": "border-top-left-radius: 5px;border-top-right-radius: 5px;",
                 " > #players_button": "border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;",
+            },
+            "MappingDialog": {
+                "": "min-height: 350px;",
+                " > QLabel": "min-width: 65px;",
+                " > QComboBox": "width: 65px;padding-left: 10px;",
+                # " > QComboBox": "margin-left: -11px;padding-left: 21p;width: 45px;",
             },
         }
     )

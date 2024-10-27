@@ -1,5 +1,7 @@
-from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
-from beethoven.ui.constants import SCALE_LABELS, SCALES_DATA, SELECTED_SCALE, SELECTED_SCALE_LABELS
+from beethoven.ui.components.selectors.exclusive.base import \
+    BaseExclusiveSelector
+from beethoven.ui.constants import (SCALE_LABELS, SCALES_DATA, SELECTED_SCALE,
+                                    SELECTED_SCALE_LABELS)
 
 
 class ScaleExclusiveSelector(BaseExclusiveSelector):

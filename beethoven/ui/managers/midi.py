@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List
 
 from PySide6.QtCore import QObject, Signal
 
@@ -19,20 +19,20 @@ class MidiManager(QObject):
         self.settings = settings
         self.midi_adapter = midi_adapter
 
-        self.input_thread: Optional[MidiInputThread] = None
-        self.output_thread: Optional[MidiOutputThread] = None
-
-        if self.settings.midi.selected_input:
-            self.update_input(self.settings.midi.selected_input)
+        self.input_thread: MidiInputThread | None = None
+        self.output_thread: MidiOutputThread | None = None
 
         if self.settings.midi.opened_outputs:
             self.update_outputs(self.settings.midi.opened_outputs)
+
+        if self.settings.midi.selected_input:
+            self.update_input(self.settings.midi.selected_input)
 
     def update_input(self, input_name: str):
         logger.info(f"input set to: {input_name or 'none'}")
 
         if self.input_thread and (not input_name or input_name != self.input_thread.midi_input.name):
-            self.adapter.close_input(self.input_thread.midi_input)
+            self.midi_adapter.close_input(self.input_thread.midi_input)
 
             self.terminate_input_thread()
 
@@ -48,6 +48,7 @@ class MidiManager(QObject):
             self.input_thread.start()
 
     def update_outputs(self, output_names: List[str]):
+        print("update_outputs")
         logger.info(f"outputs set to: {', '.join(output_names) or 'none'}")
 
         for output_name in output_names:

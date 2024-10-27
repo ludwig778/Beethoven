@@ -19,6 +19,7 @@ class MidiInputThread(QThread):
 
     def run(self):
         midi_notes: Dict[int, Note] = dict()
+        print("RUN")
 
         for message in self.midi_input:
             if message.type not in ("note_on", "note_off"):
@@ -28,6 +29,7 @@ class MidiInputThread(QThread):
 
             if message.type == "note_on":
                 midi_notes[message.note] = note
+                print("RUN", [message.note, note])
 
             if message.type == "note_off":
                 if message.note in midi_notes:

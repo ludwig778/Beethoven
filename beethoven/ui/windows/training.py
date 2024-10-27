@@ -1,6 +1,6 @@
 import logging
 from random import shuffle
-from typing import Callable, List, Optional, Protocol, cast
+from typing import Callable, List, Protocol, cast
 
 from PySide6.QtWidgets import QComboBox, QStackedLayout, QWidget
 
@@ -9,11 +9,9 @@ from beethoven.ui.checker import NoteCheckerType, NotesContainerChecker
 from beethoven.ui.components.buttons import Button, PushPullButton
 from beethoven.ui.components.combobox import MidiInputComboBox
 from beethoven.ui.components.frame import FramedChord, FramedScale
-from beethoven.ui.components.selectors import (
-    ChordMultipleSelector,
-    NoteMultipleSelector,
-    ScaleExclusiveSelector,
-)
+from beethoven.ui.components.selectors import (ChordMultipleSelector,
+                                               NoteMultipleSelector,
+                                               ScaleExclusiveSelector)
 from beethoven.ui.layouts import Stretch, horizontal_layout, vertical_layout
 from beethoven.ui.managers import AppManager
 
@@ -29,7 +27,7 @@ class BaseTrainingWidget(QWidget):
         super(BaseTrainingWidget, self).__init__(*args, **kwargs)
 
         self.manager = manager
-        self.notes_checker: Optional[NotesContainerChecker] = None
+        self.notes_checker: NotesContainerChecker | None = None
 
         self.start_button = PushPullButton("Start", pressed=False, pressed_text="Playing")
         self.stop_button = Button("Stop", object_name="stop_button")

@@ -7,7 +7,8 @@ from PySide6.QtWidgets import QLabel, QWidget
 from beethoven.models import Note
 from beethoven.settings import TuningSetting
 from beethoven.ui.components.combobox import NoteComboBox
-from beethoven.ui.layouts import LayoutItems, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (LayoutItems, Stretch, horizontal_layout,
+                                  vertical_layout)
 
 logger = logging.getLogger("selectors.string")
 

@@ -8,7 +8,8 @@ from beethoven.ui.components.combobox import TuningComboBox
 from beethoven.ui.components.selectors import StringSelector
 from beethoven.ui.components.spinbox import StringNumberSpinBox
 from beethoven.ui.dialogs.tuning_save import TuningSaveDialog
-from beethoven.ui.layouts import Spacing, Stretch, horizontal_layout, vertical_layout
+from beethoven.ui.layouts import (Spacing, Stretch, horizontal_layout,
+                                  vertical_layout)
 from beethoven.ui.managers.app import AppManager
 from beethoven.ui.utils import block_signal
 
@@ -23,7 +24,7 @@ class TuningDialog(QDialog):
 
         self.setAttribute(Qt.WA_StyledBackground)
 
-        self.tuning_settings = manager.settings.tuning
+        self.tuning_settings = manager.settings.tunings
 
         self.tuning_selector = TuningComboBox(tuning_settings=self.tuning_settings)
         self.current_tuning = self.tuning_settings.defaults[self.tuning_selector.value]

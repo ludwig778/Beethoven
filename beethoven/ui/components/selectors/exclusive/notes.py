@@ -1,5 +1,7 @@
-from beethoven.ui.components.selectors.exclusive.base import BaseExclusiveSelector
-from beethoven.ui.constants import NOTE_LABELS, NOTES_DATA, SELECTED_NOTE, SELECTED_NOTE_LABELS
+from beethoven.ui.components.selectors.exclusive.base import \
+    BaseExclusiveSelector
+from beethoven.ui.constants import (NOTE_LABELS, NOTES_DATA, SELECTED_NOTE,
+                                    SELECTED_NOTE_LABELS)
 
 
 class NoteExclusiveSelector(BaseExclusiveSelector):

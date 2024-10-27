@@ -1,25 +1,26 @@
 import logging
 from logging import Logger
-from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, Tuple
 
-from beethoven.models import (
-    Chord,
-    ChordItem,
-    Duration,
-    HarmonyItem,
-    Note,
-    Scale,
-    TimeSection,
-    TimeSignature,
-)
-from beethoven.sequencer.players import BasePlayer, SystemPlayer
-from beethoven.ui.exceptions import PlayerStopPlaying
+from beethoven.models import (Chord, ChordItem,  # Scale,; TimeSignature,
+                              Duration, HarmonyItem, Note, TimeSection)
+# from beethoven.sequencer.players import BasePlayer
+from beethoven.ui.exceptions import PlayerStopPlaying  # , SystemPlayer
+
+# from beethoven.ui.exceptions import PlayerStopPlaying
 
 NoteGenerator = Generator[Tuple[str, Any], None, None]
 NoteGenerators = Dict[Any, NoteGenerator]
 
 
-def note_repeater(cycle: Duration, messages, offset: Optional[Duration] = None):
+def one_time_play(timeline, messages):
+    for message in messages:
+        yield timeline, message
+
+    return StopIteration()
+
+
+def note_repeater(cycle: Duration, messages, offset: Duration | None = None):
     timeline = offset or Duration()
 
     while 1:
@@ -63,13 +64,14 @@ def sort_generator_outputs(generators: NoteGenerators) -> NoteGenerator:
 
 
 class BaseSorter:
-    def __init__(self, generators: Optional[NoteGenerators] = None, refeed_enabled: bool = False):
+    def __init__(self, generators: NoteGenerators | None = None, refeed_enabled: bool = False):
         self.generators = generators or {}
 
         self.refeed_enabled = refeed_enabled
 
         self.start_cursor: Duration
         self.end_cursor: Duration
+        self.values: Dict[str, Any] = {}
 
     def clear(self):
         self.values = {}
@@ -96,20 +98,25 @@ class BaseSorter:
 
             raise StopIteration()
 
-        return [cursor, data]
+        return (cursor, data)
 
 
 class NoteSorter(BaseSorter):
-    def __init__(self, **kwargs):
-        super(NoteSorter, self).__init__(**kwargs)
+    def __init__(self, **generators):
+        super(NoteSorter, self).__init__()  # **kwargs)
 
         self.values: Dict[str, Any] = {}
 
+        self.generators = generators
         for name, generator in self.generators.items():
+            # print("#######", name, generator)
             try:
                 self.values[name] = next(generator)
             except StopIteration:
                 pass
+
+
+"""
 
 
 class SequencerSorter(BaseSorter):
@@ -156,23 +163,12 @@ class SequencerSorter(BaseSorter):
 
             if player_name not in self.values:
                 self.values[player_name] = next(generator)
-
-
-def system_tick_logger(logger: Logger, level: int = logging.INFO):
-    def wrapper(cursor: Duration, time_section: TimeSection, player: BasePlayer):
-        logger.log(
-            level,
-            f"{float(cursor.value):<5}  "
-            f"{player.time_signature.beats_per_bar}/{player.time_signature.beat_unit}  "
-            f"{str(time_section):38s}   end: {float(player.end_cursor.value)}",
-        )
-
-    return wrapper
+"""
 
 
 def get_chord_from_items(
     harmony_item: HarmonyItem, chord_item: ChordItem
-) -> Tuple[Chord, Optional[Duration]]:
+) -> Tuple[Chord, Duration | None]:
     chord_data: Dict = {"root" if isinstance(chord_item.root, Note) else "degree": chord_item.root}
 
     return (

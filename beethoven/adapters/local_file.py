@@ -1,3 +1,4 @@
+"""
 from hartware_lib.adapters.directory import DirectoryAdapter
 
 
@@ -16,3 +17,4 @@ class LocalFileAdapter(DirectoryAdapter):
 
     def save(self, name: str, data: dict) -> None:
         self.save_json_file(self._format_filename(name), data)
+"""

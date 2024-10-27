@@ -1,3 +1,4 @@
+"""
 from typing import List, Tuple
 
 from beethoven.sequencer.players import BasePlayer
@@ -16,3 +17,4 @@ def split_player_by_types(
             regular.append(player)
 
     return regular, time_signature_bound
+"""

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from os import environ
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from hartware_lib.adapters.filesystem import FileAdapter
 from hartware_lib.serializers.dataclasses import DataClassExtraSerializer
@@ -11,15 +11,19 @@ from hartware_lib.serializers.main import deserialize, serialize
 
 from beethoven.models import Note
 
-
 HOME_PATH = Path.home()
-BEETHOVEN_CONFIG_PATH = HOME_PATH / Path(".config", "beethoven", "config.json")
+BEETHOVEN_CONFIG_PATH = (
+    Path(environ["BEETHOVEN_CONFIG_PATH"])
+    if "BEETHOVEN_CONFIG_PATH" in environ
+    else (HOME_PATH / Path(".config", "beethoven", "config.json"))
+)
 
 
 @dataclass
 class TuningSetting:
     notes: List[Note]
 
+    @classmethod
     def build(cls, notes: List[Note]) -> TuningSetting:
         if all([isinstance(n, Note) for n in notes]):
             raise AssertionError("Tuning must been given Notes")
@@ -27,14 +31,14 @@ class TuningSetting:
         if len(notes) < 4 or len(notes) > 8:
             raise AssertionError("Tuning must have between 4 and 8 strings")
 
-        return cls(notes)
+        return cls(notes=notes)
 
-    def dict(self, *args, **kwargs) -> Dict[str, Note]:
-        return ",".join(map(str, self.notes))
+    # def dict(self, *args, **kwargs) -> Dict[str, Note]:
+    #     return ",".join(map(str, self.notes))
 
     @classmethod
-    def build_from_str(cls, notes: List[Note]) -> TuningSetting:
-        return cls(notes=Note.parse_list(notes))
+    def build_from_str(cls, notes_str: str) -> TuningSetting:
+        return cls(notes=Note.parse_list(notes_str))
 
 
 @dataclass
@@ -42,7 +46,7 @@ class TuningSettings:
     user_defined: Dict[str, TuningSetting] = field(default_factory=dict)
 
     @property
-    def default(self) -> Dict[str, TuningSetting]:
+    def defaults(self) -> Dict[str, TuningSetting]:
         return {
             "E Standard": TuningSetting.build_from_str("E,A,D,G,B,E"),
             "E Standard 4str": TuningSetting.build_from_str("E,A,D,G"),
@@ -66,21 +70,21 @@ class TuningSettings:
     #     }
 
     @property
-    def tunings(self):
+    def tunings(self) -> Dict[str, TuningSetting]:
         return {**self.defaults, **self.user_defined}
 
 
 @dataclass
 class MidiSettings:
-    selected_input: Optional[str] = None
+    selected_input: str | None = None
     opened_outputs: List[str] = field(default_factory=list)
 
 
 @dataclass
 class PlayerSetting:
-    instrument_name: Optional[str] = None
-    instrument_style: Optional[str] = None
-    output_name: Optional[str] = None
+    instrument_name: str | None = None
+    instrument_style: str | None = None
+    output_name: str | None = None
     channel: int = 0
     mapping: str = ""
     enabled: bool = False
@@ -131,6 +135,10 @@ class AppSettings:
 
     @classmethod
     def load(cls, config_file: Path = BEETHOVEN_CONFIG_PATH) -> AppSettings:
+        # NOTE to pass pytest env variable, to remove
+        if isinstance(config_file, str):
+            config_file = Path(config_file)
+
         settings_file = FileAdapter(path=config_file)
 
         settings = None
@@ -170,17 +178,20 @@ class AppSettings:
 
         return settings
 
-    def save(self, config_file: Path = BEETHOVEN_CONFIG_PATH) -> None:
-        settings_file = FileAdapter(path=config_file)
-
-        if not settings_file.directory.exists:
-            settings_file.create_parent_dir()
-
-        serialized_settings = serialize(
+    def serialize(self) -> str:
+        return serialize(
             self, indent=4, extra_serializers=[DataClassExtraSerializer()]
         )
 
-        settings_file.write(serialized_settings)
+    def save(self, config_file: Path = BEETHOVEN_CONFIG_PATH) -> Path:
+        settings_file = FileAdapter(path=config_file)
+
+        if not settings_file.directory.exists:
+            settings_file.directory.create()
+
+        settings_file.write(self.serialize())
+
+        return config_file
 
     @staticmethod
     def delete(config_file: Path = BEETHOVEN_CONFIG_PATH) -> None:

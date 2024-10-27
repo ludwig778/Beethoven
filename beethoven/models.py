@@ -3,26 +3,31 @@ from __future__ import annotations
 from copy import copy
 from dataclasses import dataclass, field, replace
 from fractions import Fraction
-from functools import lru_cache
+# from functools import lru_cache
 from itertools import product
-from typing import Dict, Generator, List, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, Generator, List, Sequence, Tuple, Union
 from uuid import UUID, uuid4
 
 from pyparsing import ParseException
 
 from beethoven import parser
 from beethoven.constants import duration as duration_constants
-from beethoven.indexes import chord_index, degree_index, interval_index, note_index, scale_index
-from beethoven.utils.alterations import (
-    get_degree_alteration_int_from_str,
-    get_degree_alteration_str_from_int,
-    get_interval_alteration_int_from_str,
-    get_interval_alteration_str_from_int,
-    get_note_alteration_int_from_str,
-    get_note_alteration_str_from_int,
-)
+from beethoven.indexes import (chord_index, degree_index, interval_index,
+                               note_index, scale_index)
+from beethoven.utils.alterations import (get_degree_alteration_int_from_str,
+                                         get_degree_alteration_str_from_int,
+                                         get_interval_alteration_int_from_str,
+                                         get_interval_alteration_str_from_int,
+                                         get_note_alteration_int_from_str,
+                                         get_note_alteration_str_from_int)
 
-cache = lru_cache(maxsize=None)
+# cache = lru_cache(maxsize=None)
+
+
+def cache(f: Any) -> Any:
+    def swrapper(*args: Any, **kwargs: Any) -> Any:
+        return f(*args, **kwargs)
+    return swrapper
 
 
 @dataclass
@@ -30,21 +35,21 @@ class Degree:
     name: str
     alteration: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not degree_index.is_valid(self.name):
             raise ValueError(f"Invalid name: {self.name}")
 
         if self.alteration < -3 or self.alteration > 3:
             raise ValueError(f"Invalid alteration: {self.alteration}, must be between -3 and 3")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{get_degree_alteration_str_from_int(self.alteration)}{self.name}"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name + str(self.alteration))
 
     @property
-    def index(self):
+    def index(self) -> int:
         return degree_index.get_index(self.name)
 
     @classmethod
@@ -52,7 +57,7 @@ class Degree:
     def parse(cls, string: str) -> Degree:
         parsed = parser.parse(parser.degree_pattern, string)
 
-        return cls.build(**parsed)
+        return cls.build(**parsed)  # type: ignore[no-any-return]
 
     @classmethod
     def parse_list(cls, degrees_string: str) -> List[Degree]:
@@ -60,7 +65,7 @@ class Degree:
 
     @classmethod
     @cache
-    def build(cls, name: str, alteration: Optional[str] = None) -> Degree:
+    def build(cls, name: str, alteration: str | None = None) -> Degree:
         return cls(
             name=name,
             alteration=get_degree_alteration_int_from_str(alteration) if alteration else 0,
@@ -69,7 +74,7 @@ class Degree:
     def to_interval(self) -> Interval:
         return Interval(name=str(degree_index.get_index(self.name) + 1), alteration=self.alteration)
 
-    def remove_alteration(self):
+    def remove_alteration(self) -> Degree:
         return replace(self, alteration=0)
 
 
@@ -77,9 +82,15 @@ class Degree:
 class Note:
     name: str
     alteration: int = 0
-    octave: Optional[int] = None
+    octave: int | None = None
 
-    def __post_init__(self):
+    def __hash__(self) -> int:
+        return hash(self.name + str(self.alteration) + str(self.octave))
+
+    def __str__(self) -> str:
+        return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave if self.octave is not None else ''}"
+
+    def __post_init__(self) -> None:
         if not note_index.is_valid(self.name):
             raise ValueError(f"Invalid name: {self.name}")
 
@@ -89,14 +100,8 @@ class Note:
         if self.octave is not None and (self.octave < 0 or self.octave > 10):
             raise ValueError(f"Invalid octave: {self.octave}, must be between 0 and 10")
 
-    def __hash__(self):
-        return hash(self.name + str(self.alteration) + str(self.octave))
-
-    def __str__(self):
-        return f"{self.name}{get_note_alteration_str_from_int(self.alteration)}{self.octave if self.octave is not None else ''}"
-
     @property
-    def index(self):
+    def index(self) -> int:
         return self.midi_index % 12
 
     @property
@@ -104,7 +109,7 @@ class Note:
         if not self.octave:
             return (note_index.get_semitones(self.name) + self.alteration) % 12
 
-        return note_index.get_semitones(self.name) + self.alteration + self.octave * 12
+        return 24 + note_index.get_semitones(self.name) + self.alteration + self.octave * 12
 
     # TODO: move to utils, setup a customized exception
     def check_octave_states(self, other: Note) -> None:
@@ -139,7 +144,7 @@ class Note:
     def parse(cls, string: str) -> Note:
         parsed = parser.parse(parser.note_pattern, string)
 
-        return cls.build(**parsed)
+        return cls.build(**parsed)  # type: ignore[no-any-return]
 
     @classmethod
     def parse_list(cls, notes_string: str) -> List[Note]:
@@ -147,7 +152,7 @@ class Note:
 
     @classmethod
     @cache
-    def build(cls, name: str, alteration: Optional[str] = None, octave: Optional[int] = None) -> Note:
+    def build(cls, name: str, alteration: str | None = None, octave: int | None = None) -> Note:
         return cls(
             name=name,
             alteration=get_note_alteration_int_from_str(alteration) if alteration else 0,
@@ -177,7 +182,7 @@ class Note:
 
                 break
 
-        return note.add_interval(interval)
+        return note.add_interval(interval)  # type: ignore[no-any-return]
 
     def add_interval(self, interval: Interval, reverse: bool = False) -> Note:
         degree_gap = int(interval.name) - 1
@@ -248,7 +253,7 @@ class Note:
 class NotesList:
     notes: List[Note]
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash("_".join(map(str, self.notes)))
 
 
@@ -257,23 +262,23 @@ class Interval:
     name: str
     alteration: int = 0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not interval_index.is_valid(self.name):
             raise ValueError(f"Invalid name: {self.name}")
 
         if self.alteration < -3 or self.alteration > 3:
             raise ValueError(f"Invalid alteration: {self.alteration}, must be between -3 and 3")
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name + str(self.alteration))
 
-    def __str__(self):
+    def __str__(self) -> str:
         alteration_str = get_interval_alteration_str_from_int(self.alteration, int(self.name))
 
         return f"{self.name}{alteration_str}"
 
     @property
-    def semitones(self):
+    def semitones(self) -> int:
         return interval_index.get_semitones(self.name) + self.alteration
 
     def __eq__(self, other: object) -> bool:
@@ -296,7 +301,7 @@ class Interval:
     def parse(cls, string: str) -> Interval:
         parsed = parser.parse(parser.interval_pattern, string)
 
-        return cls.build(**parsed)
+        return cls.build(**parsed)  # type: ignore[no-any-return]
 
     @classmethod
     def parse_list(cls, intervals_string: str) -> List[Interval]:
@@ -307,7 +312,7 @@ class Interval:
     def build(
         cls,
         name: str,
-        alteration: Optional[str] = None,
+        alteration: Optistr | None = None,
     ) -> Interval:
         return cls(
             name=name,
@@ -322,25 +327,25 @@ class Chord:
     root: Note
     name: str
 
-    inversion: Optional[int] = None
-    base_note: Optional[Note] = None
-    extensions: Optional[List[Interval]] = None
+    inversion: int | None = None
+    base_note: Note | None = None
+    extensions: List[Interval] | None = None
 
-    degree: Optional[Degree] = None
-    base_degree: Optional[Degree] = None
+    degree: Degree | None = None
+    base_degree: Degree | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not chord_index.is_valid(self.name):
             raise ValueError(f"Invalid name: {self.name}")
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(
             f"{self.root}_{self.name}:"
             f"{self.inversion}:{self.base_note}:{self.degree}:{self.base_degree}:"
             f"{'.'.join(map(str, self.extensions)) if self.extensions else self.extensions}"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.degree or self.root} {self.name}"
 
     @classmethod
@@ -360,14 +365,14 @@ class Chord:
     @classmethod
     def build(
         cls,
-        root: Optional[Union[Note, Dict]] = None,
-        name: Optional[str] = None,
-        inversion: Optional[int] = None,
-        base_note: Optional[Union[Note, Dict]] = None,
-        extensions: Optional[Sequence[Union[Interval, Dict]]] = None,
-        degree: Optional[Union[Degree, Dict]] = None,
-        base_degree: Optional[Union[Degree, Dict]] = None,
-        scale: Optional[Scale] = None,
+        root: Union[Note, Dict[str, Any]] | None = None,
+        name: str | None = None,
+        inversion: int | None = None,
+        base_note: Union[Note, Dict[str, Any]] | None = None,
+        extensions: Sequence[Union[Interval, Dict[str, Any]]] | None = None,
+        degree: Union[Degree, Dict[str, Any]] | None = None,
+        base_degree: Union[Degree, Dict[str, Any]] | None = None,
+        scale: Scale | None = None,
     ) -> Chord:
         if name and "_" in name:
             name = name.replace("_", " ")
@@ -401,7 +406,7 @@ class Chord:
         if isinstance(base_note, dict):
             base_note = Note.build(**base_note)
 
-        _extensions: Optional[List[Interval]] = None
+        _extensions: List[Interval] | None = None
         if extensions is not None:
             _extensions = [
                 extension if isinstance(extension, Interval) else Interval.build(**extension)
@@ -419,14 +424,14 @@ class Chord:
         )
 
     @property
-    def intervals(self):
+    def intervals(self) -> List[Interval]:
         intervals_string = chord_index.get_intervals(self.name or "maj")
         intervals = Interval.parse_list(intervals_string)
 
         return intervals
 
     @property
-    def notes(self):
+    def notes(self) -> List[Note]:
         notes = [self.root.add_interval(interval) for interval in self.intervals]
 
         if self.inversion:
@@ -465,7 +470,7 @@ class Chord:
         return notes
 
     @staticmethod
-    def chord_product(roots: List[Note], chord_names: List[str]):
+    def chord_product(roots: List[Note], chord_names: List[str]) -> List[Chord]:
         return [
             Chord.parse(f"{str(root)}_{chord_name}") for root, chord_name in product(roots, chord_names)
         ]
@@ -479,21 +484,21 @@ class Scale:
     tonic: Note
     name: str
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not scale_index.is_valid(self.name):
             raise ValueError(f"Invalid name: {self.name}")
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(f"{self.tonic}_{self.name}")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.tonic} {self.name}"
 
     @property
-    def is_diatonic(self):
+    def is_diatonic(self) -> bool:
         return len(self.notes) == 7
 
-    def to_log_string(self):
+    def to_log_string(self) -> str:
         return f"{self.tonic} {self.name}"
 
     @classmethod
@@ -504,25 +509,25 @@ class Scale:
         return cls.build(**parsed)
 
     @classmethod
-    def build(cls, tonic: Union[Dict, Note], name: str) -> Scale:
+    def build(cls, tonic: Union[Dict[str, Any], Note], name: str) -> Scale:
         return cls(
             tonic=Note.build(**tonic) if isinstance(tonic, dict) else tonic,
             name=name.replace("_", " "),
         )
 
     @property
-    def intervals(self):
+    def intervals(self) -> List[Interval]:
         intervals_string = scale_index.get_intervals(self.name)
         intervals = Interval.parse_list(intervals_string)
 
         return intervals
 
     @property
-    def notes(self):
+    def notes(self) -> List[Note]:
         return [self.tonic.add_interval(interval) for interval in self.intervals]
 
     @staticmethod
-    def scale_product(tonics: List[Note], scale_names: List[str]):
+    def scale_product(tonics: List[Note], scale_names: List[str]) -> List[Scale]:
         return [
             Scale.parse(f"{str(tonic)}_{scale_name}")
             for tonic, scale_name in product(tonics, scale_names)
@@ -561,23 +566,23 @@ class Scale:
 class Bpm:
     value: int
 
-    def __post_init__(self):
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __post_init__(self) -> None:
         if self.value <= 0 or self.value > 600:
             raise ValueError(f"Invalid value: {self.value}, must be between 0 and 600")
-
-    def __str__(self):
-        return str(self.value)
 
     @classmethod
     @cache
     def parse(cls, string: str) -> Bpm:
         parsed = parser.parse(parser.bpm_pattern, string)
 
-        return cls.build(**parsed)
+        return cls(**parsed)
 
     @classmethod
     @cache
-    def build(cls, value: int) -> Bpm:
+    def _build(cls, value: int) -> Bpm:
         return cls(value=value)
 
 
@@ -586,7 +591,7 @@ class Duration:
     value: Fraction = Fraction(0)
 
     @staticmethod
-    def get_base_duration_string(base_duration: Duration, short: bool = True):
+    def get_base_duration_string(base_duration: Duration, short: bool = True) -> str:
         return {
             Duration.parse("4"): ("whole", "w"),
             Duration.parse("2"): ("half", "h"),
@@ -595,7 +600,7 @@ class Duration:
             Duration.parse("1/4"): ("sixteenth", "s"),
         }[base_duration][int(short)]
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.value)
 
     def __add__(self, other: object) -> Duration:
@@ -628,6 +633,9 @@ class Duration:
 
         return Duration(value=self.value - other.value)
 
+    def __neg__(self) -> Duration:
+        return Duration(value=self.value * -1)
+
     def __mod__(self, other: object) -> Duration:
         if not isinstance(other, Duration):
             return NotImplemented
@@ -635,25 +643,50 @@ class Duration:
         return Duration(value=self.value % other.value)
 
     def __floordiv__(self, other: object) -> Duration:
-        if not isinstance(other, Duration):
+        if isinstance(other, int):
+            return Duration(value=Fraction(self.value // other))
+
+        elif not isinstance(other, Duration):
             return NotImplemented
 
         return Duration(value=Fraction(self.value // other.value))
 
+    def __truediv__(self, other: object) -> Duration:
+        if isinstance(other, int):
+            return Duration(value=Fraction(self.value / other))
+
+        elif not isinstance(other, Duration):
+            return NotImplemented
+
+        return Duration(value=Fraction(self.value / other.value))
+
+    def __divmod__(self, other: object) -> Tuple[int, Duration]:
+        if not isinstance(other, Duration):
+            return NotImplemented
+
+        return self.value // other.value, self % other
+
+    def __bool__(self) -> bool:
+        return bool(self.value)
+
+    def __str__(self) -> str:
+        return str(float(self.value))
+
+    def __repr__(self) -> str:
+        return str(self)
+
     @classmethod
     @cache
     def parse(cls, string: str) -> Duration:
-        parsed = parser.parse(parser.duration_pattern, string)
-
-        return cls.build(**parsed)
+        return cls.build(**parser.parse(parser.duration_pattern, string))  # type: ignore[no-any-return]
 
     @classmethod
     @cache
     def build(
         cls,
-        base_duration: Optional[str] = None,
-        numerator: Optional[int] = None,
-        denominator: Optional[int] = None,
+        base_duration: str | None = None,
+        numerator: int | None = None,
+        denominator: int | None = None,
     ) -> Duration:
         if base_duration is None:
             value = Fraction(1)
@@ -674,10 +707,13 @@ class TimeSignature:
     beats_per_bar: int
     beat_unit: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.beats_per_bar}/{self.beat_unit}"
 
-    def __post_init__(self):
+    def __hash__(self) -> int:
+        return hash(str(self))
+
+    def __post_init__(self) -> None:
         if self.beat_unit < 1 or self.beat_unit > 32:
             raise ValueError(f"Invalid beat_unit: {self.beat_unit}, must be in range 1-32")
 
@@ -691,15 +727,18 @@ class TimeSignature:
 
         return cls(**parsed)
 
+    """
     @classmethod
     @cache
-    def build(cls, beats_per_bar: int, beat_unit: int) -> TimeSignature:
+    def _build(cls, beats_per_bar: int, beat_unit: int) -> TimeSignature:
         return cls(beats_per_bar=beats_per_bar, beat_unit=beat_unit)
+    """
 
+    @cache
     def get_duration(self) -> Duration:
         return Duration(value=Fraction(self.beats_per_bar * 4, self.beat_unit))
 
-    def get_time_section(self, cursor: Duration, bar_offset: int = 0):
+    def get_time_section(self, cursor: Duration, bar_offset: int = 0) -> TimeSection:
         reduction = Fraction(self.beat_unit, 4)
 
         bar, measure_rest = divmod(cursor.value * reduction, self.beats_per_bar)
@@ -711,7 +750,7 @@ class TimeSignature:
         self,
         step: Duration,
         cursor_offset: Duration = Duration(),
-        base_time_section: Optional[TimeSection] = None,
+        base_time_section: TimeSection | None = None,
     ) -> Generator[Tuple[TimeSection, Duration], None, None]:
         cursor = Duration()
 
@@ -733,35 +772,40 @@ class TimeSection:
     measure: int = 1
     rest: Fraction = Fraction()
 
+    """
     def __post_init__(self):
         if isinstance(self.rest, int):
             self.rest = Fraction(self.rest)
+    """
 
-    def to_next_bar(self):
+    def to_next_bar(self) -> None:
         if self.measure > 1 or self.rest != Fraction():
             self.bar += 1
             self.measure = 1
             self.rest = Fraction()
+
+    def __str__(self) -> str:
+        return f"{self.bar}:{self.measure}:{float(self.rest)}"
 
 
 @dataclass
 class DurationItem:
     numerator: int = 1
     denominator: int = 1
-    base_duration: Optional[Duration] = None
+    base_duration: Duration | None = None
 
     @property
     def fraction(self) -> Fraction:
         return Fraction(self.numerator, self.denominator)
 
     @property
-    def value(self) -> Optional[Duration]:
+    def value(self) -> Duration | None:
         if not self.base_duration:
             return None
 
         return self.base_duration * self.fraction
 
-    def to_string(self):
+    def to_string(self) -> str:
         if not self.base_duration:
             return ""
 
@@ -769,13 +813,13 @@ class DurationItem:
             self.base_duration
         ).upper()
 
-    def to_log_string(self):
+    def to_log_string(self) -> str:
         return (
             f"{self.numerator}/{self.denominator}"
             f"{Duration.get_base_duration_string(self.base_duration).upper() if self.base_duration else ''}"
         )
 
-    def dict(self):
+    def dict(self) -> Dict[str, Any]:
         return {
             "numerator": self.numerator,
             "denominator": self.denominator,
@@ -791,29 +835,29 @@ class ChordItem:
     duration_item: DurationItem
 
     inversion: int = 0
-    base_note: Optional[Note] = None
-    extensions: Optional[List[Interval]] = None
+    base_note: Note | None = None
+    extensions: List[Interval] | None = None
 
     id: UUID = field(default_factory=uuid4)
 
-    # def __hash__(self):
-    #    return int(self.id)
+    def __hash__(self) -> int:
+        return int(self.id)
 
     @staticmethod
-    def parse_root_note_or_degree(string: str) -> Union[Note, Degree]:
+    def parse_root_note_or_degree(string: str) -> Note | Degree:
         try:
-            return Note.parse(string)
+            return Note.parse(string)  # type: ignore[no-any-return]
         except ParseException:
             pass
 
         try:
-            return Degree.parse(string)
+            return Degree.parse(string)  # type: ignore[no-any-return]
         except ParseException:
             pass
 
         raise Exception('Couldn\'t parse note or degree from: "{string}"')
 
-    def to_simple_string(self):
+    def to_simple_string(self) -> str:
         chord_name = str(self.root)
 
         if self.name:
@@ -830,7 +874,7 @@ class ChordItem:
 
         return chord_name
 
-    def to_log_string(self):
+    def to_log_string(self) -> str:
         return (
             f"id={self.id} root={self.root} "
             f"name={self.name} duration_item={self.duration_item.to_log_string()} "
@@ -843,7 +887,7 @@ class ChordItem:
             )
         )
 
-    def as_chord(self, scale: Scale):
+    def as_chord(self, scale: Scale) -> Chord:
         chord_str = f"{self.root}4"
 
         if self.name:
@@ -867,15 +911,17 @@ class ChordItem:
             scale=scale,
         )
 
-    @classmethod
-    def build(cls, name: str, root: str, duration_item: DurationItem) -> ChordItem:
+    """
+   @classmethod
+    def _build(cls, name: str, root: str, duration_item: DurationItem) -> ChordItem:
         return cls(
             name=name,
             root=cls.parse_root_note_or_degree(root),
             duration_item=duration_item,
         )
+    """
 
-    def dict(self, *args, **kwargs):
+    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         return {
             "name": self.name,
             "root": str(self.root),
@@ -895,17 +941,18 @@ class HarmonyItem:
 
     id: UUID = field(default_factory=uuid4)
 
-    # def __hash__(self):
-    #    return int(self.id)
+    def __hash__(self) -> int:
+        return int(self.id)
 
+    """
     @classmethod
-    def build(
+    def _build(
         cls,
         scale: Union[Scale, str],
-        chord_items: List[Union[ChordItem, Dict]],
+        chord_items: List[Union[ChordItem, Dict[str, Any]]],
         bpm: Union[Bpm, str],
         time_signature: Union[TimeSignature, str],
-    ):
+    ) -> HarmonyItem:
         if isinstance(scale, str):
             scale = Scale.parse(scale)
 
@@ -926,18 +973,24 @@ class HarmonyItem:
             bpm=bpm,
             time_signature=time_signature,
         )
+    """
 
-    def to_log_string(self):
+    def to_log_string(self) -> str:
         return (
             f"id={self.id} scale={self.scale} "
             f"bpm={self.bpm} time_signature={self.time_signature} "
             "chord_items=" + ";".join([chord_item.to_log_string() for chord_item in self.chord_items])
         )
 
-    def dict(self, *args, **kwargs):
+    def dict(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
         return {
             "scale": str(self.scale).replace(" ", "_"),
             "chord_items": [chord_item.dict() for chord_item in self.chord_items],
             "bpm": self.bpm,
             "time_signature": self.time_signature,
         }
+
+
+@dataclass
+class HarmonyItemsIterator:
+    items: List[HarmonyItem]

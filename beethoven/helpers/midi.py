@@ -1,24 +1,42 @@
+"""
 from time import sleep
 from typing import List, Tuple
 
 from beethoven.adapters.midi import MidiMessage, Output
 from beethoven.models import Duration, Note
 
+# from beethoven.sequencer.runner import Message as PlayerMessage
 
 def get_on_off_messages(
-    note_index: int, output: Output, channel: int, velocity: int = 127
-) -> Tuple[MidiMessage, MidiMessage]:
+    #message,
+    message: PlayerMessage,
+    #note_index: int,
+    output: Output,
+    #channel: int,
+    #velocity: int = 127
+) -> Tuple[MidiMessage, MidiMessage] | None:
+    note_index = message.midi_index
+
+        if not note_index:
+        return None
+
     midi_message_kwargs = {
-        "note": note_index,
         "output": output,
-        "channel": channel,
-        "velocity": velocity,
+        "channel": message.player.setting.channel,
+
+
+
+        "note": note_index,
+        "velocity": message.velocity,
+        "player": message.player,
     }
 
-    return (
-        MidiMessage(type="note_on", **midi_message_kwargs),
-        MidiMessage(type="note_off", **midi_message_kwargs),
-    )
+    opener = MidiMessage(type="note_on", **midi_message_kwargs),
+
+    return opener, MidiMessage(type="note_off", opener=opener, **midi_message_kwargs)
+    #,
+        #MidiMessage(type="note_on", **midi_message_kwargs),
+    #)
 
 
 def play_note(
@@ -60,3 +78,4 @@ def play_notes(
 
     for note_off in notes_off:
         output.send(note_off.to_mido())
+"""

@@ -1,31 +1,33 @@
+from dataclasses import dataclass
 from typing import List
 
-from pydantic import BaseModel
 
-
-class NoteData(BaseModel):
+@dataclass
+class NoteData:
     index: int
     semitones: int
     alphabetic_name: str
     syllabic_name: str
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         return [self.alphabetic_name, self.syllabic_name]
 
 
-class IntervalData(BaseModel):
+@dataclass
+class IntervalData:
     index: int
     semitones: int
     short_name: str
     long_name: str
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         return [self.short_name, self.long_name]
 
 
-class ChordData(BaseModel):
+@dataclass
+class ChordData:
     intervals_string: str
     labels: List[str]
     short_name: str
@@ -33,11 +35,12 @@ class ChordData(BaseModel):
     symbol: str
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         return [self.short_name, self.full_name, self.symbol]
 
 
-class ScaleData(BaseModel):
+@dataclass
+class ScaleData:
     intervals_string: str
     labels: List[str]
     names: List[str]

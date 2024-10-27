@@ -1,8 +1,8 @@
 import logging.config
 
-from beethoven.settings import get_settings
+from beethoven.settings import BEETHOVEN_CONFIG_PATH, AppSettings
 
-settings = get_settings()
+settings = AppSettings.load()
 
 
 logging.config.dictConfig(
@@ -23,7 +23,7 @@ logging.config.dictConfig(
             "file": {
                 "class": "logging.handlers.RotatingFileHandler",
                 "formatter": "standard",
-                "filename": settings.config_file.path.parent / "beethoven.log",
+                "filename": BEETHOVEN_CONFIG_PATH.parent / "beethoven.log",
                 "maxBytes": 1000000,
                 "backupCount": 3,
             },

@@ -3,10 +3,10 @@ from functools import partial
 from PySide6.QtWidgets import QApplication
 from pytest import fixture
 
-import beethoven.instruments  # noqa # pylint: disable=unused-import
+import beethoven.sequencer.instruments  # noqa # pylint: disable=unused-import
 from beethoven.adapters.factory import get_adapters
-from beethoven.settings import delete_settings, save_settings, setup_settings
-from beethoven.ui.apps.harmony_trainer import HarmonyTrainerWidget
+from beethoven.settings import AppSettings
+# from beethoven.ui.apps.harmony_trainer import HarmonyTrainerWidget
 from beethoven.ui.apps.piano_trainer import PianoTrainerWidget
 from beethoven.ui.components.scale_picker import ScalePicker
 from beethoven.ui.components.sequencer import SequencerWidget
@@ -32,13 +32,13 @@ def qt_application():
 
 @fixture
 def manager():
-    settings = setup_settings()
+    settings = AppSettings.load()
 
-    save_settings(settings)
+    saved_path = settings.save()
 
     yield AppManager(settings=settings, adapters=get_adapters())
 
-    delete_settings(settings)
+    AppSettings.delete_settings(saved_path)
 
 
 @fixture
@@ -57,6 +57,6 @@ def widget_partials(manager):
         "sequencer_widget": partial(SequencerWidget, manager=manager),
         "compose_widget": partial(ComposeWidget, manager=manager),
         "piano_trainer_widget": partial(PianoTrainerWidget, manager=manager),
-        "harmony_trainer_widget": partial(HarmonyTrainerWidget, manager=manager),
+        # "harmony_trainer_widget": partial(HarmonyTrainerWidget, manager=manager),
         "main_window": partial(MainWindow, manager=manager),
     }

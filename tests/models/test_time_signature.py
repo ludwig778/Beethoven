@@ -3,13 +3,9 @@ from fractions import Fraction
 from pytest import mark, raises
 
 from beethoven.models import Duration, TimeSection, TimeSignature
-from beethoven.objects import (
-    eighth_duration,
-    half_duration,
-    quarter_duration,
-    sixteenth_duration,
-    whole_duration,
-)
+from beethoven.objects import (eighth_duration, half_duration,
+                               quarter_duration, sixteenth_duration,
+                               whole_duration)
 
 
 @mark.parametrize(

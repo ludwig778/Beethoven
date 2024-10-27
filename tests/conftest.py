@@ -35,5 +35,5 @@ def clean_test_directory_():
 
 
 @fixture(scope="session")
-def local_file_adapter():
+def fixtures_folder():
     return FileAdapter(path=Path("tests", "fixtures", "data"))

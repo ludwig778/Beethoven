@@ -1,34 +1,82 @@
-from typing import Dict, Union
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+from typing import Any, Dict, Protocol, Tuple, Union
 
 from mido import Message, MetaMessage, get_input_names, open_input, open_output
 from mido.backends.rtmidi import Input, Output
-from pydantic import BaseModel
+
+from beethoven.models import Duration, Note
+
+#from beethoven.sequencer.players import Message as PlayerMessage
+
+# from pydantic import BaseModel
+
+class PlayerMessageProtocol(Protocol):
+    note: Union[str, Note]
+    player: Any
+    velocity: int = 127
+    duration: Duration = Duration()
 
 
-class MidiMessage(BaseModel):
-    note: int
+
+@dataclass
+class MidiMessage:
+    origin: PlayerMessageProtocol
     output: Output
     channel: int
     velocity: int
     type: str
+    note: int | None = None
+
+    opener: MidiMessage | None = None
+
+    def fix_note_midi_index(self):
+        if isinstance(self.origin.note, str):
+            if not self.origin.player.mapping:
+                return False
+
+            note = replace(self.origin.player.mapping.mappings.get(self.origin.note))
+
+            if not isinstance(note, Note):
+                return False
+        else:
+            note = self.origin.note
+
+        self.note = note.midi_index
+
+        return bool(self.note)
 
     def to_mido(self) -> Message:
         return Message(self.type, note=self.note, channel=self.channel, velocity=self.velocity)
 
-    class Config:
-        arbitrary_types_allowed = True
+    @classmethod
+    def get_tuple_from_message(cls, message: PlayerMessageProtocol, output: Output) -> Tuple[MidiMessage, MidiMessage]:
+        midi_message_kwargs = {
+            # "note": message.note,
+            "origin": message,
+            "output": output,
+            "channel": message.player.setting.channel,
+            "velocity": message.velocity,
+            # "player": message.player,
+        }
+
+        opener = MidiMessage(type="note_on", **midi_message_kwargs)
+
+        return opener, MidiMessage(type="note_off", opener=opener, **midi_message_kwargs)
+        # ,
+        #     MidiMessage(type="note_on", **midi_message_kwargs),
+        # )
 
 
-class MidiMetaMessage(BaseModel):
+@dataclass
+class MidiMetaMessage:
     output: Output
     type: str
     text: str
 
     def to_mido(self) -> MetaMessage:
         return MetaMessage(self.type, text=self.text)
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 MidiMessageType = Union[MidiMessage, MidiMetaMessage]

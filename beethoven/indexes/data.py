@@ -1,4 +1,5 @@
-from beethoven.indexes.models import ChordData, IntervalData, NoteData, ScaleData
+from beethoven.indexes.models import (ChordData, IntervalData, NoteData,
+                                      ScaleData)
 
 notes_index_data = [
     NoteData(index=0, semitones=0, alphabetic_name="C", syllabic_name="Do"),

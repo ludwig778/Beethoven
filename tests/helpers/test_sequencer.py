@@ -1,6 +1,7 @@
 from pytest import mark
 
-from beethoven.helpers.sequencer import note_repeater, note_sequencer, sort_generator_outputs
+from beethoven.helpers.sequencer import (note_repeater, note_sequencer,
+                                         sort_generator_outputs)
 from beethoven.models import Duration
 
 

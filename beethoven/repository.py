@@ -1,9 +1,11 @@
+"""
 import json
 from dataclasses import asdict
 from pathlib import Path
 from typing import Type
 
 from pydantic import BaseModel
+from dataclasses import dataclass
 
 from beethoven.core.abstract import AbstractRepository
 from beethoven.mongo import mongo_instance
@@ -142,3 +144,4 @@ class MongoRepository(AbstractRepository):
         self.collection.drop()
 
     drop = delete_all
+"""

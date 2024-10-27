@@ -1,14 +1,17 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from beethoven.indexes.models import ChordData, IntervalData, NoteData, ScaleData
-from beethoven.indexes.notations import ChordNotationEnum, IntervalNotationEnum, NoteNotationEnum
+from beethoven.indexes.models import (ChordData, IntervalData, NoteData,
+                                      ScaleData)
+from beethoven.indexes.notations import (ChordNotationEnum,
+                                         IntervalNotationEnum,
+                                         NoteNotationEnum)
 
 
 class NoteIndex:
     directory: Dict[str, NoteData]
     index_directory: Dict[int, NoteData]
 
-    def __init__(self, notes_data) -> None:
+    def __init__(self, notes_data: List[NoteData]) -> None:
         self.directory = {}
         self.index_directory = {}
 
@@ -38,7 +41,7 @@ class NoteIndex:
         else:  # notation == NoteNotationEnum.SYLLABIC:
             return self.index_directory[index].syllabic_name
 
-    def get_note_data_by_name(self, name) -> NoteData:
+    def get_note_data_by_name(self, name: str) -> NoteData:
         return self.directory[name]
 
 
@@ -46,7 +49,7 @@ class IntervalIndex:
     directory: Dict[str, IntervalData]
     index_directory: Dict[int, IntervalData]
 
-    def __init__(self, intervals_data) -> None:
+    def __init__(self, intervals_data: List[IntervalData]) -> None:
         self.directory = {}
         self.index_directory = {}
 
@@ -82,7 +85,7 @@ class ChordIndex:
     interval_directory: Dict[str, ChordData]
     label_directory: Dict[str, List[ChordData]]
 
-    def __init__(self, chords_data) -> None:
+    def __init__(self, chords_data: List[ChordData]) -> None:
         self.directory = {}
         self.interval_directory = {}
         self.label_directory = {}
@@ -121,7 +124,7 @@ class ChordIndex:
     def get_chords_label_data(self) -> Dict[str, List[ChordData]]:
         return self.label_directory
 
-    def get_chords_by_label_data(self, labels: Optional[List[str]] = None) -> List[ChordData]:
+    def get_chords_by_label_data(self, labels: List[str] | None = None) -> List[ChordData]:
         filtered_chords = []
 
         for label, chords_data in self.label_directory.items():
@@ -135,7 +138,7 @@ class ScaleIndex:
     directory: Dict[str, ScaleData]
     label_directory: Dict[str, List[ScaleData]]
 
-    def __init__(self, scales_data) -> None:
+    def __init__(self, scales_data: List[ScaleData]) -> None:
         self.directory = {}
         self.label_directory = {}
 
@@ -161,7 +164,7 @@ class ScaleIndex:
     def get_scales_label_data(self) -> Dict[str, List[ScaleData]]:
         return self.label_directory
 
-    def get_scales_by_label_data(self, labels: Optional[List[str]] = None) -> List[ScaleData]:
+    def get_scales_by_label_data(self, labels: List[str] | None = None) -> List[ScaleData]:
         filtered_scales = []
 
         for label, scales_data in self.label_directory.items():
@@ -174,7 +177,7 @@ class ScaleIndex:
 class DegreeIndex:
     directory: List[str]
 
-    def __init__(self, degrees_data) -> None:
+    def __init__(self, degrees_data: List[str]) -> None:
         self.directory = degrees_data
 
     def is_valid(self, name: str) -> bool:

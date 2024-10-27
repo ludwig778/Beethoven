@@ -1,20 +1,8 @@
-from typing import Dict
+from typing import Any, Dict
 
-from pyparsing import (
-    Combine,
-    Empty,
-    Group,
-    Literal,
-    Optional,
-    ParserElement,
-    Suppress,
-    Word,
-    ZeroOrMore,
-    alphas,
-    delimitedList,
-    nums,
-    oneOf,
-)
+from pyparsing import (Combine, Empty, Group, Literal, Optional, ParserElement,
+                       Suppress, Word, ZeroOrMore, alphas, delimitedList, nums,
+                       oneOf)
 
 ENGLISH_NOTE_NOTATION = ("A", "B", "C", "D", "E", "F", "G")
 SOLFEGE_NOTE_NOTATION = ("La", "Si", "Do", "Re", "Mi", "Fa", "Sol")
@@ -89,5 +77,5 @@ grid_pattern = delimitedList(
 )("grid_sections")
 
 
-def parse(parser_pattern: ParserElement, string: str) -> Dict:
+def parse(parser_pattern: ParserElement, string: str) -> Dict[str, Any]:
     return parser_pattern.parseString(string, parseAll=True).asDict()

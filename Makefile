@@ -1,11 +1,13 @@
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
-TEST_ARGS= -vs --show-capture=no
+TEST_ARGS= -vvs --show-capture=no
 
 default: ui
+#default: build_mac
 
 ui:
-	poetry run python3 -m beethoven.ui
+	#poetry run python3 -m beethoven.ui
+	poetry run python3 -m beethoven.ui.main
 
 prompt:
 	poetry run python3 beethoven/prompt/main.py

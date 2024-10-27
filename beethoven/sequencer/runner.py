@@ -53,7 +53,9 @@ class Buffer:  # (NoteGenerator):
         messages = []
         g: BasePlayer
         for g in self.generators:
-            for timeline, message in g.play(self.part):
+            g.setup(self.part)
+
+            for timeline, message in g.play():
                 if timeline >= self.part.intermediate_cursor:
                     break
                 messages.append([timeline, message])

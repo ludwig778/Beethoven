@@ -1,107 +1,104 @@
+from __future__ import annotations
+
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from itertools import cycle
+from pprint import pprint
 from time import sleep
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Dict, List, Protocol, Sequence, Tuple, TypeVar
 
-from beethoven.adapters.midi import MidiAdapter
-from beethoven.helpers.midi import get_on_off_messages
-from beethoven.helpers.sequencer import SequencerSorter
-from beethoven.models import Bpm, ChordItem, Duration, HarmonyItem, TimeSection
-from beethoven.sequencer.players import BasePlayer, SystemPlayer
-from beethoven.types import SequencerItems
-from beethoven.ui.constants import DEFAULT_TIME_SIGNATURE
+from mido.backends.rtmidi import Output  # type: ignore[import]
+from PySide6.QtCore import SignalInstance
+
+from beethoven.adapters.midi import MidiAdapter, MidiMessage
+from beethoven.models import (ChordItem, Duration, DurationItem,
+                              HarmonyItem, TimeSection, TimeSignature)
+from beethoven.sequencer.objects import BasePlayer, Message, Conductor, SequencerStrategy, Splitter, HarmonyItemSelector, SequencerStrategy, Part
+
+# from beethoven.ui.constants import DEFAULT_TIME_SIGNATURE
+
+Obj = TypeVar("Obj")
+
+
+class NoteGeneratorProtocol(Protocol):
+    def __init__(self, strategy: SequencerStrategy | None= None): ...
+    def __iter__(self): ...
+    def __next__(self): ...
+    def setup(self, part: Part, strategy: SequencerStrategy | None= None, **kwargs): ...
+    # def get_generators(self): ...
+
+
+class Buffer:  # (NoteGenerator):
+    def __init__(self, generators: Sequence[BasePlayer], *args, **kwargs):
+        super(Buffer, self).__init__(*args, **kwargs)
+
+        self.generators: Sequence[BasePlayer] = generators or []
+
+        self.cursor: Duration
+        self.limit_cursor: Duration
+
+    def get_generators(self): return self.generators
+    def set_generators(self, generators): self.generators = generators
+
+    def setup(self, part: Part, strategy: SequencerStrategy | None = None, **kwargs):
+        self.part = part
+        # if strategy:
+        #     self.strategy = strategy
+        # self.propagate_part(**kwargs)
+        self.cursor = part.start_cursor
+        # self.limit_cursor = self.part.end_cursor
+        self.limit_cursor = self.part.intermediate_cursor
+
+    def get_messages(self):
+        messages = []
+        g: BasePlayer
+        for g in self.generators:
+            for timeline, message in g.play(self.part):
+                if timeline >= self.part.intermediate_cursor:
+                    break
+                messages.append([timeline, message])
+        return messages
 
 
 @dataclass
-class SequencerItemIterator:
-    current_items: SequencerItems
-    next_items: SequencerItems
-    next_items_updater: Callable[[HarmonyItem, ChordItem], SequencerItems]
+class Sequencer:
+    continuous_duration_ratio = 2
 
-    @classmethod
-    def setup(cls, current_items, next_items_updater):
-        next_items = next_items_updater(*current_items)
-
-        return cls(
-            current_items=current_items,
-            next_items=next_items,
-            next_items_updater=next_items_updater,
-        )
-
-    def reset(self, new_current_items: SequencerItems):
-        self.current_items = new_current_items
-        self.next_items = self.next_items_updater(*self.current_items)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self) -> Tuple[SequencerItems, SequencerItems]:
-        self.current_items = self.next_items
-        self.next_items = self.next_items_updater(*self.next_items)
-
-        return self.current_items, self.next_items
-
-    def run(self):
-        yield self.current_items, self.next_items
-
-        yield from self
-
-
-@dataclass
-class SequencerParams:
-    item_iterator: SequencerItemIterator
+    harmony_iterator: HarmonyItemSelector
     players: List[BasePlayer] = field(default_factory=list)
 
     continuous: bool = False
     preview: bool = False
 
-    on_tick: Optional[Callable] = None
-    on_time_signature_change: Optional[Callable] = None
-    on_harmony_item_change: Optional[Callable] = None
-    on_chord_item_change: Optional[Callable] = None
-    on_grid_end: Optional[Callable] = None
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    def update(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def set_players(self, players: Optional[List[BasePlayer]] = None):
-        self.players = players or []
-
-        return self
-
-    def clear_options(self):
-        return self.set_options()
-
-    def set_options(
+    def __init__(
         self,
-        continuous: bool = False,
-        preview: bool = False,
+        midi_adapter: MidiAdapter,
+        harmony_iterator: HarmonyItemSelector,
+        players: List[BasePlayer],
+        preview: bool,
+        items_change: SignalInstance
     ):
-        self.continuous = continuous
-        self.preview = preview
-
-        return self
-
-
-class Sequencer:
-    continuous_duration_ratio = 2
-
-    def __init__(self, midi_adapter: MidiAdapter):
         self.midi_adapter = midi_adapter
+        self.harmony_iterator = harmony_iterator
+        self.players = players
+        self.preview = preview
+        self.items_change = items_change
 
-        self._system_player = SystemPlayer()
+        self._cached_midi_outputs: Dict[str, Output] = {}
 
         self.reset()
 
-    def setup(self, params: SequencerParams):
-        self.params = params
+    def set_players(self, players):
+        self.players = players
 
-    def get_players(self):
-        return [*self.params.players, self._system_player]
+    def set_harmony_iterator(self, harmony_iterator):
+        self.harmony_iterator = harmony_iterator
+
+    def get_midi_output(self, output_name):
+        if output_name and output_name not in self._cached_midi_outputs:
+            self._cached_midi_outputs[output_name] = self.midi_adapter.open_output(output_name)
+
+        return self._cached_midi_outputs[output_name]
 
     def reset(self):
         self.global_cursor = Duration()
@@ -111,140 +108,184 @@ class Sequencer:
         self.previous_harmony_item = None
 
     def run(self):  # noqa: C901
-        self.previous_harmony_end_time_section.to_next_bar()
+        conductor = Conductor.build("MCL")
+        splitter = Splitter(conductor=conductor)
 
-        sequencer_sorter = SequencerSorter(players=self.get_players())
+        v = 0
+        print("RUN")
+        players = self.players
 
-        self._system_player.system_setup(callable=self.params.on_tick)
+        if v:
+            print(self.players)
 
-        for [harmony_item, chord_item], _ in self.params.item_iterator.run():
-            if self.params.on_harmony_item_change:
-                self.params.on_harmony_item_change(harmony_item)
+        buffer = Buffer(generators=players)
+        if v:
+            print("(", players, ")")
 
-            if self.params.continuous or self.params.preview:
-                harmony_time_signature = DEFAULT_TIME_SIGNATURE
-                harmony_time_signature_duration = (
-                    harmony_time_signature.get_duration() * self.continuous_duration_ratio
-                )
-            else:
-                harmony_time_signature = harmony_item.time_signature
-                harmony_time_signature_duration = harmony_time_signature.get_duration()
+        if v:
+            print("RERUN")
+        # print("RERUN")
+        # print("RERUN")
+        # print(self.params.harmony_iterator)
+        message: Message
+        last_cursor = Duration()
 
-            chord_sum = Duration()
-            if harmony_item != self.previous_harmony_item:
-                chord_sum = Duration()
+        # for sequencer_items, next_sequencer_items in self.params.harmony_iterator.run():
 
-            bar_offset = self.previous_harmony_end_time_section.bar - 1
+        print(f"{self.preview = }")
+        print(f"{self.continuous = }")
+        preview_iterator: cycle[Tuple[Tuple[HarmonyItem, ChordItem], Tuple[HarmonyItem, ChordItem]]]
+        if self.preview or self.continuous:
+            sequencer_items = self.harmony_iterator.current_items
+            # next_sequencer_items = self.harmony_iterator.get_next_items()
 
-            for player in self.get_players():
-                player.reset()
+            harmony_item, chord_item = sequencer_items
 
-            if self.params.on_chord_item_change:
-                self.params.on_chord_item_change(harmony_item, chord_item)
+            harmony_item = replace(harmony_item)
+            harmony_item.time_signature = TimeSignature.parse("4/4")
+            harmony_item.chord_items = [chord_item]
+            chord_item.duration_item = DurationItem(base_duration=Duration.parse("4"))
 
-            if self.params.continuous:
-                chord_duration = harmony_time_signature_duration
-            elif chord_duration := chord_item.duration_item.value:
-                pass
-            elif chord_sum.value:
-                chord_duration = harmony_time_signature_duration - (
-                    chord_sum % harmony_time_signature_duration
-                )
-            else:
-                chord_duration = harmony_time_signature_duration
+            preview_iterator = cycle([
+                ((harmony_item, chord_item), (harmony_item, chord_item))
+            ])
 
-            chord_sum += chord_duration
+        i = 0
+        # while 1:
+        print(self.preview)
+        for sequencer_items, next_sequencer_items in preview_iterator or self.harmony_iterator.run():
+            harmony_item, chord_item = sequencer_items
+            if not self.preview:
+                self.items_change.emit(harmony_item, chord_item)
 
-            start_chord_time_section = harmony_time_signature.get_time_section(
-                chord_sum - chord_duration, bar_offset=bar_offset
-            )
-            end_chord_time_section = harmony_time_signature.get_time_section(
-                chord_sum, bar_offset=bar_offset
-            )
+            # pprint(harmony_item)
+            print("Sequencer = ", harmony_item.scale.to_log_string(), " - ", chord_item.root)
 
-            start_cursor = self.global_cursor + chord_sum - chord_duration
-            end_cursor = self.global_cursor + chord_sum
+            sequencer_items = (harmony_item, chord_item)
 
-            if self.previous_time_signature != harmony_item.time_signature:
-                if self.params.on_time_signature_change:
-                    self.params.on_time_signature_change(
-                        self.previous_time_signature, harmony_item.time_signature
-                    )
+            # harmony_item, chord_item = sequencer_items
+            if v:
+                print("=" * 55)
+            if v:
+                print("#", i)
+            #  if self.params.on_harmony_item_change:
+            #      self.params.on_harmony_item_change(harmony_item)
 
-                self.previous_time_signature = harmony_item.time_signature
+            # if self.params.on_chord_item_change:
+            #     self.params.on_chord_item_change(harmony_item, chord_item)
 
-            self.previous_harmony_end_time_section = end_chord_time_section
-            self.previous_harmony_item = harmony_item
+            for part in splitter.run(sequencer_items, next_sequencer_items):
+                if v:
+                    print("-" * 33)
 
-            sequencer_sorter.setup(
-                scale=harmony_item.scale,
-                chord=chord_item.as_chord(harmony_item.scale),
-                time_signature=harmony_time_signature,
-                start_cursor=start_cursor,
-                end_cursor=end_cursor,
-                start_time_section=start_chord_time_section,
-            )
+                # print("START", part.start_cursor)
+                # print("INTER", part.intermediate_cursor)
+                # print("END  ", part.end_cursor)
+                # print("scale", part.scale)
+                # print("chord", part.chord)
 
-            last_cursor = start_cursor
+                if v:
+                    pprint(part)
+                # pprint(part)
 
-            for cursor, msg in self.sort_sequencer_sorter_messages(sequencer_sorter):
-                if cursor > last_cursor:
-                    self.sleep_for_gap(last_cursor, cursor, bpm=harmony_item.bpm)
+                if v:
+                    print()
+                buffer.setup(part)
 
-                if callable(msg):
-                    msg()
-                else:
-                    self.midi_adapter.send_message(msg)
+                events = defaultdict(list)
+                messages = buffer.get_messages()
+                for cursor, message in messages:
+                    """
+                    if not callable(message):
+                        print(f"{str(cursor.value):6}, {str(message.note):4}, {str(message.duration.value)}")
+                    """
 
-                last_cursor = cursor
+                    if cursor >= part.end_cursor:
+                        break
 
-            if last_cursor < end_cursor:
-                self.sleep_for_gap(last_cursor, end_cursor, bpm=harmony_item.bpm)
+                    if isinstance(message, Message):
+                        note_on, note_off = MidiMessage.get_tuple_from_message(
+                            message=message,
+                            output=self.get_midi_output(message.player.setting.output_name),
+                        )
 
-            self.global_cursor = end_cursor
+                        events[cursor].append(note_on)
+                        events[cursor + message.duration].append(note_off)
+                    elif callable(message):
+                        events[cursor].append(message)
 
-            if self.params.preview:
-                self.params.preview = False
+                end_cursor = part.end_cursor
+                end_cursor = part.intermediate_cursor
+                ratio = 1
+                midi_messages: List[MidiMessage]
+                """
+                pprint(events)
+                print("++++", last_cursor, end_cursor)
+                """
+                if v:
+                    pprint(list(events.keys()))
+                for cursor, midi_messages in sorted(events.items(), key=lambda x: x[0]):
+                    if cursor > last_cursor:
+                        if v:
+                            print("SLEEP", last_cursor, cursor, float((cursor - last_cursor).value) * ratio * 60)  # / part.bpm.value)
+                        sleep(float((cursor - last_cursor).value) * ratio * 60 / part.bpm.value)
+                        # sleep_for_gap(last_cursor, cursor, bpm=part.bpm)
+                    # print("out sleep")
 
-                break
+                    for midi_message in midi_messages:
+                        # print(message)
+                        print("-", cursor, midi_message.origin.note, midi_message.type)
 
-        if self.params.on_grid_end:
-            self.params.on_grid_end()
+                        if callable(midi_message):
+                            midi_message()
 
-    @staticmethod
-    def sort_sequencer_sorter_messages(sequencer_sorter: SequencerSorter):
-        values: Dict[str, list] = defaultdict(list)
+                            continue
+                        else:
+                            midi_message.fix_note_midi_index()
 
-        for cursor, msg in sequencer_sorter:
-            for value_cursor in list(values.keys()):
-                if value_cursor < cursor:
-                    for msg in values.pop(value_cursor):
-                        yield value_cursor, msg
+                        if (
+                            not midi_message.output or
+                            not midi_message.origin.player.setting.enabled or
+                            not midi_message.note
+                        ):
+                            # print(
+                            #     "ddddd",
+                            #     bool(message.output),
+                            #     message.origin.player.setting.enabled,
+                            #     message.fix_note_midi_index(),
+                            # )
+                            # print("OUT", message.origin.player)
+                            continue
+                        # else:
+                        elif midi_message.note:
+                            if midi_message.type == "note_on":
+                                # print("MSG", message.note)
+                                self.midi_adapter.send_message(midi_message)
+                            else:
+                                if midi_message.opener:
+                                    midi_message.note = midi_message.opener.note
+                                if midi_message.note:
+                                    self.midi_adapter.send_message(midi_message)
+                            # print("======", datetime.now(), cursor, last_cursor, end_cursor)
+                            # if message.type == "note_on":
+                            #     print("MSG", message.note)
 
-            if callable(msg):
-                yield cursor, msg
-            else:
-                player = msg["player"]
-                duration = msg["duration"]
+                    last_cursor = cursor
 
-                note_on, note_off = get_on_off_messages(
-                    note_index=msg["note"],
-                    output=player.output,
-                    channel=player.channel,
-                    velocity=msg["velocity"],
-                )
+                # print("----", cursor, last_cursor, end_cursor)
+                if last_cursor < end_cursor:
+                    print("end sleep", part.start_cursor, end_cursor, last_cursor, float((end_cursor - last_cursor).value) * ratio * 60)  # / part.bpm.value)
+                    # sleep(float((end_cursor - last_cursor).value) * ratio * 60 / part.bpm.value)
+                print("end", part.start_cursor, part.intermediate_cursor, part.end_harmony_cursor)
+                # sleep_for_gap(last_cursor, end_cursor, bpm=part.bpm)
 
-                yield cursor, note_on
+            # if self.preview:
+            #     i += 1
+            #     if i > 20:
+            #         break
+            i += 1
+            if self.preview:
+                if i > 3:
+                    break
 
-                if duration == Duration():
-                    yield cursor, note_off
-                else:
-                    values[cursor + duration].append(note_off)
-
-        for value_cursor in sorted(list(values.keys())):
-            for msg in values.pop(value_cursor):
-                yield value_cursor, msg
-
-    @staticmethod
-    def sleep_for_gap(cursor, end_cursor, bpm: Bpm):
-        sleep(float((end_cursor - cursor).value * 60 / bpm.value))
+        print("Sequencer::Run grid ended")

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 logger = logging.getLogger("players.registry")
 
@@ -9,7 +9,7 @@ logger = logging.getLogger("players.registry")
 class RegisteredPlayerMeta(type):
     instances: Dict[str, Dict[str, RegisteredPlayerMeta]] = {}
 
-    def __new__(cls, clsname, superclasses, attributedict):
+    def __new__(cls, clsname, superclasses, attributedict):  # type: ignore[no-untyped-def]
         newclass = type.__new__(cls, clsname, superclasses, attributedict)
 
         if hasattr(newclass, "instrument") and hasattr(newclass, "style"):
@@ -27,11 +27,11 @@ class RegisteredPlayerMeta(type):
         return list(cls.instances.keys())
 
     @classmethod
-    def get_instrument_styles(cls, instrument_name) -> Dict[str, RegisteredPlayerMeta]:
+    def get_instrument_styles(cls, instrument_name: str) -> Dict[str, RegisteredPlayerMeta]:
         return cls.instances.get(instrument_name, {})
 
     @classmethod
-    def get_instrument_style(cls, instrument_name, style_name) -> Optional[RegisteredPlayerMeta]:
+    def get_instrument_style(cls, instrument_name: str, style_name: str) -> RegisteredPlayerMeta | None:
         return cls.instances.get(instrument_name, {}).get(style_name)
 
 

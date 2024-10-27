@@ -136,7 +136,7 @@ class Sequencer:
 
         print(f"{self.preview = }")
         print(f"{self.continuous = }")
-        preview_iterator: cycle[Tuple[Tuple[HarmonyItem, ChordItem], Tuple[HarmonyItem, ChordItem]]]
+        preview_iterator: cycle[Tuple[Tuple[HarmonyItem, ChordItem], Tuple[HarmonyItem, ChordItem]]] | None = None
         if self.preview or self.continuous:
             sequencer_items = self.harmony_iterator.current_items
             # next_sequencer_items = self.harmony_iterator.get_next_items()

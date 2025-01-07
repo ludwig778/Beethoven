@@ -90,7 +90,7 @@ def get_default_harmony_items() -> List[HarmonyItem]:
     # return [get_default_harmony_item()]
     return [
         HarmonyItem(
-            scale=Scale.parse("C4_major"),
+            scale=Scale.parse("C2_major"),
             bpm=DEFAULT_BPM,
             time_signature=DEFAULT_TIME_SIGNATURE,
             chord_items=[
@@ -112,7 +112,7 @@ def get_default_harmony_items() -> List[HarmonyItem]:
             ],
         ),
         HarmonyItem(
-            scale=Scale.parse("G4_mixolydian"),
+            scale=Scale.parse("G2_mixolydian"),
             bpm=DEFAULT_BPM,
             time_signature=DEFAULT_TIME_SIGNATURE,
             chord_items=[

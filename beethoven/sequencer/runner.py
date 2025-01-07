@@ -287,7 +287,8 @@ class Sequencer:
             #         break
             i += 1
             if self.preview:
-                if i > 3:
+                # if i > 3:
+                if i > 31:
                     break
 
         print("Sequencer::Run grid ended")

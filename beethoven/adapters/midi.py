@@ -79,6 +79,19 @@ class MidiMetaMessage:
         return MetaMessage(self.type, text=self.text)
 
 
+@dataclass
+class MidiControlMessage:
+    input: Input
+    type: str
+    channel: int
+    control: int
+    value: int
+    # time: int
+
+    # def to_mido(self) -> MetaMessage:
+    #     return MetaMessage(self.type, text=self.text)
+
+
 MidiMessageType = Union[MidiMessage, MidiMetaMessage]
 Inputs = Dict[str, Input]
 Outputs = Dict[str, Output]

@@ -5,6 +5,7 @@ from typing import List, TypeVar
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import QWidget
 
+from beethoven.adapters.midi import MidiControlMessage
 from beethoven.sequencer.instruments import *
 # from beethoven.helpers.sequencer import system_tick_logger
 from beethoven.models import Bpm, ChordItem, HarmonyItem, Scale, TimeSignature
@@ -78,6 +79,15 @@ class ComposeWidget(QWidget):
 
         self.previous_binding = QShortcut(QKeySequence("Left"), self)
         self.previous_binding.activated.connect(self.handle_previous_binding)  # type: ignore
+
+        def show_note(control_message: MidiControlMessage):
+            if control_message.value == 0:
+                return
+            print("NEXT")
+            print(control_message)
+            #self.handle_action_binding()
+            self.handle_next_binding()
+        self.manager.midi.input_event_trigger.connect(show_note)
 
         self.setLayout(
             vertical_layout(
@@ -222,9 +232,11 @@ class ComposeWidget(QWidget):
         # if self.sequencer_widget.is_play_button_pressed():
         print("NEXT BINDING PLAY()")
         if self.manager.sequencer_manager.is_stopped() or self.manager.sequencer_manager.is_playing_preview():
-            self.play(preview=True)
+            self.play(preview=True, continuous=True)
+            # self.play(preview=True)
         else:
-            self.play()
+            # self.play()
+            self.play(preview=True, continuous=True)
 
     def handle_previous_binding(self):
         previous_items = self.harmony_iterator.previous()
@@ -236,9 +248,11 @@ class ComposeWidget(QWidget):
         # if self.manager.sequencer_manager.is_playing():
         print("PREVIOUS BINDING PLAY()")
         if self.manager.sequencer_manager.is_stopped() or self.manager.sequencer_manager.is_playing_preview():
-            self.play(preview=True)
+            self.play(preview=True, continuous=True)
+            # self.play(preview=True)
         else:
-            self.play()
+            # self.play()
+            self.play(preview=True, continuous=True)
 
     def handle_change_from_grid(self, harmony_item: HarmonyItem, chord_item: ChordItem, harmony_change: bool):
         logger.info(f"hid={harmony_item.id} cid={chord_item.id} {harmony_change=}")
@@ -252,9 +266,11 @@ class ComposeWidget(QWidget):
         print("GRID CHANGE PLAY()")
         if not harmony_change:
             if self.manager.sequencer_manager.is_stopped() or self.manager.sequencer_manager.is_playing_preview():
-                self.play(preview=True)
+                self.play(preview=True, continuous=True)
+                # self.play(preview=True)
             else:
-                self.play()
+                # self.play()
+                self.play(preview=True, continuous=True)
 
     def handle_change_from_chord_picker(self, chord_item):
         logger.info(f"chord item={chord_item.to_log_string()}")
@@ -263,9 +279,11 @@ class ComposeWidget(QWidget):
 
         print("CHORD PICKER CHANGE PLAY()")
         if self.manager.sequencer_manager.is_stopped() or self.manager.sequencer_manager.is_playing_preview():
-            self.play(preview=True)
+            # self.play(preview=True)
+            self.play(preview=True, continuous=True)
         else:
-            self.play()
+            # self.play()
+            self.play(preview=True, continuous=True)
 
     def handle_sequencer_stepper_change(self, _):
         key_step = self.sequencer_widget.is_key_step_button_pressed()

@@ -34,7 +34,7 @@ class PianoTrainerWidget(QWidget):
         self.stop_button = Button("Stop")
         self.stop_button.setObjectName("stop_button")
 
-        self.manager.midi.notes_changed.connect(self.notes_changed)
+        self.manager.midi.input_notes_changed.connect(self.notes_changed)
         self.start_button.clicked.connect(self.start)
         self.stop_button.clicked.connect(self.stop)
 

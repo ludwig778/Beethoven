@@ -3,26 +3,42 @@ from typing import Dict
 
 from PySide6.QtCore import QThread, SignalInstance
 
-from beethoven.adapters.midi import Input, MidiAdapter
+from beethoven.adapters.midi import Input, MidiAdapter, MidiControlMessage
 from beethoven.models import Note
 from beethoven.sequencer.runner import Sequencer
 
 
 class MidiInputThread(QThread):
-    def __init__(self, midi_input: Input, on_note_change: SignalInstance):
+    def __init__(
+        self,
+        midi_input: Input,
+        on_note_change: SignalInstance,
+        on_event_trigger: SignalInstance,
+    ):
         super(MidiInputThread, self).__init__()
 
         self.logger = logging.getLogger("threads.midi_input")
 
         self.midi_input = midi_input
         self.on_note_change = on_note_change
+        self.on_event_trigger = on_event_trigger
 
     def run(self):
         midi_notes: Dict[int, Note] = dict()
         print("RUN")
 
         for message in self.midi_input:
-            if message.type not in ("note_on", "note_off"):
+            if message.type == "control_change":
+                self.on_event_trigger.emit(MidiControlMessage(
+                    input=self.midi_input,
+                    type=message.type,
+                    channel=message.channel,
+                    control=message.control,
+                    value=message.value,
+                ))
+
+                continue
+            elif message.type not in ("note_on", "note_off"):
                 continue
 
             note = Note.from_midi_index(message.note)
